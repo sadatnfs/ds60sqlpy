@@ -1,7 +1,8 @@
 # The official Swift image on Amazon Linux 2023 carries the same 6.3.3 toolchain
 # as the Ubuntu image with a much smaller OS package set: no Ubuntu kernel
-# headers or their open advisories. Its python3 is 3.9, so the worker runs on
-# the distribution's python3.12; the healthcheck's stdlib call works with either.
+# headers or their open advisories. Its system python3 is 3.9 and stays the one
+# dnf uses; the worker, the healthcheck and every python3 on PATH run on the
+# distribution's python3.12 through a /usr/local/bin link.
 ARG DS60_SWIFT_IMAGE=swift:6.3.3-amazonlinux2023@sha256:d5cb8e6ef1810f6b13bd36cd03f1cd1bda2f742fabcca959fc5fb0c0ccb39ba8
 FROM ${DS60_SWIFT_IMAGE}
 # --releasever=latest applies Amazon Linux security updates newer than the
@@ -11,7 +12,9 @@ RUN dnf -y upgrade --releasever=latest \
     && dnf -y install --releasever=latest python3.12 \
     && dnf clean all && rm -rf /var/cache/dnf \
     && install -d -m 0700 /run/ds60 \
-    && python3.12 -c 'import sys; assert sys.version_info[:2] == (3, 12)' \
+    && ln -s /usr/bin/python3.12 /usr/local/bin/python3 \
+    && python3 -c 'import sys; assert sys.version_info[:2] == (3, 12)' \
+    && dnf --version >/dev/null \
     && command -v stdbuf
 WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
