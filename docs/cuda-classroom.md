@@ -192,7 +192,11 @@ digests in `compose.modules.yaml` and the mirror configuration when qualifying
 a release. Python libraries
 are pinned with hashes under `docker/workers/gpu/`. A framework's CUDA runtime
 components can differ from the base compiler toolkit, so choose driver support
-from the complete profile, not only the image's `nvcc` version. Do not replace
+from the complete profile, not only the image's `nvcc` version. The PyTorch
+profile locks Torch 2.15.0, whose wheels install their own CUDA 13.2 runtime
+libraries on top of the 12.8.1 base, so that profile needs an NVIDIA driver
+from the 580 branch or newer and a compute capability 7.5 or newer GPU. The
+C++, CuPy and TensorFlow profiles keep their CUDA 12 runtimes. Do not replace
 one lock with an unbounded package install inside a running worker. NVIDIA's
 [compatibility documentation](https://docs.nvidia.com/deploy/cuda-compatibility/)
 explains the additional driver/runtime constraints.

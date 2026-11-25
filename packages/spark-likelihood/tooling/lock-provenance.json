@@ -22,9 +22,9 @@
     },
     "locks/build.lock": {
       "upstream_repository_path": "packages/spark-tmbad/tooling/python-build-requirements.txt",
-      "upstream_source_sha256": "7479054cafb7e927bdf5f598843572e596d81aa8461319556181f99962ec1cd3",
-      "copied_lock_sha256": "6f67db4bb7d7078519f083efb5c51c73a091f0f8181ace5f6bebebbadd8e0b2d",
-      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
+      "upstream_source_sha256": "1a63588a5acb205b17542bfe79fc251866e7a885fad867353260cc497ca9ba1c",
+      "copied_lock_sha256": "f803e192bd767066e9707da49d7c35d55730658facb8ac1b7de5a5e7c7f94394",
+      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained from the upstream file, which moved to setuptools 84.2.1 and dropped wheel for Dependabot alerts."
     }
   }
 }

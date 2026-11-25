@@ -9,7 +9,8 @@ own licenses, and Spark's existing Apache license headers remain intact.
 NumPy 2.2.6 and their pinned dependencies. `locks/scientific.lock` owns the
 additional SciPy 1.15.3, pandas 2.2.3, PyArrow 19.0.1 and Lightning 2.6.1 stack.
 These locks target native Linux and Python 3.12. `locks/build.lock` pins the
-separate wheel builder to setuptools 80.9.0 and wheel 0.45.1. Runtime setuptools
+separate wheel builder to setuptools 84.2.1, which provides `bdist_wheel` itself,
+so no separate wheel package is installed. Runtime setuptools
 retains the CPU lock's version; build tools run in a separate Docker stage.
 The source origins and unchanged requirement hashes are retained in
 `lock-provenance.json`. Those origin paths are provenance, not build inputs.
