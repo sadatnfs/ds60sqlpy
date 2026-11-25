@@ -246,6 +246,10 @@ def test_ci_installs_renderer_before_sql_or_starter_checks() -> None:
     assert "--output dist/DS60LearningLab-Docker-Starter.zip" in starter
     assert "path: dist/DS60LearningLab-Docker-Starter.zip" in starter
     assert "if-no-files-found: error" in starter
+    docker = app.split("\n  docker:", maxsplit=1)[1]
+    guides = "scripts/check_guide_examples.py"
+    assert docker.index("uv sync --frozen") < docker.index(guides)
+    assert f"uv run --no-sync python {guides}" in docker
 
 
 def test_current_docker_entrypoint_covers_every_profile_and_recreation_receipts() -> None:
