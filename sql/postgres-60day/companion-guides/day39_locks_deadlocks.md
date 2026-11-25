@@ -272,7 +272,7 @@ disposable queue/deadlock objects.
 
 ## Expanded practice lab
 
-Prompts 4–7 compare waiting, immediate failure, cooperative queues, and advisory
+Prompts 4-7 compare waiting, immediate failure, cooperative queues, and advisory
 coordination. `NOWAIT` raises an error instead of waiting; `SKIP LOCKED` omits
 currently claimed rows, which is useful for workers but wrong for complete
 reporting.

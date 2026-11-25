@@ -289,7 +289,7 @@ rows.
 
 ## Expanded practice lab
 
-Prompts 4–7 add single-session recovery patterns to the concurrency exercises.
+Prompts 4-7 add single-session recovery patterns to the concurrency exercises.
 After `ROLLBACK TO SAVEPOINT`, PostgreSQL keeps that savepoint available until
 it is released or the transaction ends. This is why error recovery must first
 return to a valid savepoint before more statements run.

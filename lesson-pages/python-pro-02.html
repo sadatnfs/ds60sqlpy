@@ -723,7 +723,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* structured result: associates each input with success/failure/cancellation so no work</span></span>
 <span class="source-line"><span class="syntax-string">  disappears.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — state the execution choice from the blocking behavior::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: state the execution choice from the blocking behavior::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):</span></span>
 <span class="source-line"><span class="syntax-string">        if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:</span></span>
@@ -740,7 +740,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: The decision follows where time is spent, not a belief that one primitive is</span></span>
 <span class="source-line"><span class="syntax-string">          universally faster.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — prove an async concurrency ceiling::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: prove an async concurrency ceiling::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import asyncio</span></span>
 <span class="source-line"></span>
@@ -872,7 +872,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_pro_02_concurrency_parallelism.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — choose a model</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: choose a model</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `choose_execution_model` in the learner artifact. For each case, write</span></span>
 <span class="source-line"><span class="syntax-comment"># one sentence explaining the choice: - an async database driver, - a synchronous file</span></span>
 <span class="source-line"><span class="syntax-comment"># metadata API, - image transforms written in pure Python, - three tiny computations.</span></span>
@@ -880,7 +880,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># without `await` is still CPU work and blocks the event loop.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — build a bounded async map</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: build a bounded async map</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one</span></span>
 <span class="source-line"><span class="syntax-comment"># producer, 3. a fixed number of consumers, 4. indexed items so results retain input</span></span>
 <span class="source-line"><span class="syntax-comment"># order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place</span></span>
@@ -888,14 +888,14 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># `CancelledError` unless cleanup requires it; if caught, re-raise it.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — add per-item timeouts</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: add per-item timeouts</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Wrap each worker call with `asyncio.timeout`. Test one worker slower than the</span></span>
 <span class="source-line"><span class="syntax-comment"># limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally` block</span></span>
 <span class="source-line"><span class="syntax-comment"># returns the active count to zero. Prediction: what happens to sibling consumers when one</span></span>
 <span class="source-line"><span class="syntax-comment"># item times out?</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — adapt blocking I/O</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: adapt blocking I/O</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.</span></span>
 <span class="source-line"><span class="syntax-comment"># Compare sequential and threaded elapsed time with generous bounds, then verify ordered</span></span>
 <span class="source-line"><span class="syntax-comment"># results rather than treating speed as the correctness assertion. Explain why a thread</span></span>
@@ -903,54 +903,54 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># accept more requests.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — isolate CPU work</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: isolate CPU work</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Make the CPU function a top-level function with serializable arguments and</span></span>
 <span class="source-line"><span class="syntax-comment"># results. Use `multiprocessing.get_context(&quot;spawn&quot;)` with `ProcessPoolExecutor`, and</span></span>
 <span class="source-line"><span class="syntax-comment"># create processes only beneath an `if __name__ == &quot;__main__&quot;:` guard. Run the solution</span></span>
 <span class="source-line"><span class="syntax-comment"># with `--with-processes`; explain when startup makes a small workload slower.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — reason about shared state</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: reason about shared state</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `deterministic_lost_update`. Force two workers to read the same</span></span>
 <span class="source-line"><span class="syntax-comment"># snapshot, then apply both writes. Compare with two serialized increments. List three</span></span>
 <span class="source-line"><span class="syntax-comment"># repairs: - one owner task/process receives update messages, - a lock protects the</span></span>
 <span class="source-line"><span class="syntax-comment"># complete read/modify/write unit, or - an external system performs an atomic update.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — prove cancellation cleanup</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: prove cancellation cleanup</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Cancel `bounded_map` while workers are active. Instrument acquired resources and</span></span>
 <span class="source-line"><span class="syntax-comment"># prove active count, queued acknowledgements, and child tasks return to zero before the</span></span>
 <span class="source-line"><span class="syntax-comment"># parent finishes.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — inspect structured failures</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: inspect structured failures</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Run multiple workers that fail with different typed exceptions. Use `except*` to</span></span>
 <span class="source-line"><span class="syntax-comment"># handle one expected category while preserving unexpected failures and their original</span></span>
 <span class="source-line"><span class="syntax-comment"># tracebacks.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — stream a backpressured producer</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: stream a backpressured producer</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Adapt `bounded_map` from a finite Sequence to an async iterator whose length is</span></span>
 <span class="source-line"><span class="syntax-comment"># unknown. Preserve output order without retaining every input or creating one task per</span></span>
 <span class="source-line"><span class="syntax-comment"># item.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — trace context across boundaries</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: trace context across boundaries</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Set a request ID in `contextvars`, then observe propagation through an async</span></span>
 <span class="source-line"><span class="syntax-comment"># task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any</span></span>
 <span class="source-line"><span class="syntax-comment"># explicit propagation visible.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — design graceful executor shutdown</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: design graceful executor shutdown</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Own a thread or process pool through a context manager. Stop accepting new work,</span></span>
 <span class="source-line"><span class="syntax-comment"># wait with a bounded policy, cancel pending futures when allowed, and report unfinished</span></span>
 <span class="source-line"><span class="syntax-comment"># work without hanging interpreter exit.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — make an evidence-based model decision</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: make an evidence-based model decision</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Benchmark sequential, bounded asyncio/threads, and spawned processes on</span></span>
 <span class="source-line"><span class="syntax-comment"># representative I/O and CPU fixtures. Record correctness, startup, throughput, peak</span></span>
-<span class="source-line"><span class="syntax-comment"># active work, transfer size, and cleanup—not just fastest elapsed time.</span></span>
+<span class="source-line"><span class="syntax-comment"># active work, transfer size, and cleanup, not just fastest elapsed time.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
 <span class="source-line"><span class="syntax-comment"># === End numbered professional practice ===</span></span>

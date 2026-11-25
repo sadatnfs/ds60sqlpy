@@ -68,7 +68,7 @@ authorize a reset.
 
 - **Level:** Intermediate
 - **Catalog prerequisite:** `sql-15`; [SQL Day 15; Phase 1 Project](../../postgres-60day/companion-guides/day15_phase1_project.md)
-- **Prerequisites:** Complete SQL Days 1–15 so you can query, join, aggregate,
+- **Prerequisites:** Complete SQL Days 1-15 so you can query, join, aggregate,
   modify, and verify the supplied training schema before designing one of your
   own. PostgreSQL setup and the disposable database are also required.
 - **Artifacts:** [learner SQL](../lessons/sql_found_01_relational_design.sql) ·

@@ -24,7 +24,7 @@ API/boundary anatomy:
 * `python -m build` then clean install: proves the built wheel, not repository-path import
   behavior.
 
-Micro-example A — distinguish distribution and import identities::
+Micro-example A: distinguish distribution and import identities::
 
     import importlib.util
 
@@ -38,7 +38,7 @@ Micro-example A — distinguish distribution and import identities::
 Expected: Installer and import identifiers can differ; availability must be checked through the
           intended interface.
 
-Micro-example B — create a deterministic source manifest digest::
+Micro-example B: create a deterministic source manifest digest::
 
     import hashlib
 
@@ -160,26 +160,26 @@ def self_check() -> None:
 # Full acceptance checks and progressive hints:
 # companion-guides/py_pro_01_package_engineering.md
 #
-# Exercise 1 — classify artifacts
+# Exercise 1: classify artifacts
 # Prompt: Implement `classify_artifact`. Use complete final suffixes and reject
 # `package.whl.txt`. Add checks for one wheel, one sdist, and one unsupported file.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 2 — create an offline build command
+# Exercise 2: create an offline build command
 # Prompt: Implement `offline_build_command` as an argument list. Use the running
 # interpreter, invoke the `build` module, request both formats, disable isolation, and
 # choose an explicit output directory. Why an argument list? It avoids a second round of
 # shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 3 — inspect dependency intent
+# Exercise 3: inspect dependency intent
 # Prompt: For each fixture entry, decide whether it is: 1. a runtime dependency, 2. an
 # optional installed feature, 3. a development-only dependency group, or 4. a build
 # bootstrap requirement. Explain when `colorama`'s environment marker is true. Confirm
 # that building metadata does not install the `test` or `quality` groups.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 4 — build in a disposable directory
+# Exercise 4: build in a disposable directory
 # Prompt: Use a temporary or ignored directory. A production-quality helper should first
 # copy the source tree to a disposable staging directory because some backends write
 # metadata beside the source even when `--outdir` is elsewhere. These commands
@@ -188,7 +188,7 @@ def self_check() -> None:
 # backend requirement is missing, return to connected setup instead of relaxing policy.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 5 — prove the installed origin
+# Exercise 5: prove the installed origin
 # Prompt: Install the wheel into a fresh target using `pip install --no-index --no-deps
 # --target <directory> <wheel>`. Start Python from outside the fixture source tree, put
 # only that target on `PYTHONPATH`, and print: - `ds60_tiny_greeter.__file__`, - the
@@ -197,31 +197,31 @@ def self_check() -> None:
 # import path under the fresh installation target, never the fixture source tree.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 6 — build a wheel from the source distribution
+# Exercise 6: build a wheel from the source distribution
 # Prompt: Build the fixture sdist in disposable storage, unpack it, build a wheel from
 # that unpacked sdist with `--no-isolation`, and compare the result with the direct wheel
 # build. Record every required local tool.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 7 — inspect installed metadata without importing
+# Exercise 7: inspect installed metadata without importing
 # Prompt: Use `importlib.metadata` against the fresh target to inspect name, version,
 # requirements, extras, and console scripts before importing the package. Reject
 # unexpected or missing metadata.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 8 — separate reproducibility from equivalence
+# Exercise 8: separate reproducibility from equivalence
 # Prompt: Build twice from the same clean staged source. Compare file hashes, archive
 # member lists, metadata contents, and installed behavior. Explain which differences are
 # harmless and which invalidate the release.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 9 — test dependency markers across targets
+# Exercise 9: test dependency markers across targets
 # Prompt: Create a review matrix for the fixture's build, runtime, optional, development,
 # and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and
 # Python 3.12.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 10 — design a local release gate
+# Exercise 10: design a local release gate
 # Prompt: Write an offline release checklist that verifies clean source, tests, type/lint
 # checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and
 # secret scan without publishing anything.

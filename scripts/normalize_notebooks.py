@@ -330,13 +330,13 @@ SOURCE_REPLACEMENTS: Final[dict[str, tuple[tuple[str, str], ...]]] = {
     ),
     "python/ds-60day/notebooks/day14_code_quality_tooling.ipynb": (
         (
-            "# Day 14 — Code quality: black, flake8, mypy\n"
+            "# Day 14: Code quality: black, flake8, mypy\n"
             "Objectives:\n"
             "- Auto-format with black.\n"
             "- Lint with flake8.\n"
             "- Type-check with mypy.\n"
             "Includes sample configs and commands.",
-            "# Day 14 — Code quality with Ruff and mypy\n"
+            "# Day 14: Code quality with Ruff and mypy\n"
             "Objectives:\n"
             "- Use Ruff to find correctness, import, and style problems.\n"
             "- Use Ruff's formatter to keep layout consistent.\n"
@@ -448,14 +448,14 @@ SOURCE_REPLACEMENTS: Final[dict[str, tuple[tuple[str, str], ...]]] = {
     ),
     "python/ds-60day/notebooks/day50_time_series_modeling.ipynb": (
         (
-            "# Day 50 — Time series modeling: ARIMA/Prophet/LSTM overview\n"
+            "# Day 50: Time series modeling: ARIMA/Prophet/LSTM overview\n"
             "Objectives:\n"
             "- Stationarity and differencing.\n"
             "- Fit a simple ARIMA with pmdarima.\n"
             "- Prophet/LSTM overview (when to use).\n"
             "Note: Prophet and deep nets require additional installs; we'll demo "
             "ARIMA with pmdarima.",
-            "# Day 50 — Time-series modeling and forecast evaluation\n"
+            "# Day 50: Time-series modeling and forecast evaluation\n"
             "Objectives:\n"
             "- Split time-ordered data without future leakage.\n"
             "- Fit a small ARIMA model with pmdarima.\n"
@@ -615,9 +615,9 @@ SOURCE_REPLACEMENTS: Final[dict[str, tuple[tuple[str, str], ...]]] = {
     ),
     "python/ds-60day/solutions/day14_code_quality_tooling/day14_solutions.ipynb": (
         (
-            "# Day 14 — Solutions: Code Quality\n"
+            "# Day 14: Solutions: Code Quality\n"
             "Demonstration of an improved loader with explicit types and safe file handling.",
-            "# Day 14 — Solutions: Code Quality with Ruff and mypy\n"
+            "# Day 14: Solutions: Code Quality with Ruff and mypy\n"
             "This improved loader addresses lint, type-contract, and resource-safety "
             "concerns. Tests are still required to verify behavior.",
         ),

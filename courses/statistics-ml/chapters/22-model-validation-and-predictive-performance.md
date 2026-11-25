@@ -160,7 +160,7 @@ ROC curves vary sensitivity against false-positive rate over thresholds; AUC sum
 
 ### stat-22-24
 
-**Precision–recall curves**
+**Precision-recall curves**
 
 PR curves show precision against recall as the threshold changes. They reflect prevalence and emphasize positive retrieval. Different interpolation or average-precision conventions can yield different summary numbers.
 

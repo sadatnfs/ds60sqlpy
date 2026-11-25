@@ -506,7 +506,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--deliverable-3-stakeholder-outputs">Deliverable 3: Stakeholder outputs<a class="heading-anchor" href="#guide--deliverable-3-stakeholder-outputs" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Finance: current-year budget versus actual by month/category.</li>
-<li>Marketing: active customers by signup cohort and lifecycle month 0–6. Select the six latest <em>distinct</em> signup months before expanding the lifecycle grid. Count every signup once in <code>cohort_size</code>, count a customer at most once per activity month, and report <code>active_customers / NULLIF(cohort_size, 0)</code> as <code>retention_rate</code>. Keeping the numerator and denominator visible makes the percentage auditable.</li>
+<li>Marketing: active customers by signup cohort and lifecycle month 0-6. Select the six latest <em>distinct</em> signup months before expanding the lifecycle grid. Count every signup once in <code>cohort_size</code>, count a customer at most once per activity month, and report <code>active_customers / NULLIF(cohort_size, 0)</code> as <code>retention_rate</code>. Keeping the numerator and denominator visible makes the percentage auditable.</li>
 <li>Operations: an actual plan for recent units by product category.</li>
 </ul>
 <h4 id="guide--deliverable-4-performance-sign-off">Deliverable 4: Performance sign-off<a class="heading-anchor" href="#guide--deliverable-4-performance-sign-off" aria-label="Link to this section">#</a></h4>
@@ -514,7 +514,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--deliverable-5-written-handoff">Deliverable 5: Written handoff<a class="heading-anchor" href="#guide--deliverable-5-written-handoff" aria-label="Link to this section">#</a></h4>
 <p>Document DQ exceptions, model grain, join rationale, KPI definitions, reconciliation, freshness-versus-speed tradeoffs, known limitations, and next steps. Evidence must support every sign-off claim.</p>
 <h4 id="guide--state-and-safety">State and safety<a class="heading-anchor" href="#guide--state-and-safety" aria-label="Link to this section">#</a></h4>
-<p>The learner file ends with <code>ROLLBACK</code>; its views and indexes do not persist. Replace it with <code>COMMIT</code> only as a deliberate reviewed migration. Days 59–60 are capstone criteria/checkpoints, so measured evidence and documentation are part of the deliverable, not optional stretch work.</p>
+<p>The learner file ends with <code>ROLLBACK</code>; its views and indexes do not persist. Replace it with <code>COMMIT</code> only as a deliberate reviewed migration. Days 59-60 are capstone criteria/checkpoints, so measured evidence and documentation are part of the deliverable, not optional stretch work.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-60: Final Capstone, Part 3: End-to-End Sign-Off.
@@ -1094,7 +1094,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>The learner file contains three runnable outputs:</p>
 <ul>
 <li>Finance: YTD actual, budget, and variance at <code>(month, category)</code> grain.</li>
-<li>Marketing: active customers by signup cohort and lifecycle month 0–6. A full retention rate additionally needs the cohort-size denominator from Day 47.</li>
+<li>Marketing: active customers by signup cohort and lifecycle month 0-6. A full retention rate additionally needs the cohort-size denominator from Day 47.</li>
 <li>Operations: an <code>EXPLAIN</code> of recent units by product category.</li>
 </ul>
 <p>For each output, record the consumer, business definition, result grain, freshness expectation, and at least one reconciliation or sanity check.</p>
@@ -1159,7 +1159,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <ul>
 <li>Both learner and solution files end with <code>ROLLBACK</code>; replace it with <code>COMMIT</code> only in a deliberate migration after reviewing object names and ownership.</li>
 <li><code>CREATE VIEW</code> without <code>OR REPLACE</code> is intentional in the reference transaction and expects a clean course setup.</li>
-<li>Days 59–60 are sign-off checkpoints, so some deliverables are documentation and measured evidence rather than new SQL exercises.</li>
+<li>Days 59-60 are sign-off checkpoints, so some deliverables are documentation and measured evidence rather than new SQL exercises.</li>
 </ul>
 <h4 id="solution-1--exercise-1-identify-clock-dependence">Exercise 1: Identify clock dependence<a class="heading-anchor" href="#solution-1--exercise-1-identify-clock-dependence" aria-label="Link to this section">#</a></h4>
 <p>Snapshot summaries depend only on table state. Trailing/current-period reports also depend on the clock and need a bound <code>as_of_date</code> for reproducible review.</p>

@@ -540,7 +540,7 @@ ROLLBACK;</code></pre>
 <li>Record the exact statement order in both terminals so the anomaly is reproducible.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 4–7 add single-session recovery patterns to the concurrency exercises. After <code>ROLLBACK TO SAVEPOINT</code>, PostgreSQL keeps that savepoint available until it is released or the transaction ends. This is why error recovery must first return to a valid savepoint before more statements run.</p>
+<p>Prompts 4-7 add single-session recovery patterns to the concurrency exercises. After <code>ROLLBACK TO SAVEPOINT</code>, PostgreSQL keeps that savepoint available until it is released or the transaction ends. This is why error recovery must first return to a valid savepoint before more statements run.</p>
 <p>For the transfer, lock/check/update both balances as one transaction and verify that total money is unchanged. A multi-query read-only report can still need <code>REPEATABLE READ</code> when all results must describe one consistent snapshot.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

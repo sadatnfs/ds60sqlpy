@@ -636,7 +636,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* Hypothesis strategy + property: defines an input domain and invariant, with deterministic</span></span>
 <span class="source-line"><span class="syntax-string">  settings and no repository cache.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — replace wall-clock sleep with an injected clock::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: replace wall-clock sleep with an injected clock::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    class FixedClock:</span></span>
 <span class="source-line"><span class="syntax-string">        def __init__(self, value):</span></span>
@@ -657,7 +657,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: The exact expiration boundary is tested instantly and deterministically without</span></span>
 <span class="source-line"><span class="syntax-string">          sleeping.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — state an idempotence property::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: state an idempotence property::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    def normalize_tags(tags):</span></span>
 <span class="source-line"><span class="syntax-string">        return tuple(sorted({tag.strip().lower() for tag in tags if tag.strip()}))</span></span>
@@ -750,73 +750,73 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_test_01_architecture_generative.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — Choose fixture lifetime</span></span>
-<span class="source-line"><span class="syntax-comment"># Prompt: For each resource—immutable input rows, mutable in-memory store, temporary JSON</span></span>
-<span class="source-line"><span class="syntax-comment"># file, and database connection—choose function, class, module, or session scope. Prefer</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Choose fixture lifetime</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: For each resource (immutable input rows, mutable in-memory store, temporary JSON</span></span>
+<span class="source-line"><span class="syntax-comment"># file, and database connection), choose function, class, module, or session scope. Prefer</span></span>
 <span class="source-line"><span class="syntax-comment"># the narrowest lifetime that is fast enough and keeps tests independent.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — Complete interval merging</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Complete interval merging</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `merge_intervals`. Add examples for empty input, reversed endpoints,</span></span>
 <span class="source-line"><span class="syntax-comment"># adjacent intervals, duplicates, and nesting. Then express properties: - output is</span></span>
 <span class="source-line"><span class="syntax-comment"># sorted, - output intervals no longer touch, - every original integer point remains</span></span>
 <span class="source-line"><span class="syntax-comment"># covered, and - no new point is created.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — Use Hypothesis meaningfully</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Use Hypothesis meaningfully</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Generate lists of bounded integer endpoint pairs with 100 deterministic examples,</span></span>
 <span class="source-line"><span class="syntax-comment"># no example database, and no deadline. Introduce an adjacency bug briefly, inspect the</span></span>
 <span class="source-line"><span class="syntax-comment"># smallest counterexample, restore the implementation, and keep a useful regression case.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — Compare test doubles</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Compare test doubles</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Complete `choose_double`. Use a fake for the stateful store, a mock only for one</span></span>
 <span class="source-line"><span class="syntax-comment"># audit interaction, and a real temporary file for serialization behavior. Explain why</span></span>
 <span class="source-line"><span class="syntax-comment"># mocking every store method couples tests to implementation steps.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — Patch and restore process state</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Patch and restore process state</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use `patch.dict(os.environ, ..., clear=False)` or pytest&#x27;s `monkeypatch` fixture</span></span>
 <span class="source-line"><span class="syntax-comment"># to change cache settings for one test. Assert the original environment is restored</span></span>
 <span class="source-line"><span class="syntax-comment"># afterward. Prefer passing a mapping directly when the API permits it.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — Add a contract failure</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Add a contract failure</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create a deliberately broken store that never overwrites values. Run the shared</span></span>
 <span class="source-line"><span class="syntax-comment"># contract and locate the exact violated behavior. Contract tests complement, rather than</span></span>
 <span class="source-line"><span class="syntax-comment"># replace, implementation-specific failure tests.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — model a state machine</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: model a state machine</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create a deterministic rule-based state machine for `ExpiringCache`: put, get,</span></span>
 <span class="source-line"><span class="syntax-comment"># delete, advance time, and overwrite. Compare every action with a simple in-memory model.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — add metamorphic tests</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: add metamorphic tests</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Write metamorphic relations for interval merging when the exact output is</span></span>
 <span class="source-line"><span class="syntax-comment"># inconvenient: input permutation, duplicate insertion, endpoint translation, and applying</span></span>
 <span class="source-line"><span class="syntax-comment"># merge twice.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — evaluate mutation-test survivors</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: evaluate mutation-test survivors</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Make three deliberate mutations: change expiry `&lt;` to `&lt;=`, stop merging</span></span>
 <span class="source-line"><span class="syntax-comment"># adjacent intervals, and skip store overwrite. Predict which test should fail and add a</span></span>
 <span class="source-line"><span class="syntax-comment"># focused test for any survivor.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — test concurrency without timing races</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: test concurrency without timing races</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Design a two-worker cache/store test using barriers/events to force a specific</span></span>
 <span class="source-line"><span class="syntax-comment"># interleaving. State whether the contract promises thread safety; if it does not, test</span></span>
 <span class="source-line"><span class="syntax-comment"># the synchronization wrapper instead.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — triage a flaky test</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: triage a flaky test</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Take a test that depends on wall-clock sleep, random data, shared files, or</span></span>
 <span class="source-line"><span class="syntax-comment"># unordered output. Classify the cause, collect repeat evidence, and replace the unstable</span></span>
 <span class="source-line"><span class="syntax-comment"># boundary rather than adding retries.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — design a layered verification portfolio</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: design a layered verification portfolio</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Map one feature across pure unit/property tests, shared store contract, real</span></span>
 <span class="source-line"><span class="syntax-comment"># temporary-file integration, CLI/process smoke, and optional external system test. Define</span></span>
 <span class="source-line"><span class="syntax-comment"># what each layer proves and does not prove.</span></span>

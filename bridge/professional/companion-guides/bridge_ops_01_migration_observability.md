@@ -83,7 +83,7 @@ By the end, you can:
 | checksum | Hash of immutable migration content used to detect edited history |
 | migration metadata | Table recording which version and checksum committed |
 | advisory lock | PostgreSQL transaction-scoped coordination lock used here to serialize runners |
-| expand–migrate–contract | Add compatible shape, move data/traffic, then remove old shape later |
+| expand-migrate-contract | Add compatible shape, move data/traffic, then remove old shape later |
 | idempotent delivery | Repeating a migration attempt produces no second logical change |
 | SQLSTATE | PostgreSQL's machine-readable error classification |
 | structured log | Event plus named fields rather than an interpolated prose message |

@@ -198,7 +198,7 @@ Decomposition analysis explains an aggregate change through components such as p
 
 ### stat-38-28
 
-**Oaxaca–Blinder decomposition**
+**Oaxaca-Blinder decomposition**
 
 Oaxaca-Blinder decomposition splits group mean differences into portions associated with covariate differences and coefficient differences under fitted linear models. The reference coefficient structure affects the decomposition, and omitted variables or selection can alter results. The unexplained portion is not automatically discrimination or a causal effect. State the model, comparison population and descriptive interpretation.
 

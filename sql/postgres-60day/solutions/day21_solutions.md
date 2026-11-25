@@ -100,7 +100,7 @@ ORDER BY
   customer_id;
 ```
 
-**Expected shape:** One row per ordering customer with bucket 1–4.
+**Expected shape:** One row per ordering customer with bucket 1-4.
 
 Check the result at the stated grain. An alternative formulation is
 valid only if it preserves the same NULL, ordering, time, money, and
@@ -109,11 +109,11 @@ cardinality contract.
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-21 Exercise 1, read from `orders`. Build the answer toward `customer_id`, `stored_spend`, and `spend_quartile`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-21 Exercise 1, expected output: One row per ordering customer with bucket 1–4. The final columns are `customer_id`, `stored_spend`, and `spend_quartile`. The final order is `spend_quartile, stored_spend DESC, customer_id`.
+- **Expected result/shape:** For sql-21 Exercise 1, expected output: One row per ordering customer with bucket 1-4. The final columns are `customer_id`, `stored_spend`, and `spend_quartile`. The final order is `spend_quartile, stored_spend DESC, customer_id`.
 - **Independent verification:** For sql-21 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `customer_id`, `stored_spend`, and `spend_quartile`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 - **Intermediate relation check:** For sql-21 Exercise 1, run `customer_spend` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 - **Clause check:** For sql-21 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `customer_id`, `stored_spend`, and `spend_quartile` ordered by `spend_quartile, stored_spend DESC, customer_id`.
-- **Alternative/trade-off:** For sql-21 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker. Evaluate another form against the concrete expected result (One row per ordering customer with bucket 1–4) and the verification above.
+- **Alternative/trade-off:** For sql-21 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker. Evaluate another form against the concrete expected result (One row per ordering customer with bucket 1-4) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
 ## Exercise 2: Query writing

@@ -119,11 +119,11 @@ evidence.
 persists, then resume from two with a healthy sink.
 
 **Approach:** The first run saves `[2]` and raises; the second extractor request is `2`, writes
-records 3–4, and saves `4`. No checkpoint for the failed batch is recorded.
+records 3-4, and saves `4`. No checkpoint for the failed batch is recorded.
 
 **Why this boundary matters:** Extraction on retry must receive the last durable checkpoint.
 
-**Verification evidence:** With sequences 1–4 and batch size two, fail write two; assert checkpoint `2`, then restart and assert only sequences 3–4 are written and checkpoint becomes `4`.
+**Verification evidence:** With sequences 1-4 and batch size two, fail write two; assert checkpoint `2`, then restart and assert only sequences 3-4 are written and checkpoint becomes `4`.
 
 ### Exercise 5: Record validation
 

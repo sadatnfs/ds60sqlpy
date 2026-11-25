@@ -24,7 +24,7 @@ API/boundary anatomy:
 * DuckDB projection/filter: pushes required columns and supported predicates near the scan;
   inspect plan and profile.
 
-Micro-example A — observe CSV's string-only boundary::
+Micro-example A: observe CSV's string-only boundary::
 
     import csv
     from pathlib import Path
@@ -39,7 +39,7 @@ Micro-example A — observe CSV's string-only boundary::
 Expected: Dates, units, prices, and blanks all arrive as strings and must be interpreted by an
           explicit contract.
 
-Micro-example B — show why projection changes analytical work::
+Micro-example B: show why projection changes analytical work::
 
     rows = [
         {"region": "north", "units": 2, "note": "large free text"},
@@ -141,14 +141,14 @@ def self_check() -> None:
 # Full acceptance checks and progressive hints:
 # companion-guides/py_data_01_arrow_duckdb.md
 #
-# Exercise 1 — define the CSV contract
+# Exercise 1: define the CSV contract
 # Prompt: Implement `parse_nullable_text` and `total_revenue`. Parse dates, integers, and
 # prices in one place rather than scattering conversion across analysis code. Test blank
 # notes and a malformed number. For real money, prefer `Decimal` or integer minor units. A
 # binary `float` is used in the learner exercise only to keep its first step small.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 2 — compare storage contracts
+# Exercise 2: compare storage contracts
 # Prompt: Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | |
 # Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan
 # select columns efficiently? | | | | Does Python need an extra engine? | | | | Is
@@ -156,21 +156,21 @@ def self_check() -> None:
 # and for a repeated 50-million-row analytical scan. Explain each answer.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 3 — build an Arrow schema
+# Exercise 3: build an Arrow schema
 # Prompt: With PyArrow installed, define non-null integer, date, region, category, units,
 # and decimal fields plus a nullable note. Create the table with this schema, write
 # Parquet, read it, and assert: - schema equality, - six rows, and - three null notes. Do
 # not infer the schema first and then claim it was guaranteed.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 4 — make partitions deliberate
+# Exercise 4: make partitions deliberate
 # Prompt: Implement `partition_directory`. Reject `../north`, slashes, empty strings, and
 # unexpected case. Write one stable file per region at
 # `region=<validated-value>/part-000.csv`. Partitioning every high-cardinality value can
 # create millions of tiny files, so choose commonly filtered dimensions and plan sizes.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 5 — query Parquet with DuckDB
+# Exercise 5: query Parquet with DuckDB
 # Prompt: Use an in-memory connection and `read_parquet(?)`. Group revenue by region for
 # rows with at least two units. Bind path and threshold values as parameters. Then run
 # `EXPLAIN` on the same SQL. Find: - a Parquet scan, - a units filter, and - projected
@@ -178,56 +178,56 @@ def self_check() -> None:
 # formatting changes, so look for semantics rather than copying one exact rendering.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 6 — explain pushdown honestly
+# Exercise 6: explain pushdown honestly
 # Prompt: Pushdown does not mean every query reads zero irrelevant bytes. Row-group
 # statistics, file organization, filter selectivity, expression support, and engine
 # version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and
 # 3. what would require profiling or scan metrics to prove.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 7 — exercise the fallback
+# Exercise 7: exercise the fallback
 # Prompt: Run `summarize_with_csv_fallback` in an environment without PyArrow/DuckDB. If
 # pandas exists, it uses typed `read_csv`; otherwise it uses the standard library. Confirm
 # the same row count, null count, region set, and revenue across engines. Verify optional
 # package detection neither installs dependencies nor contacts the network.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 8 — plan schema evolution
+# Exercise 8: plan schema evolution
 # Prompt: Create version 2 of the sales schema with one nullable additive column and one
 # proposed type change. Define which readers remain compatible and write a
 # migration/rejection policy.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 9 — control file and row-group size
+# Exercise 9: control file and row-group size
 # Prompt: Generate a larger local deterministic dataset and compare many tiny Parquet
 # files with fewer bounded files/row groups. Record metadata count, scan planning, file
 # sizes, and filtered query behavior.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 10 — validate a dataset before querying
+# Exercise 10: validate a dataset before querying
 # Prompt: Build a local validation report for schema equality, required/null counts,
 # unique row IDs, accepted regions, positive units, decimal range, date range, partition-
 # to-column agreement, and total row count.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 11 — reconcile a local analytical join
+# Exercise 11: reconcile a local analytical join
 # Prompt: Create a small region lookup fixture, join it to sales in DuckDB, and reproduce
 # the result with standard-library or pandas logic. Include an unknown region and
 # duplicate lookup key.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 12 — find a non-pushdown filter
+# Exercise 12: find a non-pushdown filter
 # Prompt: Compare `units >= ?` with a transformed predicate such as a function of units.
 # Inspect plans and scan evidence, then rewrite only when semantics remain identical.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 13 — publish a dataset atomically
+# Exercise 13: publish a dataset atomically
 # Prompt: Write partitioned output to a temporary version directory, validate it, create a
 # manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a
 # local current-version pointer.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 14 — reconcile decimals and timestamps across engines
+# Exercise 14: reconcile decimals and timestamps across engines
 # Prompt: Add boundary decimal values and timezone-aware timestamps to a local round trip.
 # Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit
 # normalization.

@@ -204,7 +204,7 @@ For every result, write its row grain and expected shape first.
 1. **Query writing:** Assign customers to four stored-spend buckets.
    **Progressive hint:** Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker.
    **Inputs/evidence:** For sql-21 Exercise 1, read from `orders`. Build the answer toward `customer_id`, `stored_spend`, and `spend_quartile`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-21 Exercise 1, expected output: One row per ordering customer with bucket 1–4. The final columns are `customer_id`, `stored_spend`, and `spend_quartile`. The final order is `spend_quartile, stored_spend DESC, customer_id`.
+   **Expected result/shape:** For sql-21 Exercise 1, expected output: One row per ordering customer with bucket 1-4. The final columns are `customer_id`, `stored_spend`, and `spend_quartile`. The final order is `spend_quartile, stored_spend DESC, customer_id`.
    **Verify:** For sql-21 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `customer_id`, `stored_spend`, and `spend_quartile`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 2. **Query writing:** Calculate salary percent rank within each department.
    **Progressive hint:** Partition by department and rank on salary alone so tied salaries share rank.

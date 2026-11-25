@@ -10,7 +10,7 @@ identity/order, field order, numeric special values, encoding, and serialization
 delivery bundle contains a safe model representation, schema, and manifest of
 hashes/versions/evidence. Loading verifies bytes and compatibility before parsing or prediction.
 Promotion is a policy decision based on tests, thresholds, limitations, ownership, and
-rollback—not the existence of a model file.
+rollback, not the existence of a model file.
 
 API/boundary anatomy:
 * canonical data hash: normalizes only declared non-semantic ordering and rejects
@@ -20,7 +20,7 @@ API/boundary anatomy:
 * manifest verification before load: checks every relative path, byte hash, format, and expected
   metadata before trusting content.
 
-Micro-example A — make record order irrelevant but value changes visible::
+Micro-example A: make record order irrelevant but value changes visible::
 
     import hashlib
     import json
@@ -40,7 +40,7 @@ Micro-example A — make record order irrelevant but value changes visible::
 Expected: Declared row ordering does not change the identity, while one semantic value change
           does.
 
-Micro-example B — fail a bundle when one artifact byte changes::
+Micro-example B: fail a bundle when one artifact byte changes::
 
     import hashlib
 
@@ -127,98 +127,98 @@ def self_check() -> None:
 # Full acceptance checks and progressive hints:
 # companion-guides/py_ml_01_reproducible_delivery.md
 #
-# Exercise 1 — Complete snapshot hashing
+# Exercise 1: Complete snapshot hashing
 # Prompt: Require a nonempty unique `record_id`, sort by it, serialize with sorted keys,
 # reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed
 # value does not. Explain what the hash does *not* prove: source ownership, legality,
 # labeling quality, representativeness, or absence of leakage.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 2 — Fit and serialize the local model
+# Exercise 2: Fit and serialize the local model
 # Prompt: Fit `y = intercept + coefficient*x` on three deterministic points. Store only
 # format identifier, feature name, and numeric parameters in JSON. Do not use pickle:
 # loading an untrusted pickle can execute code.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 3 — Version the feature schema
+# Exercise 3: Version the feature schema
 # Prompt: Declare feature name, ordered position, dtype, required status, and schema
 # version. Test exact compatibility, reordered input, a renamed feature, and a version
 # change. Decide which future changes could be safely additive for a different consumer
 # contract.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 4 — Define runtime compatibility
+# Exercise 4: Define runtime compatibility
 # Prompt: Declare Python 3.11 through below 3.13 and required package major versions.
 # Inject the observed versions into the check rather than dumping a machine-specific
 # environment. Report every incompatibility, not only the first.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 5 — Build and tamper with a bundle
+# Exercise 5: Build and tamper with a bundle
 # Prompt: Write model, schema, and manifest into a temporary directory. Verify all hashes.
 # Replace `model.json` with `{}` and confirm loading fails before parsing or prediction.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 6 — Promote with evidence
+# Exercise 6: Promote with evidence
 # Prompt: Register a candidate with: - tests passed, - compatibility passed, - named
 # metric and threshold, - metric value, and - 64-character manifest hash. Move it to
 # staging and production. Reject a version with missing tests even if its metric is high.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 7 — Rehearse rollback
+# Exercise 7: Rehearse rollback
 # Prompt: Promote version 1, then version 2. Record a simulated latency regression and
 # roll back to archived version 1. Confirm one production version remains and the event
 # trail preserves action, target, and reason.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 8 — Relate the lab to MLflow
+# Exercise 8: Relate the lab to MLflow
 # Prompt: Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day
 # 53. MLflow can store evidence; it does not define your compatibility or approval policy
 # automatically.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 9 — rebuild a bundle deterministically
+# Exercise 9: rebuild a bundle deterministically
 # Prompt: Build the JSON model bundle twice from canonical records and the same
 # configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field
 # such as timestamps, path order, or float serialization.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 10 — write a claim-bounded model card
+# Exercise 10: write a claim-bounded model card
 # Prompt: Create a model card from the manifest and evaluation evidence: intended and
 # excluded use, population, metric/threshold, slices/support, data provenance,
 # limitations, monitoring, owners, and stop conditions.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 11 — design shadow and canary evidence
+# Exercise 11: design shadow and canary evidence
 # Prompt: Specify a no-side-effect shadow comparison followed by a bounded canary. Define
 # routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how
 # delayed labels are handled.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 12 — separate drift from compatibility
+# Exercise 12: separate drift from compatibility
 # Prompt: Create examples of schema incompatibility, valid schema with shifted
 # distribution, and stable inputs with performance degradation. Route each to reject,
 # monitor/investigate, or rollback/retrain policy.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 13 — test forward and backward compatibility
+# Exercise 13: test forward and backward compatibility
 # Prompt: Build a matrix of producer/consumer schema and model versions. Test an additive
 # optional field, required rename, reordered feature, and changed numeric meaning across
 # old/new readers.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 14 — capture dependency and supply-chain evidence
+# Exercise 14: capture dependency and supply-chain evidence
 # Prompt: Create a local release manifest containing reviewed lock hash, direct runtime
 # requirements, Python range, package major versions, artifact hashes, source
 # revision/dirty flag, and a generated component inventory.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 15 — verify artifact trust before parsing
+# Exercise 15: verify artifact trust before parsing
 # Prompt: Model a trusted local manifest root and verify every bundle file's relative
 # path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape,
 # extra required files, and pickle.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 16 — rehearse rollback dependency failure
+# Exercise 16: rehearse rollback dependency failure
 # Prompt: Archive version 1, promote version 2, then discover that version 1's runtime
 # dependency is unavailable. Define rollback-target readiness, fallback decision, event
 # trail, and prevention.

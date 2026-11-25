@@ -122,7 +122,7 @@ Combine factorial points, center replicates and axial points to estimate quadrat
 
 ### stat-13-18
 
-**Box–Behnken designs**
+**Box-Behnken designs**
 
 Use mid-edge combinations and center points for quadratic models without all extreme corners. This can avoid dangerous joint extremes, but omitted corners limit information about behavior there.
 

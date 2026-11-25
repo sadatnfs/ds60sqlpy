@@ -68,7 +68,7 @@ authorize a reset.
 
 - **Level:** Advanced
 - **Catalog prerequisites:** `sql-35` and `sql-types-01`
-- **Prerequisites:** SQL Days 31–34 on plans and B-tree indexes,
+- **Prerequisites:** SQL Days 31-34 on plans and B-tree indexes,
   [SQL Day 35 query pitfalls](../../postgres-60day/companion-guides/day35_avoiding_pitfalls.md),
   plus
   [SQL-TYPES-01](sql_types_01_native_types_search.md) for array/range operators.
@@ -194,7 +194,7 @@ sequential scan; that is a valid cost decision.
 - GiST supports point distance/nearest-neighbour operations.
 - SP-GiST partitions text search space for its supported operators.
 - An expression index stores `lower(message)`.
-- A partial index stores only severity 4–5 rows.
+- A partial index stores only severity 4-5 rows.
 
 A query must match the indexed expression and operator. `lower(message) = ...`
 can use the expression index; plain `message = ...` is a different expression.

@@ -36,7 +36,7 @@ Multi-armed bandits repeatedly choose among actions with uncertain reward distri
 
 ### stat-35-02
 
-**Exploration–exploitation tradeoffs**
+**Exploration-exploitation tradeoffs**
 
 The exploration-exploitation tradeoff balances immediate expected reward against learning that improves later choices. The value of information depends on remaining horizon and uncertainty, so a poorly known action is not automatically worth trying. Operational constraints can rule out otherwise informative actions. Evaluate cumulative reward and learning cost under the same horizon rather than celebrating fast convergence after ignoring early harmful decisions.
 
@@ -120,7 +120,7 @@ Policy gradients optimize parameters of a stochastic policy using reward-weighte
 
 ### stat-35-16
 
-**Actor–critic methods**
+**Actor-critic methods**
 
 Actor-critic methods combine an actor policy with a critic estimating value or advantage. The critic can reduce gradient variance but introduces approximation error and coupled training dynamics. Bootstrapping and off-policy corrections need care. Monitor value estimation, policy entropy and actual task outcomes separately so a critic that becomes confidently wrong does not masquerade as policy improvement.
 

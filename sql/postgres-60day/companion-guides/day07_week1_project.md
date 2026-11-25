@@ -68,7 +68,7 @@ authorize a reset.
 
 - **Level:** Foundation (beginner)
 - **Prerequisites:** [Day 06; set operations](day06_set_operations.md) and the
-  joins and aggregates from Days 01–05
+  joins and aggregates from Days 01-05
 - **Artifacts:** [learner SQL](../day07_week1_project.sql) ·
   [solution reasoning](../solutions/day07_solutions.md) ·
   [executable solution](../solutions/day07_solutions.sql)
@@ -288,7 +288,7 @@ Continue to [Day 08; scalar and inline subqueries](day08_scalar_inline_subquerie
 
 Goal
 - Extend the starter report of last-90-day revenue and buyers by country and
-  category using the joins, aggregates, and set reasoning from Days 01–06.
+  category using the joins, aggregates, and set reasoning from Days 01-06.
 
 Deliverable checklist
 - Use the six prompts above as the project acceptance checklist. They cover

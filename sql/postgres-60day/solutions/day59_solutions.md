@@ -285,7 +285,7 @@ For a hypothetical 100M-row deployment, record:
 
 ## Capstone checkpoint limits
 
-- Days 59–60 provide sign-off criteria rather than neatly isolated exercises.
+- Days 59-60 provide sign-off criteria rather than neatly isolated exercises.
 - The current executable solution selects representative KPI, finance, and
   performance checks; the learner starter contains the product-pair and
   marketing queries that must also be discussed in the final write-up.

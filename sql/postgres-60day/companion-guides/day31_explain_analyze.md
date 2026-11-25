@@ -232,7 +232,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 add prediction, construction, debugging, and an empty-result edge
+Prompts 3-6 add prediction, construction, debugging, and an empty-result edge
 case. Read a plan from the most deeply indented node upward: scans produce rows,
 joins combine them, aggregates reduce their grain, and the root returns the
 final result. For each plan, record estimated versus actual rows before timing;

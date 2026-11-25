@@ -42,7 +42,7 @@ def test_mle_subject_and_substantive_guides() -> None:
         assert guide.count("## Worked case ") == 2
         assert all(f"### {n}. " in guide for n in range(1, 7))
         assert len(re.sub(r"```.*?```", "", guide, flags=re.S).split()) >= 600
-        assert "—" not in guide
+        assert "\u2014" not in guide
     assert (BASE / "projects/local-system/.ds60-ml-project.json").is_file()
 
 

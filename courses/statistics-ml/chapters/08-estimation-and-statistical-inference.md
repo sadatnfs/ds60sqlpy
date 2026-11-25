@@ -96,7 +96,7 @@ Fisher information measures expected likelihood curvature or score variance unde
 
 ### stat-08-15
 
-**Cramér–Rao bounds**
+**Cramér-Rao bounds**
 
 Cramer-Rao bounds limit unbiased estimator variance under differentiability and regularity assumptions. They are not universal limits for biased estimators or irregular models. Attaining a bound is conditional on the assumed model.
 

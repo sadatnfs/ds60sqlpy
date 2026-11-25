@@ -685,7 +685,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* structured log + metrics: records bounded diagnostic context and aggregate outcomes without</span></span>
 <span class="source-line"><span class="syntax-string">  secrets or unbounded labels.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — keep liveness and readiness independent::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: keep liveness and readiness independent::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    def status(*, running, dependencies, artifact_verified, draining):</span></span>
 <span class="source-line"><span class="syntax-string">        return {</span></span>
@@ -705,7 +705,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">Expected: A dependency outage removes traffic readiness while avoiding a harmful restart loop.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — reject high-cardinality metric labels::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: reject high-cardinality metric labels::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    allowed_metric_labels = {&quot;route&quot;, &quot;method&quot;, &quot;outcome&quot;, &quot;error_class&quot;}</span></span>
 <span class="source-line"><span class="syntax-string">    proposed = {</span></span>
@@ -787,13 +787,13 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_svc_02_hardening_observability.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — Validate startup configuration</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Validate startup configuration</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Parse maximum concurrency, rate capacity, and refill rate. Reject zero,</span></span>
 <span class="source-line"><span class="syntax-comment"># negative, blank, or nonnumeric values before constructing the service. Keep credential</span></span>
 <span class="source-line"><span class="syntax-comment"># retrieval outside dataclass representations and logs.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — Complete health/readiness policy</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Complete health/readiness policy</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Health remains true for a running process. Readiness requires at least one</span></span>
 <span class="source-line"><span class="syntax-comment"># configured dependency, all probes ready, verified artifact, and no draining state.</span></span>
 <span class="source-line"><span class="syntax-comment"># Return named reasons so an operator can diagnose 503 without exposing secrets. Do not</span></span>
@@ -801,31 +801,31 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># external outage.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — Design structured events</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Design structured events</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Emit request started/completed/failed/rejected with request ID, action, bounded</span></span>
 <span class="source-line"><span class="syntax-comment"># reason, and error type. Redact token, authorization, password, secret, and API key</span></span>
 <span class="source-line"><span class="syntax-comment"># fields case-insensitively. Do not log request bodies by default.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — Design metrics</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Design metrics</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and</span></span>
 <span class="source-line"><span class="syntax-comment"># not-ready outcomes. Observe duration values. Do not put user, token, request ID, or</span></span>
 <span class="source-line"><span class="syntax-comment"># arbitrary URL into metric labels.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — Bound concurrency</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Bound concurrency</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Acquire a `BoundedSemaphore` without blocking. Return a lease that always</span></span>
 <span class="source-line"><span class="syntax-comment"># releases in `__exit__`, including exceptions. With capacity one, hold a lease and verify</span></span>
 <span class="source-line"><span class="syntax-comment"># a second attempt returns busy immediately.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — Rate limit with injected time</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Rate limit with injected time</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Consume two tokens, reject the third request, advance a fake clock one second,</span></span>
 <span class="source-line"><span class="syntax-comment"># and accept one refill. State that this in-process bucket is not sufficient across</span></span>
 <span class="source-line"><span class="syntax-comment"># multiple service instances.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — Separate authentication and authorization</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: Separate authentication and authorization</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: The local static authenticator maps placeholder test tokens to principals.</span></span>
 <span class="source-line"><span class="syntax-comment"># Readers may predict; operators may predict and reload. Prove unknown identity returns</span></span>
 <span class="source-line"><span class="syntax-comment"># 401 while an authenticated but unauthorized action returns 403. Production identity</span></span>
@@ -833,20 +833,20 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># security, and audit policy.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — Trust an artifact narrowly</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: Trust an artifact narrowly</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Compute expected SHA-256 before startup, verify exact bytes, then parse a flat</span></span>
 <span class="source-line"><span class="syntax-comment"># JSON object. Tamper with the file and confirm verification fails. Do not use pickle for</span></span>
 <span class="source-line"><span class="syntax-comment"># untrusted service artifacts.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — Run the incident drill</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: Run the incident drill</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Set a dependency probe false: 1. readiness reports its name, 2. health remains</span></span>
 <span class="source-line"><span class="syntax-comment"># true, 3. new work receives 503, 4. the not-ready metric increments, and 5. a request-</span></span>
 <span class="source-line"><span class="syntax-comment"># rejected log carries the request ID and bounded reason. Then restore the dependency and</span></span>
 <span class="source-line"><span class="syntax-comment"># confirm readiness recovers.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — Draw the Internet-facing boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: Draw the Internet-facing boundary</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: List what this local example does not supply: TLS termination, real identity,</span></span>
 <span class="source-line"><span class="syntax-comment"># secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse</span></span>
 <span class="source-line"><span class="syntax-comment"># controls, autoscaling, durable telemetry, retention/privacy policy, artifact</span></span>
@@ -854,61 +854,61 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># each omitted control and which local test evidence cannot validate it.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — drain and shut down gracefully</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: drain and shut down gracefully</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Add a draining transition that makes readiness false, rejects new work, allows</span></span>
 <span class="source-line"><span class="syntax-comment"># active leases a bounded grace period, and records unfinished requests before shutdown.</span></span>
 <span class="source-line"><span class="syntax-comment"># Make repeated drain calls idempotent.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — add a dependency circuit breaker</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: add a dependency circuit breaker</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Wrap one dependency probe/call in a closed/open/half-open breaker with injected</span></span>
 <span class="source-line"><span class="syntax-comment"># time. Define which failures count, one bounded probe, readiness interaction, and</span></span>
 <span class="source-line"><span class="syntax-comment"># recovery metrics.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 13 — define distributed limiting semantics</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13: define distributed limiting semantics</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Explain how the local token bucket behaves with four service processes, then</span></span>
 <span class="source-line"><span class="syntax-comment"># design a shared limiter contract covering atomicity, key, window/token semantics,</span></span>
 <span class="source-line"><span class="syntax-comment"># timeout, fail-open/closed choice, and privacy.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 14 — bound telemetry backpressure</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14: bound telemetry backpressure</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Make the log/metric exporter slow or unavailable. Define a bounded queue,</span></span>
 <span class="source-line"><span class="syntax-comment"># drop/coalesce policy, priority for security events, and counters that reveal lost</span></span>
 <span class="source-line"><span class="syntax-comment"># telemetry without blocking request handling indefinitely.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 15 — propagate trace context safely</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15: propagate trace context safely</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Accept or create a request/trace ID, validate its bounded format, carry it</span></span>
 <span class="source-line"><span class="syntax-comment"># through local logs and an outbound fake client, and prove malformed or attacker-sized</span></span>
 <span class="source-line"><span class="syntax-comment"># IDs are replaced rather than reflected.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 16 — rehearse credential rotation</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16: rehearse credential rotation</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Model a credential provider accepting active and previous key versions during a</span></span>
 <span class="source-line"><span class="syntax-comment"># bounded overlap. Rotate, verify new requests use the active key, expire the old key, and</span></span>
 <span class="source-line"><span class="syntax-comment"># ensure neither value reaches repr/log/metrics.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 17 — compose dependency timeout budgets</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 17: compose dependency timeout budgets</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: For a 750 ms request budget calling two dependencies, allocate local queue,</span></span>
 <span class="source-line"><span class="syntax-comment"># dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and</span></span>
 <span class="source-line"><span class="syntax-comment"># stop work when useful completion is impossible.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 18 — run a fault-injection matrix</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 18: run a fault-injection matrix</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Inject dependency false/exception/latency, artifact tampering, auth outage,</span></span>
 <span class="source-line"><span class="syntax-comment"># limiter saturation, log-export failure, handler exception, and drain. For each, predict</span></span>
 <span class="source-line"><span class="syntax-comment"># status, readiness/health, cleanup, log, and metric evidence.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 19 — define an SLO and error budget</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 19: define an SLO and error budget</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Define one availability and one latency SLI over eligible requests,</span></span>
 <span class="source-line"><span class="syntax-comment"># target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action.</span></span>
 <span class="source-line"><span class="syntax-comment"># Use generated local events to compute a small example.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 20 — audit privacy, retention, and cardinality</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 20: audit privacy, retention, and cardinality</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Inventory every log field, metric label, trace attribute, and local artifact.</span></span>
 <span class="source-line"><span class="syntax-comment"># Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and</span></span>
 <span class="source-line"><span class="syntax-comment"># owner; then test representative forbidden values.</span></span>

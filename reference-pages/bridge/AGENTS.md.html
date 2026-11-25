@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="agent-guidance-for-the-engineering-bridge">Agent guidance for the engineering bridge<a class="heading-anchor" href="#agent-guidance-for-the-engineering-bridge" aria-label="Link to this section">#</a></h2>
 <p>This file governs everything under <code>bridge/</code>.</p>
 <h3 id="purpose-and-prerequisites">Purpose and prerequisites<a class="heading-anchor" href="#purpose-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>The bridge connects the Python and PostgreSQL tracks without becoming a second beginner course. Day 1 follows Python Day 15 and SQL Day 15. Days 2–8 are sequential. Preserve this dependency chain when changing lesson order.</p>
+<p>The bridge connects the Python and PostgreSQL tracks without becoming a second beginner course. Day 1 follows Python Day 15 and SQL Day 15. Days 2-8 are sequential. Preserve this dependency chain when changing lesson order.</p>
 <h3 id="artifact-contract">Artifact contract<a class="heading-anchor" href="#artifact-contract" aria-label="Link to this section">#</a></h3>
 <p>Every day must have:</p>
 <ul>
@@ -209,7 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Companion guides include objectives, prerequisites, vocabulary, worked examples, exercises, self-checks, common pitfalls, and a next step. Solution notes discuss tradeoffs and failure behavior instead of merely repeating code. Every guide must include a novice-safe <code>## How to run this lesson</code>, at least two runnable topic-specific examples, an explicit Expected/Verify contract for each exercise, and a final copy-ready <code>## Ask an AI tutor about this lesson</code> prompt using the exact stable ID and paths. The guide and solution must remain self-contained without an AI tutor. Each cataloged bridge module must meet its immutable <code>curriculum/practice_baseline.json</code> target on learner, guide, and explanatory solution surfaces with aligned, distinct numbered prompts.</p>
 <h3 id="database-and-security-rules">Database and security rules<a class="heading-anchor" href="#database-and-security-rules" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Target Python 3.11–3.12, PostgreSQL 16+, and Psycopg 3.</li>
+<li>Target Python 3.11-3.12, PostgreSQL 16+, and Psycopg 3.</li>
 <li>Read the disposable course connection string from <code>DS60_DATABASE_URL</code>.</li>
 <li>Never commit or log credentials.</li>
 <li>Keep Psycopg imports inside optional live-DB boundaries when possible so core examples remain importable without the dependency.</li>

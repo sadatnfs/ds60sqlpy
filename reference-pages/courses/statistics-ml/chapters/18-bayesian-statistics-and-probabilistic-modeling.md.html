@@ -237,7 +237,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Average predictions or estimands across models using posterior model weights. This propagates uncertainty among included models only. If all models share a structural error, averaging does not remove it.</p>
 <h4 id="stat-18-17">Markov chain Monte Carlo<a class="heading-anchor" href="#stat-18-17" aria-label="Link to this section">#</a></h4>
 <p>Construct a Markov chain targeting the posterior and retain its dependence in uncertainty assessment. More iterations help only if the chain explores relevant regions. Disconnected modes may remain invisible to one chain.</p>
-<h4 id="stat-18-18">Metropolis–Hastings<a class="heading-anchor" href="#stat-18-18" aria-label="Link to this section">#</a></h4>
+<h4 id="stat-18-18">Metropolis-Hastings<a class="heading-anchor" href="#stat-18-18" aria-label="Link to this section">#</a></h4>
 <p>Propose a move and correct using the target-density ratio and proposal asymmetry. Symmetric proposals simplify the ratio. Store repeated states after rejection; keeping accepted moves alone changes the sampled distribution.</p>
 <h4 id="stat-18-19">Gibbs sampling<a class="heading-anchor" href="#stat-18-19" aria-label="Link to this section">#</a></h4>
 <p>Sample each variable or block from its full conditional distribution. Strong posterior correlation can make coordinate updates mix slowly. Conjugate conditionals simplify sampling but do not guarantee efficient exploration.</p>

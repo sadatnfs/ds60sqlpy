@@ -221,7 +221,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 separate index *eligibility* from a planner's cost decision. First
+Prompts 3-6 separate index *eligibility* from a planner's cost decision. First
 measure category frequency: on a compact table, reading every page can be
 cheaper than bouncing through an index. Use a half-open timestamp range for the
 payment-date index so boundary semantics are explicit.

@@ -353,7 +353,7 @@ Security work is complete only when both allowed and denied paths are proven:
 
 ## Next step
 
-Revisit SQL Days 38–44 with separate owner, migration, application, and
+Revisit SQL Days 38-44 with separate owner, migration, application, and
 read-only operational roles in mind. Then continue to the future professional
 modules on routines/triggers, SQL contract tests, index operations, and recovery
 rehearsals; use the [curriculum gap backlog](../../../docs/curriculum-gap-backlog.md)

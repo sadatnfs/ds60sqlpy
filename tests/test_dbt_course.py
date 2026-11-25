@@ -46,7 +46,7 @@ def test_dbt_complete_subject_contract() -> None:
         assert guide.count("## Worked case ") == 2
         assert all(f"### {n}. " in guide for n in range(1, 7))
         assert len(re.sub(r"```.*?```", "", guide, flags=re.S).split()) >= 600
-        assert "—" not in guide
+        assert "\u2014" not in guide
         for variant in row.get("variants", []):
             assert variant["id"] == "sql-model"
             assert variant["runtime_profile"] == "dbt-duckdb"

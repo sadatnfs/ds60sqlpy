@@ -37,7 +37,7 @@ How to run and reset safely
   then run the same command with `00_verify.sql`.
 - Re-running `00_setup.sql` drops and recreates the disposable `training` schema. Never run it against a database that contains data you care about.
 - Most lesson scripts use `BEGIN` and `ROLLBACK`. The stated exception is the
-  Days 52–54 warehouse project: Day 52 resets and commits the course-owned
+  Days 52-54 warehouse project: Day 52 resets and commits the course-owned
   `dwh` schema for Days 53 and 54, so run those lessons in order.
 
 Naming and conventions used throughout the curriculum

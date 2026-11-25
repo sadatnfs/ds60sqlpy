@@ -280,7 +280,7 @@ Continue to [Day 48; affinity and attribution](day48_project1_ecommerce_part3.md
 
 The starter deduplicates `orders` to one row per `(customer_id, order_month)`,
 joins each customer to the signup month from `customers.created_at`, and counts
-active customers at offsets 0–12.
+active customers at offsets 0-12.
 
 This lesson is retention only. Funnel analysis belongs to the later
 event/capstone work and is not a Day 47 deliverable.

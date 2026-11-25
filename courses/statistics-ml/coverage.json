@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_sha256": "146945b484305436b8cdee1fd3eb90b6689c3b32397321f20b2a77b15ae1f938",
+  "source_sha256": "695c9e1d7c700a247fc96c4ff31e6f2f6832c0bee419ca5eb17e3f26ef1d2da1",
   "topics": [
     {
       "id": "stat-01-01",
@@ -1005,7 +1005,7 @@
     {
       "id": "stat-05-09",
       "source_section": 5,
-      "label": "Horvitz–Thompson estimation",
+      "label": "Horvitz-Thompson estimation",
       "chapter_id": "statistics-005",
       "chapter_path": "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md",
       "anchor": "stat-05-09",
@@ -1115,7 +1115,7 @@
     {
       "id": "stat-05-20",
       "source_section": 5,
-      "label": "Capture–recapture estimation",
+      "label": "Capture-recapture estimation",
       "chapter_id": "statistics-005",
       "chapter_path": "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md",
       "anchor": "stat-05-20",
@@ -1295,7 +1295,7 @@
     {
       "id": "stat-06-15",
       "source_section": 6,
-      "label": "Quantile–quantile plots",
+      "label": "Quantile-quantile plots",
       "chapter_id": "statistics-006",
       "chapter_path": "courses/statistics-ml/chapters/06-measurement-exploratory-analysis-and-data-quality.md",
       "anchor": "stat-06-15",
@@ -1395,7 +1395,7 @@
     {
       "id": "stat-06-25",
       "source_section": 6,
-      "label": "Test–retest reliability",
+      "label": "Test-retest reliability",
       "chapter_id": "statistics-006",
       "chapter_path": "courses/statistics-ml/chapters/06-measurement-exploratory-analysis-and-data-quality.md",
       "anchor": "stat-06-25",
@@ -1795,7 +1795,7 @@
     {
       "id": "stat-08-15",
       "source_section": 8,
-      "label": "Cramér–Rao bounds",
+      "label": "Cramér-Rao bounds",
       "chapter_id": "statistics-008",
       "chapter_path": "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md",
       "anchor": "stat-08-15",
@@ -2115,7 +2115,7 @@
     {
       "id": "stat-09-18",
       "source_section": 9,
-      "label": "Mann–Whitney U test",
+      "label": "Mann-Whitney U test",
       "chapter_id": "statistics-009",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
       "anchor": "stat-09-18",
@@ -2145,7 +2145,7 @@
     {
       "id": "stat-09-21",
       "source_section": 9,
-      "label": "Kruskal–Wallis test",
+      "label": "Kruskal-Wallis test",
       "chapter_id": "statistics-009",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
       "anchor": "stat-09-21",
@@ -2165,7 +2165,7 @@
     {
       "id": "stat-09-23",
       "source_section": 9,
-      "label": "Kolmogorov–Smirnov test",
+      "label": "Kolmogorov-Smirnov test",
       "chapter_id": "statistics-009",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
       "anchor": "stat-09-23",
@@ -2175,7 +2175,7 @@
     {
       "id": "stat-09-24",
       "source_section": 9,
-      "label": "Anderson–Darling test",
+      "label": "Anderson-Darling test",
       "chapter_id": "statistics-009",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
       "anchor": "stat-09-24",
@@ -2185,7 +2185,7 @@
     {
       "id": "stat-09-25",
       "source_section": 9,
-      "label": "Shapiro–Wilk test",
+      "label": "Shapiro-Wilk test",
       "chapter_id": "statistics-009",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
       "anchor": "stat-09-25",
@@ -2195,7 +2195,7 @@
     {
       "id": "stat-09-26",
       "source_section": 9,
-      "label": "Levene’s and Brown–Forsythe tests",
+      "label": "Levene’s and Brown-Forsythe tests",
       "chapter_id": "statistics-009",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
       "anchor": "stat-09-26",
@@ -2315,7 +2315,7 @@
     {
       "id": "stat-10-05",
       "source_section": 10,
-      "label": "Benjamini–Hochberg procedure",
+      "label": "Benjamini-Hochberg procedure",
       "chapter_id": "statistics-010",
       "chapter_path": "courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md",
       "anchor": "stat-10-05",
@@ -2325,7 +2325,7 @@
     {
       "id": "stat-10-06",
       "source_section": 10,
-      "label": "Benjamini–Yekutieli procedure",
+      "label": "Benjamini-Yekutieli procedure",
       "chapter_id": "statistics-010",
       "chapter_path": "courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md",
       "anchor": "stat-10-06",
@@ -3225,7 +3225,7 @@
     {
       "id": "stat-13-18",
       "source_section": 13,
-      "label": "Box–Behnken designs",
+      "label": "Box-Behnken designs",
       "chapter_id": "statistics-013",
       "chapter_path": "courses/statistics-ml/chapters/13-classical-experimental-design.md",
       "anchor": "stat-13-18",
@@ -4485,7 +4485,7 @@
     {
       "id": "stat-18-18",
       "source_section": 18,
-      "label": "Metropolis–Hastings",
+      "label": "Metropolis-Hastings",
       "chapter_id": "statistics-018",
       "chapter_path": "courses/statistics-ml/chapters/18-bayesian-statistics-and-probabilistic-modeling.md",
       "anchor": "stat-18-18",
@@ -4635,7 +4635,7 @@
     {
       "id": "stat-19-03",
       "source_section": 19,
-      "label": "Bias–variance tradeoff",
+      "label": "Bias-variance tradeoff",
       "chapter_id": "statistics-019",
       "chapter_path": "courses/statistics-ml/chapters/19-statistical-learning-and-classical-supervised-models.md",
       "anchor": "stat-19-03",
@@ -4865,7 +4865,7 @@
     {
       "id": "stat-19-26",
       "source_section": 19,
-      "label": "Positive–unlabeled learning",
+      "label": "Positive-unlabeled learning",
       "chapter_id": "statistics-019",
       "chapter_path": "courses/statistics-ml/chapters/19-statistical-learning-and-classical-supervised-models.md",
       "anchor": "stat-19-26",
@@ -5625,7 +5625,7 @@
     {
       "id": "stat-22-24",
       "source_section": 22,
-      "label": "Precision–recall curves",
+      "label": "Precision-recall curves",
       "chapter_id": "statistics-022",
       "chapter_path": "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md",
       "anchor": "stat-22-24",
@@ -6245,7 +6245,7 @@
     {
       "id": "stat-25-13",
       "source_section": 25,
-      "label": "Augmented Dickey–Fuller tests",
+      "label": "Augmented Dickey-Fuller tests",
       "chapter_id": "statistics-025",
       "chapter_path": "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md",
       "anchor": "stat-25-13",
@@ -6355,7 +6355,7 @@
     {
       "id": "stat-25-24",
       "source_section": 25,
-      "label": "Ljung–Box tests",
+      "label": "Ljung-Box tests",
       "chapter_id": "statistics-025",
       "chapter_path": "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md",
       "anchor": "stat-25-24",
@@ -6435,7 +6435,7 @@
     {
       "id": "stat-26-07",
       "source_section": 26,
-      "label": "Holt–Winters methods",
+      "label": "Holt-Winters methods",
       "chapter_id": "statistics-026",
       "chapter_path": "courses/statistics-ml/chapters/26-classical-forecasting-methods.md",
       "anchor": "stat-26-07",
@@ -6925,7 +6925,7 @@
     {
       "id": "stat-27-30",
       "source_section": 27,
-      "label": "Diebold–Mariano tests",
+      "label": "Diebold-Mariano tests",
       "chapter_id": "statistics-027",
       "chapter_path": "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md",
       "anchor": "stat-27-30",
@@ -7005,7 +7005,7 @@
     {
       "id": "stat-28-08",
       "source_section": 28,
-      "label": "Kaplan–Meier estimation",
+      "label": "Kaplan-Meier estimation",
       "chapter_id": "statistics-028",
       "chapter_path": "courses/statistics-ml/chapters/28-survival-analysis-duration-models-and-reliability.md",
       "anchor": "stat-28-08",
@@ -7015,7 +7015,7 @@
     {
       "id": "stat-28-09",
       "source_section": 28,
-      "label": "Nelson–Aalen estimation",
+      "label": "Nelson-Aalen estimation",
       "chapter_id": "statistics-028",
       "chapter_path": "courses/statistics-ml/chapters/28-survival-analysis-duration-models-and-reliability.md",
       "anchor": "stat-28-09",
@@ -7135,7 +7135,7 @@
     {
       "id": "stat-28-21",
       "source_section": 28,
-      "label": "Fine–Gray models",
+      "label": "Fine-Gray models",
       "chapter_id": "statistics-028",
       "chapter_path": "courses/statistics-ml/chapters/28-survival-analysis-duration-models-and-reliability.md",
       "anchor": "stat-28-21",
@@ -7165,7 +7165,7 @@
     {
       "id": "stat-28-24",
       "source_section": 28,
-      "label": "Joint longitudinal–survival models",
+      "label": "Joint longitudinal-survival models",
       "chapter_id": "statistics-028",
       "chapter_path": "courses/statistics-ml/chapters/28-survival-analysis-duration-models-and-reliability.md",
       "anchor": "stat-28-24",
@@ -8305,7 +8305,7 @@
     {
       "id": "stat-34-06",
       "source_section": 34,
-      "label": "Bradley–Terry models",
+      "label": "Bradley-Terry models",
       "chapter_id": "statistics-034",
       "chapter_path": "courses/statistics-ml/chapters/34-generative-ai-and-language-model-evaluation.md",
       "anchor": "stat-34-06",
@@ -8435,7 +8435,7 @@
     {
       "id": "stat-34-19",
       "source_section": 34,
-      "label": "Cost–latency–quality analysis",
+      "label": "Cost-latency-quality analysis",
       "chapter_id": "statistics-034",
       "chapter_path": "courses/statistics-ml/chapters/34-generative-ai-and-language-model-evaluation.md",
       "anchor": "stat-34-19",
@@ -8465,7 +8465,7 @@
     {
       "id": "stat-35-02",
       "source_section": 35,
-      "label": "Exploration–exploitation tradeoffs",
+      "label": "Exploration-exploitation tradeoffs",
       "chapter_id": "statistics-035",
       "chapter_path": "courses/statistics-ml/chapters/35-bandits-reinforcement-learning-and-adaptive-decisions.md",
       "anchor": "stat-35-02",
@@ -8605,7 +8605,7 @@
     {
       "id": "stat-35-16",
       "source_section": 35,
-      "label": "Actor–critic methods",
+      "label": "Actor-critic methods",
       "chapter_id": "statistics-035",
       "chapter_path": "courses/statistics-ml/chapters/35-bandits-reinforcement-learning-and-adaptive-decisions.md",
       "anchor": "stat-35-16",
@@ -8755,7 +8755,7 @@
     {
       "id": "stat-36-08",
       "source_section": 36,
-      "label": "Karush–Kuhn–Tucker conditions",
+      "label": "Karush-Kuhn-Tucker conditions",
       "chapter_id": "statistics-036",
       "chapter_path": "courses/statistics-ml/chapters/36-optimization-and-operations-research.md",
       "anchor": "stat-36-08",
@@ -9425,7 +9425,7 @@
     {
       "id": "stat-38-28",
       "source_section": 38,
-      "label": "Oaxaca–Blinder decomposition",
+      "label": "Oaxaca-Blinder decomposition",
       "chapter_id": "statistics-038",
       "chapter_path": "courses/statistics-ml/chapters/38-product-customer-marketing-and-business-analytics.md",
       "anchor": "stat-38-28",
@@ -9765,7 +9765,7 @@
     {
       "id": "stat-40-02",
       "source_section": 40,
-      "label": "Training–serving consistency",
+      "label": "Training-serving consistency",
       "chapter_id": "statistics-040",
       "chapter_path": "courses/statistics-ml/chapters/40-production-methodology-governance-and-senior-scientific-judgment.md",
       "anchor": "stat-40-02",
@@ -9885,7 +9885,7 @@
     {
       "id": "stat-40-14",
       "source_section": 40,
-      "label": "Champion–challenger evaluation",
+      "label": "Champion-challenger evaluation",
       "chapter_id": "statistics-040",
       "chapter_path": "courses/statistics-ml/chapters/40-production-methodology-governance-and-senior-scientific-judgment.md",
       "anchor": "stat-40-14",

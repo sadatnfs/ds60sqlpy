@@ -35,6 +35,12 @@ DEFAULT_POLICY = ROOT / "docker/cve-policy.json"
 # published with the release seed. Upstream images may still be scanned as references.
 DATABASE_PROFILE = "postgres"
 REFERENCE_PROFILES = frozenset({DATABASE_PROFILE})
+# Published scientific project images are layered on qualified course images, so a
+# reviewed policy entry for one of those bases also covers the same finding here.
+SCIENTIFIC_PROFILES: dict[str, tuple[str, ...]] = {
+    "project-spark-torch": ("spark-local-python", "llm-torch-cpu"),
+    "project-spark-tmb": ("spark-local-python", "r-statistics", "java21"),
+}
 SEVERITIES = ("CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN")
 SERIOUS = frozenset({"CRITICAL", "HIGH"})
 MAX_POLICY_DAYS = 90
@@ -474,9 +480,13 @@ def evaluate(
     reported: list[dict[str, Any]] = []
     used: set[Entry] = set()
 
+    covered = (profile, *SCIENTIFIC_PROFILES.get(profile, ()))
+
     def accepted(kind: str, finding_id: str, package: str) -> Entry | None:
         for entry in policy.entries:
-            if entry.covers(kind, finding_id, package, profile) and entry.expires_at >= now.date():
+            if entry.expires_at >= now.date() and any(
+                entry.covers(kind, finding_id, package, name) for name in covered
+            ):
                 used.add(entry)
                 return entry
         return None
@@ -792,7 +802,7 @@ def command_scan(args: argparse.Namespace, runner: Runner, now: datetime) -> int
     if args.tested is not None:
         if args.image is not None:
             raise ScanError("Use either --tested or --image, not both")
-        snapshot = load_tested(args.tested, catalog_profiles(ROOT))
+        snapshot = load_tested(args.tested, catalog_profiles(ROOT) | frozenset(SCIENTIFIC_PROFILES))
         context = snapshot["context"]
         architecture = snapshot["architecture"]
         targets += [

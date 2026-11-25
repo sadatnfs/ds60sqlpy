@@ -68,7 +68,7 @@ authorize a reset.
 
 - **Level:** Foundation (beginner)
 - **Prerequisites:** [Day 14; numeric types and casting](day14_numeric_and_casting.md)
-  and the complete Day 01–14 foundation sequence
+  and the complete Day 01-14 foundation sequence
 - **Artifacts:** [learner SQL](../day15_phase1_project.sql) ·
   [solution reasoning](../solutions/day15_solutions.md) ·
   [executable solution](../solutions/day15_solutions.sql)
@@ -294,7 +294,7 @@ Continue to [Day 16; window-function fundamentals](day16_window_functions_fundam
 ## Deep dive and reference
 
 Goal
-- Produce a robust monthly revenue report segmented by customer attributes and product categories using techniques from Days 01–14.
+- Produce a robust monthly revenue report segmented by customer attributes and product categories using techniques from Days 01-14.
 
 What you’ll build
 - Extend the supplied monthly segment-country report while retaining its

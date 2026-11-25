@@ -228,7 +228,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 cover four common production surprises: leading-wildcard searches,
+Prompts 3-6 cover four common production surprises: leading-wildcard searches,
 deep `OFFSET` pages, fanout, and nullable counts. Keyset pagination must use a
 unique deterministic tuple such as `(order_date, order_id)` and repeat the same
 ordering in the seek predicate.

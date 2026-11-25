@@ -11,14 +11,14 @@ This folder contains narrative, text-only companion guides for each daily SQL sc
 ## Topic index
 
 - 00_setup; schema and seed data overview
-- 01–07 core SQL & joins; 08–15 subqueries, DML, CASE, strings/dates/numerics; week 1 project
-- 16–22 windows; 23–30 CTEs, pivoting, JSON/XML, patterns; week 2 project
-- 31–37 plans, indexes, optimization, partitioning; 38–45 transactions/locks/ops; phase 3 project
-- 46–48 Project 1 (e‑commerce): LTV, cohorts, funnels, payback
-- 49–51 Project 2 (finance): positions/P&L, risk, reconciliation
-- 52–54 Project 3 (DWH): modeling, SCD, aggregates/marts
-- 55–57 Project 4 (BI): semantic views, RLS, caching/refresh
-- 58–60 Final capstone: ingest/clean, model/KPIs, package/hand‑off
+- 01-07 core SQL & joins; 08-15 subqueries, DML, CASE, strings/dates/numerics; week 1 project
+- 16-22 windows; 23-30 CTEs, pivoting, JSON/XML, patterns; week 2 project
+- 31-37 plans, indexes, optimization, partitioning; 38-45 transactions/locks/ops; phase 3 project
+- 46-48 Project 1 (e‑commerce): LTV, cohorts, funnels, payback
+- 49-51 Project 2 (finance): positions/P&L, risk, reconciliation
+- 52-54 Project 3 (DWH): modeling, SCD, aggregates/marts
+- 55-57 Project 4 (BI): semantic views, RLS, caching/refresh
+- 58-60 Final capstone: ingest/clean, model/KPIs, package/hand‑off
 
 Open a lesson in the Docker classroom and select **Whole SQL lesson (psql)**.
 See the [track entrypoint](../README.md) for the beginner on-ramp, saved work

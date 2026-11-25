@@ -516,7 +516,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>The learner transaction safely removes the demonstration MV at rollback.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 3–6 focus on the materialized view&#x27;s data contract. A new base row is invisible until refresh, so record both data time and refresh time. Concurrent refresh requires a qualifying unique index and cannot be demonstrated as a first population inside this rollback-only lesson.</p>
+<p>Prompts 3-6 focus on the materialized view&#x27;s data contract. A new base row is invisible until refresh, so record both data time and refresh time. Concurrent refresh requires a qualifying unique index and cannot be demonstrated as a first population inside this rollback-only lesson.</p>
 <p>Reconcile the view to the exact line-revenue definition it materializes; stored order totals are a separate measure. Grouped aggregates emit no row for an absent dimension combination, so any displayed zero must come from an explicit dimension/date spine and outer join.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

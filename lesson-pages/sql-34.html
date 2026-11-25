@@ -523,7 +523,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>A faster query that changes counts or totals is incorrect.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 3–6 make semantic equivalence the first optimization gate. Compare <code>MATERIALIZED</code> and <code>NOT MATERIALIZED</code> as planner boundaries, then verify a one-row-per-order pre-aggregation against the direct join with <code>EXCEPT</code> in both directions.</p>
+<p>Prompts 3-6 make semantic equivalence the first optimization gate. Compare <code>MATERIALIZED</code> and <code>NOT MATERIALIZED</code> as planner boundaries, then verify a one-row-per-order pre-aggregation against the direct join with <code>EXCEPT</code> in both directions.</p>
 <p>When payments and line items are both many-to-one with orders, aggregate each to order grain before combining them. Use <code>NOT EXISTS</code> for a NULL-safe anti-join; <code>NOT IN</code> becomes unknown for every candidate if its subquery can return NULL.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

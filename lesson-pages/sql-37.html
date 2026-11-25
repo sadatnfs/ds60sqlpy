@@ -511,7 +511,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>All demo tables and indexes disappear at the learner script&#x27;s <code>ROLLBACK</code>.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 3–6 turn partition pruning into observable evidence. Compare plans with and without the partition-key predicate and inspect <code>tableoid::regclass</code> to see physical row placement. Add the DEFAULT partition only after observing the helpful “no partition found” error for an uncovered date.</p>
+<p>Prompts 3-6 turn partition pruning into observable evidence. Compare plans with and without the partition-key predicate and inspect <code>tableoid::regclass</code> to see physical row placement. Add the DEFAULT partition only after observing the helpful “no partition found” error for an uncovered date.</p>
 <p>Range bounds are <code>[FROM, TO)</code>: midnight on February 1 belongs to the February partition, not January. A DEFAULT partition improves ingest availability but also needs monitoring so unexpected dates do not accumulate unnoticed.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

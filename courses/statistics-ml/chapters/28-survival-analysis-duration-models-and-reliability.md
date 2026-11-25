@@ -70,13 +70,13 @@ Left truncation, or delayed entry, includes an individual only after they surviv
 
 ### stat-28-08
 
-**Kaplan–Meier estimation**
+**Kaplan-Meier estimation**
 
 Kaplan-Meier estimates survival by multiplying \(1-\frac{d_{j}}{n_{j}}\) at each event time. Censoring changes later denominators without creating an event drop. Ties require a clear convention for events and censoring at the same recorded time. Its tail is unstable when few remain under observation, so accompany curves with numbers at risk and avoid interpreting an unreached median as an infinite lifetime.
 
 ### stat-28-09
 
-**Nelson–Aalen estimation**
+**Nelson-Aalen estimation**
 
 Nelson-Aalen estimates cumulative hazard as the sum \(\frac{d_{j}}{n_{j}}\) across event times. Exponentiating its negative gives a survival estimate related to, but not identical to, Kaplan-Meier in finite samples. It is useful for inspecting accumulated event intensity and model diagnostics. Large jumps near the tail can reflect small risk sets rather than a well-estimated sudden biological change.
 
@@ -148,7 +148,7 @@ The cumulative incidence function F_k(t) gives \(\Pr(T\le t,\mathrm{cause}=k)\).
 
 ### stat-28-21
 
-**Fine–Gray models**
+**Fine-Gray models**
 
 Fine-Gray regression models a subdistribution hazard related to the cumulative incidence of a target cause. Its modified risk set retains certain individuals after competing events through weighting, so the coefficient has a different meaning from a cause-specific hazard ratio. It can be useful for incidence prediction, but interpreting it as a direct biological instantaneous rate is misleading.
 
@@ -166,7 +166,7 @@ Multistate models represent transitions among states such as healthy, ill and de
 
 ### stat-28-24
 
-**Joint longitudinal–survival models**
+**Joint longitudinal-survival models**
 
 Joint longitudinal-survival models connect a repeated biomarker process with an event process, often through shared random effects or latent current value. They can address informative dropout caused by the event and update risk predictions as measurements arrive. Results depend on both submodels and the association structure. The biomarker-error model is consequential because plugging noisy observed values directly into a hazard can bias relationships.
 

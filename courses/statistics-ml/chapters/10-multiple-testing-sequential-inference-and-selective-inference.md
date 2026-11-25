@@ -38,13 +38,13 @@ Order p-values and test the smallest at alpha/m, then \(\frac{\alpha}{m-1}\), st
 
 ### stat-10-05
 
-**Benjamini–Hochberg procedure**
+**Benjamini-Hochberg procedure**
 
 Find the largest rank k with p_(k)<=q*k/m and reject through k. Its FDR guarantee needs independence or suitable positive dependence; it is not universally valid for arbitrary dependence.
 
 ### stat-10-06
 
-**Benjamini–Yekutieli procedure**
+**Benjamini-Yekutieli procedure**
 
 Divide the BH target by the harmonic sum of \(\frac{1}{i}\) to obtain a conservative general-dependence correction. Its broader guarantee can substantially reduce power when the family is large.
 

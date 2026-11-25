@@ -513,6 +513,6 @@ Attempt the [learner notebook](../notebooks/bridge_jupyter_01_postgresql_magics.
 before reviewing the
 [completed notebook](../solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb)
 and [solution reasoning](../solutions/bridge_jupyter_01_postgresql_magics_solutions.md).
-Then use Bridge Days 3–5 to move a reusable query behind a typed, tested
+Then use Bridge Days 3-5 to move a reusable query behind a typed, tested
 Psycopg boundary, or continue to BRIDGE-OPS-01 for migration delivery and
 operational evidence.

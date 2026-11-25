@@ -15,7 +15,9 @@ subject `AGENTS.md`. Inspect `git status --short --branch` and preserve unrelate
 work. Use the user's requested checkout and parallel agents with explicit file
 ownership. Respect existing task authorization; do not add a separate approval
 step for ordinary authorized edits. Git publication, image publication, history
-rewrites and destructive cleanup have distinct scopes. Do not use em dashes.
+rewrites and destructive cleanup have distinct scopes. Do not use em or en
+dashes; `scripts/check_no_dashes.py` rejects them in every tracked text file
+except vendored third-party bundles.
 
 ## Choose the right role
 

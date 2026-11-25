@@ -514,7 +514,7 @@ def _notebook_document(
             "goal",
             dedent(
                 f"""\
-                # {lesson.id.upper()} — {lesson.title}
+                # {lesson.id.upper()}: {lesson.title}
 
                 ## Goal
 

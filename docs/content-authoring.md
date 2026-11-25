@@ -112,7 +112,7 @@ a failed rendering test.
 
 Do not add a lesson solely to increase the count.
 
-Established Days 1–60 keep their IDs and filenames. New professional modules
+Established Days 1-60 keep their IDs and filenames. New professional modules
 use the stable named specifications in `src/ds60sqlpy/catalog_builder.py` and
 live under the applicable `professional/` directory. Do not force a
 foundation, elective, or specialization into a misleading sequential day.
@@ -359,7 +359,7 @@ plain text, static HTML and the unified classroom.
 
 ## Python and notebooks
 
-- Target Python 3.11–3.12; use Python 3.12 as the canonical environment.
+- Target Python 3.11-3.12; use Python 3.12 as the canonical environment.
 - Keep a valid notebook structure and repository kernelspec.
 - Use clean-kernel execution to detect hidden state.
 - Prefer `pathlib`, local data, explicit seeds, and small cells.

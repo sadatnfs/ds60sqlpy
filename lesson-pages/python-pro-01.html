@@ -663,7 +663,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* `python -m build` then clean install: proves the built wheel, not repository-path import</span></span>
 <span class="source-line"><span class="syntax-string">  behavior.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — distinguish distribution and import identities::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: distinguish distribution and import identities::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import importlib.util</span></span>
 <span class="source-line"></span>
@@ -677,7 +677,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: Installer and import identifiers can differ; availability must be checked through the</span></span>
 <span class="source-line"><span class="syntax-string">          intended interface.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — create a deterministic source manifest digest::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: create a deterministic source manifest digest::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import hashlib</span></span>
 <span class="source-line"></span>
@@ -799,26 +799,26 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_pro_01_package_engineering.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — classify artifacts</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: classify artifacts</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `classify_artifact`. Use complete final suffixes and reject</span></span>
 <span class="source-line"><span class="syntax-comment"># `package.whl.txt`. Add checks for one wheel, one sdist, and one unsupported file.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — create an offline build command</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: create an offline build command</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `offline_build_command` as an argument list. Use the running</span></span>
 <span class="source-line"><span class="syntax-comment"># interpreter, invoke the `build` module, request both formats, disable isolation, and</span></span>
 <span class="source-line"><span class="syntax-comment"># choose an explicit output directory. Why an argument list? It avoids a second round of</span></span>
 <span class="source-line"><span class="syntax-comment"># shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — inspect dependency intent</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: inspect dependency intent</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: For each fixture entry, decide whether it is: 1. a runtime dependency, 2. an</span></span>
 <span class="source-line"><span class="syntax-comment"># optional installed feature, 3. a development-only dependency group, or 4. a build</span></span>
 <span class="source-line"><span class="syntax-comment"># bootstrap requirement. Explain when `colorama`&#x27;s environment marker is true. Confirm</span></span>
 <span class="source-line"><span class="syntax-comment"># that building metadata does not install the `test` or `quality` groups.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — build in a disposable directory</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: build in a disposable directory</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use a temporary or ignored directory. A production-quality helper should first</span></span>
 <span class="source-line"><span class="syntax-comment"># copy the source tree to a disposable staging directory because some backends write</span></span>
 <span class="source-line"><span class="syntax-comment"># metadata beside the source even when `--outdir` is elsewhere. These commands</span></span>
@@ -827,7 +827,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># backend requirement is missing, return to connected setup instead of relaxing policy.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — prove the installed origin</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: prove the installed origin</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Install the wheel into a fresh target using `pip install --no-index --no-deps</span></span>
 <span class="source-line"><span class="syntax-comment"># --target &lt;directory&gt; &lt;wheel&gt;`. Start Python from outside the fixture source tree, put</span></span>
 <span class="source-line"><span class="syntax-comment"># only that target on `PYTHONPATH`, and print: - `ds60_tiny_greeter.__file__`, - the</span></span>
@@ -836,31 +836,31 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># import path under the fresh installation target, never the fixture source tree.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — build a wheel from the source distribution</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: build a wheel from the source distribution</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Build the fixture sdist in disposable storage, unpack it, build a wheel from</span></span>
 <span class="source-line"><span class="syntax-comment"># that unpacked sdist with `--no-isolation`, and compare the result with the direct wheel</span></span>
 <span class="source-line"><span class="syntax-comment"># build. Record every required local tool.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — inspect installed metadata without importing</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: inspect installed metadata without importing</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use `importlib.metadata` against the fresh target to inspect name, version,</span></span>
 <span class="source-line"><span class="syntax-comment"># requirements, extras, and console scripts before importing the package. Reject</span></span>
 <span class="source-line"><span class="syntax-comment"># unexpected or missing metadata.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — separate reproducibility from equivalence</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: separate reproducibility from equivalence</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Build twice from the same clean staged source. Compare file hashes, archive</span></span>
 <span class="source-line"><span class="syntax-comment"># member lists, metadata contents, and installed behavior. Explain which differences are</span></span>
 <span class="source-line"><span class="syntax-comment"># harmless and which invalidate the release.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — test dependency markers across targets</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: test dependency markers across targets</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create a review matrix for the fixture&#x27;s build, runtime, optional, development,</span></span>
 <span class="source-line"><span class="syntax-comment"># and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and</span></span>
 <span class="source-line"><span class="syntax-comment"># Python 3.12.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — design a local release gate</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: design a local release gate</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Write an offline release checklist that verifies clean source, tests, type/lint</span></span>
 <span class="source-line"><span class="syntax-comment"># checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and</span></span>
 <span class="source-line"><span class="syntax-comment"># secret scan without publishing anything.</span></span>
@@ -1099,7 +1099,7 @@ import_name <span class="syntax-operator">=</span> <span class="syntax-string">&
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">InstallProof</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Evidence that a wheel—not the source tree—supplied the import.&quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Evidence that a wheel, not the source tree, supplied the import.&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line">    wheel<span class="syntax-punctuation">:</span> Path</span>
 <span class="source-line">    import_origin<span class="syntax-punctuation">:</span> Path</span>

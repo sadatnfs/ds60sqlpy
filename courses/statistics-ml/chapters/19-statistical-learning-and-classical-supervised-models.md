@@ -38,7 +38,7 @@ Add a complexity penalty to training loss or constrain the model class. Regulari
 
 ### stat-19-03
 
-**Bias–variance tradeoff**
+**Bias-variance tradeoff**
 
 For squared loss, prediction error decomposes into irreducible noise, squared bias and variance under a specified sampling setup. More flexible models often reduce bias while increasing variability, but the pattern is not universally monotonic.
 
@@ -176,7 +176,7 @@ Weight errors or training observations according to consequences. Altered class 
 
 ### stat-19-26
 
-**Positive–unlabeled learning**
+**Positive-unlabeled learning**
 
 Learn with confirmed positives and unlabeled cases containing both classes. Identification depends on how positives become labeled or on class-prior information. Treating every unlabeled case as negative can bias the model.
 

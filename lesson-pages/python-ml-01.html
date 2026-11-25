@@ -648,7 +648,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">delivery bundle contains a safe model representation, schema, and manifest of</span></span>
 <span class="source-line"><span class="syntax-string">hashes/versions/evidence. Loading verifies bytes and compatibility before parsing or prediction.</span></span>
 <span class="source-line"><span class="syntax-string">Promotion is a policy decision based on tests, thresholds, limitations, ownership, and</span></span>
-<span class="source-line"><span class="syntax-string">rollback—not the existence of a model file.</span></span>
+<span class="source-line"><span class="syntax-string">rollback, not the existence of a model file.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">API/boundary anatomy:</span></span>
 <span class="source-line"><span class="syntax-string">* canonical data hash: normalizes only declared non-semantic ordering and rejects</span></span>
@@ -658,7 +658,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* manifest verification before load: checks every relative path, byte hash, format, and expected</span></span>
 <span class="source-line"><span class="syntax-string">  metadata before trusting content.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — make record order irrelevant but value changes visible::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: make record order irrelevant but value changes visible::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import hashlib</span></span>
 <span class="source-line"><span class="syntax-string">    import json</span></span>
@@ -678,7 +678,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: Declared row ordering does not change the identity, while one semantic value change</span></span>
 <span class="source-line"><span class="syntax-string">          does.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — fail a bundle when one artifact byte changes::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: fail a bundle when one artifact byte changes::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import hashlib</span></span>
 <span class="source-line"></span>
@@ -765,98 +765,98 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_ml_01_reproducible_delivery.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — Complete snapshot hashing</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Complete snapshot hashing</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Require a nonempty unique `record_id`, sort by it, serialize with sorted keys,</span></span>
 <span class="source-line"><span class="syntax-comment"># reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed</span></span>
 <span class="source-line"><span class="syntax-comment"># value does not. Explain what the hash does *not* prove: source ownership, legality,</span></span>
 <span class="source-line"><span class="syntax-comment"># labeling quality, representativeness, or absence of leakage.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — Fit and serialize the local model</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Fit and serialize the local model</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Fit `y = intercept + coefficient*x` on three deterministic points. Store only</span></span>
 <span class="source-line"><span class="syntax-comment"># format identifier, feature name, and numeric parameters in JSON. Do not use pickle:</span></span>
 <span class="source-line"><span class="syntax-comment"># loading an untrusted pickle can execute code.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — Version the feature schema</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Version the feature schema</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Declare feature name, ordered position, dtype, required status, and schema</span></span>
 <span class="source-line"><span class="syntax-comment"># version. Test exact compatibility, reordered input, a renamed feature, and a version</span></span>
 <span class="source-line"><span class="syntax-comment"># change. Decide which future changes could be safely additive for a different consumer</span></span>
 <span class="source-line"><span class="syntax-comment"># contract.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — Define runtime compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Define runtime compatibility</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Declare Python 3.11 through below 3.13 and required package major versions.</span></span>
 <span class="source-line"><span class="syntax-comment"># Inject the observed versions into the check rather than dumping a machine-specific</span></span>
 <span class="source-line"><span class="syntax-comment"># environment. Report every incompatibility, not only the first.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — Build and tamper with a bundle</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Build and tamper with a bundle</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Write model, schema, and manifest into a temporary directory. Verify all hashes.</span></span>
 <span class="source-line"><span class="syntax-comment"># Replace `model.json` with `{}` and confirm loading fails before parsing or prediction.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — Promote with evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Promote with evidence</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Register a candidate with: - tests passed, - compatibility passed, - named</span></span>
 <span class="source-line"><span class="syntax-comment"># metric and threshold, - metric value, and - 64-character manifest hash. Move it to</span></span>
 <span class="source-line"><span class="syntax-comment"># staging and production. Reject a version with missing tests even if its metric is high.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — Rehearse rollback</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: Rehearse rollback</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Promote version 1, then version 2. Record a simulated latency regression and</span></span>
 <span class="source-line"><span class="syntax-comment"># roll back to archived version 1. Confirm one production version remains and the event</span></span>
 <span class="source-line"><span class="syntax-comment"># trail preserves action, target, and reason.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — Relate the lab to MLflow</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: Relate the lab to MLflow</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day</span></span>
 <span class="source-line"><span class="syntax-comment"># 53. MLflow can store evidence; it does not define your compatibility or approval policy</span></span>
 <span class="source-line"><span class="syntax-comment"># automatically.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — rebuild a bundle deterministically</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: rebuild a bundle deterministically</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Build the JSON model bundle twice from canonical records and the same</span></span>
 <span class="source-line"><span class="syntax-comment"># configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field</span></span>
 <span class="source-line"><span class="syntax-comment"># such as timestamps, path order, or float serialization.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — write a claim-bounded model card</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: write a claim-bounded model card</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create a model card from the manifest and evaluation evidence: intended and</span></span>
 <span class="source-line"><span class="syntax-comment"># excluded use, population, metric/threshold, slices/support, data provenance,</span></span>
 <span class="source-line"><span class="syntax-comment"># limitations, monitoring, owners, and stop conditions.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — design shadow and canary evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: design shadow and canary evidence</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Specify a no-side-effect shadow comparison followed by a bounded canary. Define</span></span>
 <span class="source-line"><span class="syntax-comment"># routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how</span></span>
 <span class="source-line"><span class="syntax-comment"># delayed labels are handled.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — separate drift from compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: separate drift from compatibility</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create examples of schema incompatibility, valid schema with shifted</span></span>
 <span class="source-line"><span class="syntax-comment"># distribution, and stable inputs with performance degradation. Route each to reject,</span></span>
 <span class="source-line"><span class="syntax-comment"># monitor/investigate, or rollback/retrain policy.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 13 — test forward and backward compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13: test forward and backward compatibility</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Build a matrix of producer/consumer schema and model versions. Test an additive</span></span>
 <span class="source-line"><span class="syntax-comment"># optional field, required rename, reordered feature, and changed numeric meaning across</span></span>
 <span class="source-line"><span class="syntax-comment"># old/new readers.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 14 — capture dependency and supply-chain evidence</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14: capture dependency and supply-chain evidence</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create a local release manifest containing reviewed lock hash, direct runtime</span></span>
 <span class="source-line"><span class="syntax-comment"># requirements, Python range, package major versions, artifact hashes, source</span></span>
 <span class="source-line"><span class="syntax-comment"># revision/dirty flag, and a generated component inventory.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 15 — verify artifact trust before parsing</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15: verify artifact trust before parsing</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Model a trusted local manifest root and verify every bundle file&#x27;s relative</span></span>
 <span class="source-line"><span class="syntax-comment"># path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape,</span></span>
 <span class="source-line"><span class="syntax-comment"># extra required files, and pickle.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 16 — rehearse rollback dependency failure</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16: rehearse rollback dependency failure</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Archive version 1, promote version 2, then discover that version 1&#x27;s runtime</span></span>
 <span class="source-line"><span class="syntax-comment"># dependency is unavailable. Define rollback-target readiness, fallback decision, event</span></span>
 <span class="source-line"><span class="syntax-comment"># trail, and prevention.</span></span>

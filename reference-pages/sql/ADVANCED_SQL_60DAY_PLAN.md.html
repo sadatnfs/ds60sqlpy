@@ -212,12 +212,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><code>postgres-60day/00_setup.sql</code> drops and recreates the course-owned <code>training</code> schema. Run it only in the disposable training database, then run <code>00_verify.sql</code>.</li>
 <li>Normal learner lessons wrap demonstrations in <code>BEGIN</code> and <code>ROLLBACK</code>. Preserve that boundary while learning.</li>
 <li>Days 38 and 39 include genuinely concurrent exercises. Reproducing isolation anomalies, blocking, and deadlocks requires two or three <code>psql</code> sessions; one sequential file cannot demonstrate them faithfully.</li>
-<li>Days 52–54 are the declared stateful sequence. Day 52 drops, rebuilds, and commits the course-owned <code>dwh</code> schema. Run Day 52 before Days 53 and 54. Days 53 and 54 demonstrate changes inside rollback-safe transactions.</li>
+<li>Days 52-54 are the declared stateful sequence. Day 52 drops, rebuilds, and commits the course-owned <code>dwh</code> schema. Run Day 52 before Days 53 and 54. Days 53 and 54 demonstrate changes inside rollback-safe transactions.</li>
 <li>Day 43 introduces backup and recovery concepts. Server-side <code>COPY</code>, WAL archiving, base backups, and point-in-time recovery depend on deployment and privileges; the learner file keeps unsafe filesystem operations commented.</li>
 <li>Day 44 can use <code>pg_stat_statements</code> when an administrator has installed and configured it. The core lesson remains usable without that extension.</li>
 <li>Query plans and timings depend on PostgreSQL version, statistics, cache state, hardware, concurrency, and data volume. The small deterministic seed can rationally produce sequential scans even when an index is well designed. There is no portable fixed speedup or runtime guarantee.</li>
 </ul>
-<h3 id="phase-1-relational-querying-and-report-foundations-days-1-15">Phase 1 - Relational querying and report foundations (Days 1–15)<a class="heading-anchor" href="#phase-1-relational-querying-and-report-foundations-days-1-15" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-1-relational-querying-and-report-foundations-days-1-15">Phase 1 - Relational querying and report foundations (Days 1-15)<a class="heading-anchor" href="#phase-1-relational-querying-and-report-foundations-days-1-15" aria-label="Link to this section">#</a></h3>
 <h4 id="core-queries-joins-and-sets">Core queries, joins, and sets<a class="heading-anchor" href="#core-queries-joins-and-sets" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><a href="../../lesson-pages/sql-01.html#learner">Day 1 - <code>SELECT</code>, <code>WHERE</code>, ordering, and limits</a>: filter customers and products, create derived columns, and return deterministic top-N results.</li>
@@ -239,7 +239,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="../../lesson-pages/sql-14.html#learner">Day 14 - numeric precision and casting</a>: use exact <code>numeric</code>, <code>ROUND</code>, <code>CEIL</code>, <code>FLOOR</code>, safe division, casts, and JSONB text extraction.</li>
 <li><a href="../../lesson-pages/sql-15.html#learner">Day 15 - segmented revenue project</a>: extend monthly segment-country revenue with at least two documented dimensions and reconcile the result against line-item totals.</li>
 </ul>
-<h3 id="phase-2-windows-ctes-and-semi-structured-data-days-16-30">Phase 2 - Windows, CTEs, and semi-structured data (Days 16–30)<a class="heading-anchor" href="#phase-2-windows-ctes-and-semi-structured-data-days-16-30" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-2-windows-ctes-and-semi-structured-data-days-16-30">Phase 2 - Windows, CTEs, and semi-structured data (Days 16-30)<a class="heading-anchor" href="#phase-2-windows-ctes-and-semi-structured-data-days-16-30" aria-label="Link to this section">#</a></h3>
 <h4 id="window-functions">Window functions<a class="heading-anchor" href="#window-functions" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><a href="../../lesson-pages/sql-16.html#learner">Day 16 - window fundamentals</a>: add customer averages, department salary ranges, and revenue shares to detail rows, compare <code>GROUP BY</code> with a window&#x27;s row count, and filter a window value one query level out.</li>
@@ -261,7 +261,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="../../lesson-pages/sql-29.html#learner">Day 29 - pattern matching and full-text search</a>: use <code>LIKE</code>/<code>ILIKE</code>, PostgreSQL POSIX regular expressions, <code>to_tsvector</code>, and <code>to_tsquery</code>.</li>
 <li><a href="../../lesson-pages/sql-30.html#learner">Day 30 - cohort retention and CLV project</a>: extend cohort-month revenue with cohort size, retention rate, and a documented moving-average CLV heuristic.</li>
 </ul>
-<h3 id="phase-3-plans-physical-design-concurrency-and-operations-days-31-45">Phase 3 - Plans, physical design, concurrency, and operations (Days 31–45)<a class="heading-anchor" href="#phase-3-plans-physical-design-concurrency-and-operations-days-31-45" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-3-plans-physical-design-concurrency-and-operations-days-31-45">Phase 3 - Plans, physical design, concurrency, and operations (Days 31-45)<a class="heading-anchor" href="#phase-3-plans-physical-design-concurrency-and-operations-days-31-45" aria-label="Link to this section">#</a></h3>
 <h4 id="plans-indexes-and-query-structure">Plans, indexes, and query structure<a class="heading-anchor" href="#plans-indexes-and-query-structure" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><a href="../../lesson-pages/sql-31.html#learner">Day 31 - <code>EXPLAIN</code> and <code>EXPLAIN ANALYZE</code></a>: compare estimates with actual rows and observe predicate selectivity.</li>
@@ -283,7 +283,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="../../lesson-pages/sql-44.html#learner">Day 44 - monitoring and diagnostics</a>: inspect <code>pg_stat_activity</code>, use plans for diagnosis, and optionally query administrator-enabled <code>pg_stat_statements</code>.</li>
 <li><a href="../../lesson-pages/sql-45.html#learner">Day 45 - optimization project</a>: compare a non-sargable baseline, a range-predicate rewrite, an index, and pre-aggregation. Report locally observed plans, rows, buffers, and timings; do not claim a universal percentage improvement.</li>
 </ul>
-<h3 id="phase-4-applied-postgresql-projects-days-46-60">Phase 4 - Applied PostgreSQL projects (Days 46–60)<a class="heading-anchor" href="#phase-4-applied-postgresql-projects-days-46-60" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-4-applied-postgresql-projects-days-46-60">Phase 4 - Applied PostgreSQL projects (Days 46-60)<a class="heading-anchor" href="#phase-4-applied-postgresql-projects-days-46-60" aria-label="Link to this section">#</a></h3>
 <h4 id="project-1-e-commerce-analytics">Project 1: e-commerce analytics<a class="heading-anchor" href="#project-1-e-commerce-analytics" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><a href="../../lesson-pages/sql-46.html#learner">Day 46 - LTV segmentation and cohort setup</a>: calculate customer lifetime value, threshold segments, and revenue by cohort offsets.</li>

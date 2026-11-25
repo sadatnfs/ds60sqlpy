@@ -287,6 +287,7 @@ uv run --no-sync python -m ruff check src scripts tests bridge python/profession
 uv run --no-sync python -m mypy
 uv run --no-sync python scripts/scan_secrets.py --history
 uv run --no-sync python scripts/check_public_release.py
+uv run --no-sync python scripts/check_no_dashes.py
 node scripts/check_classroom_ui.mjs
 git diff --check
 ```

@@ -96,7 +96,7 @@ A unit root in an autoregressive polynomial makes shocks persistent rather than 
 
 ### stat-25-13
 
-**Augmented Dickey–Fuller tests**
+**Augmented Dickey-Fuller tests**
 
 The augmented Dickey-Fuller regression tests a unit-root null using a lagged level and enough lagged differences to handle residual dependence. A constant or trend term changes the null/alternative specification and critical values. Rejecting the null supports the chosen stationary alternative under the test assumptions. Failure to reject can reflect weak power; lag selection and structural breaks should be reported.
 
@@ -162,7 +162,7 @@ STL estimates seasonal and trend components using locally weighted regression an
 
 ### stat-25-24
 
-**Ljung–Box tests**
+**Ljung-Box tests**
 
 The Ljung-Box statistic combines squared residual autocorrelations through several lags to test a no-autocorrelation null. Degrees of freedom should reflect estimated model parameters where appropriate. A significant result suggests leftover linear structure or misspecification; a nonsignificant result does not prove independent Gaussian errors. Choose lags meaningfully, report the tested range and inspect variance and outliers separately.
 

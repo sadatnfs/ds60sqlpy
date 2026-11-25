@@ -251,7 +251,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 turn partition pruning into observable evidence. Compare plans with
+Prompts 3-6 turn partition pruning into observable evidence. Compare plans with
 and without the partition-key predicate and inspect `tableoid::regclass` to see
 physical row placement. Add the DEFAULT partition only after observing the
 helpful “no partition found” error for an uncovered date.

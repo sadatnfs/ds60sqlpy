@@ -182,13 +182,13 @@ def test_verify_contracts_must_name_observable_evidence() -> None:
 def test_verify_contracts_cannot_merely_restate_the_exercise() -> None:
     blocks = [
         "Build a report with three metrics and one limitation.\n"
-        "**Verify:** Report — build a report with three metrics and one limitation.",
+        "**Verify:** Report: build a report with three metrics and one limitation.",
         "Return normalized values without mutating the input.\n"
         "**Verify:** Assert the result equals [0.0, 0.5, 1.0] and the input is unchanged.",
     ]
 
     assert _restated_verify_lines(blocks) == (
-        "Report — build a report with three metrics and one limitation.",
+        "Report: build a report with three metrics and one limitation.",
     )
 
 
@@ -390,7 +390,7 @@ def test_solution_structure_rejects_duplicate_authoritative_labels(
 ) -> None:
     path = tmp_path / "solution.md"
     path.write_text(
-        "# Solution\n\n## Exercise 1 — first\n\nText.\n\nExercise 1 — second\n",
+        "# Solution\n\n## Exercise 1: first\n\nText.\n\nExercise 1 \u2014 second\n",
         encoding="utf-8",
     )
     lesson = Lesson(

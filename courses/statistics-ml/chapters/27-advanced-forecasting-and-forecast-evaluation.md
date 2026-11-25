@@ -204,7 +204,7 @@ Interval coverage is the fraction of realized outcomes falling inside an adverti
 
 ### stat-27-30
 
-**Diebold–Mariano tests**
+**Diebold-Mariano tests**
 
 The Diebold-Mariano test compares the mean loss differential of competing forecasts, accounting for serial dependence in that differential. Multistep overlapping forecasts often require a long-run variance estimate. Small samples, nested models and extensive model selection complicate the reference distribution. A significant difference is not automatically operationally important, so report effect size, uncertainty and the tested loss/horizon.
 

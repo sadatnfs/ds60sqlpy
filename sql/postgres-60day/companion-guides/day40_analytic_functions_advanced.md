@@ -70,7 +70,7 @@ authorize a reset.
 - **Catalog prerequisite:** `sql-found-02`
 - **Prerequisites:** Complete
   [SQL-FOUND-02; versioned schema migrations](../../professional/companion-guides/sql_found_02_versioned_migrations.md).
-  That route already includes the window-function sequence from Days 16–22 and
+  That route already includes the window-function sequence from Days 16-22 and
   the transaction/locking sequence through SQL-39.
 - **Artifacts:** [learner SQL](../day40_analytic_functions_advanced.sql) ·
   [solution reasoning](../solutions/day40_solutions.md) ·
@@ -260,7 +260,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 distinguish continuous interpolation, observed-value percentiles,
+Prompts 3-6 distinguish continuous interpolation, observed-value percentiles,
 partitioned shares, leakage-free windows, and undefined dispersion. For
 `(10,20,100,200)`, `percentile_disc(0.5)` returns an observed middle choice,
 while `percentile_cont(0.5)` interpolates between the two central values.

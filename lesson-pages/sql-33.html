@@ -502,7 +502,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>All exercise indexes roll back with the learner transaction.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 3–6 test the contracts behind composite, covering, and partial indexes. For <code>(category, created_at)</code>, queries anchored on the leftmost equality have a more useful search prefix than <code>created_at</code> alone. <code>INCLUDE</code> columns can satisfy the output list without changing the index&#x27;s search key.</p>
+<p>Prompts 3-6 test the contracts behind composite, covering, and partial indexes. For <code>(category, created_at)</code>, queries anchored on the leftmost equality have a more useful search prefix than <code>created_at</code> alone. <code>INCLUDE</code> columns can satisfy the output list without changing the index&#x27;s search key.</p>
 <p>A partial index is eligible only when PostgreSQL can prove the query predicate implies its stored predicate; eligibility does not guarantee selection. For nullable segments, measure the NULL subset before deciding whether a tiny partial index earns its write and maintenance cost.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

@@ -212,7 +212,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Daily lessons should use <code>BEGIN</code> and <code>ROLLBACK</code> unless persistence is an explicit objective.</li>
 <li>Do not make a later lesson depend on objects rolled back by an earlier lesson.</li>
 <li>Multi-part projects need an idempotent fixture or explicit, validated persistence instructions.</li>
-<li>Days 52–54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned <code>dwh</code> schema, then Days 53 and 54 run in order.</li>
+<li>Days 52-54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned <code>dwh</code> schema, then Days 53 and 54 run in order.</li>
 <li>Superuser-only operations must be optional and labeled.</li>
 <li><code>sql-found-01</code> follows SQL Day 15 and is the direct prerequisite for Day 16. <code>sql-found-02</code> follows Day 39 and precedes schema-evolution and operational modules. Other named modules under <code>sql/professional/</code> extend the track without renumbering established days. A new SQL learner first completes <code>sql-start-01</code>, <code>sql-start-02</code>, and <code>sql-start-03</code>, then begins <code>sql-01</code>. The on-ramp uses supplied temporary fixtures and assumes no SQL background.</li>
 <li><code>sql-concurrency-01</code> defaults to a rollback-safe single-session model. Only its explicitly optional two-session lab commits <code>sql_concurrency_live</code> state; preparation must refuse existing state and cleanup must avoid CASCADE.</li>
@@ -257,7 +257,7 @@ python scripts/audit_lesson_depth.py</code></pre>
 <li><code>00_verify.sql</code> confirms deterministic counts, coverage, chronology, totals, and foreign keys.</li>
 <li>Each independent lesson succeeds in a clean session.</li>
 <li>Rollback leaves no unexpected persistent objects.</li>
-<li>The Days 52–54 stateful sequence succeeds in order.</li>
+<li>The Days 52-54 stateful sequence succeeds in order.</li>
 <li>Catalog and solution availability are accurate.</li>
 </ul>
 <p>When an artifact filename, stateful group, or solution availability changes, run <code>python scripts/build_catalog.py</code> before validation.</p>

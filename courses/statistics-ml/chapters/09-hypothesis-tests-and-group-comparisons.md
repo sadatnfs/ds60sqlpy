@@ -153,7 +153,7 @@ MANOVA evaluates group differences in a vector of outcomes using covariance stru
 
 ### stat-09-18
 
-**Mann–Whitney U test**
+**Mann-Whitney U test**
 
 Rank comparisons estimate probabilistic ordering, with ties handled appropriately. A median-shift interpretation requires comparable distribution shapes. Different spreads alone can affect rank behavior even when medians agree.
 
@@ -171,7 +171,7 @@ Count positive versus negative nonzero differences using a binomial reference. I
 
 ### stat-09-21
 
-**Kruskal–Wallis test**
+**Kruskal-Wallis test**
 
 Compare ranks across independent groups. It detects distributional differences under its assumptions and is not automatically a pure median test. Unequal shapes complicate a location-only interpretation.
 
@@ -183,25 +183,25 @@ Rank conditions within each matched block and compare rank totals. Blocks must b
 
 ### stat-09-23
 
-**Kolmogorov–Smirnov test**
+**Kolmogorov-Smirnov test**
 
 The KS statistic is the maximum absolute CDF gap. Standard one-sample calibration assumes a fully specified continuous reference distribution. Estimating its parameters from the same data changes the null distribution.
 
 ### stat-09-24
 
-**Anderson–Darling test**
+**Anderson-Darling test**
 
 Anderson-Darling weights distributional discrepancies strongly in the tails. Critical values depend on the reference family and parameter estimation. Choose the diagnostic because tail adequacy matters, not simply because it rejects more often.
 
 ### stat-09-25
 
-**Shapiro–Wilk test**
+**Shapiro-Wilk test**
 
 Shapiro-Wilk checks compatibility with a normal family. Small samples have limited diagnostic power and huge samples detect harmless deviations. The relevant question is whether a method's inference is sensitive to the departure.
 
 ### stat-09-26
 
-**Levene’s and Brown–Forsythe tests**
+**Levene’s and Brown-Forsythe tests**
 
 Compare absolute deviations from group centers. Median-centered Brown-Forsythe is less sensitive to nonnormal tails than mean-centered Levene. Variance testing should not become an unplanned switch that distorts subsequent inference.
 

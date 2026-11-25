@@ -658,7 +658,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* estimand + assignment mechanism: defines which causal contrast is identified and which</span></span>
 <span class="source-line"><span class="syntax-string">  assumptions support it.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — bootstrap a mean difference with a seeded generator::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: bootstrap a mean difference with a seeded generator::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import numpy as np</span></span>
 <span class="source-line"></span>
@@ -676,7 +676,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: The resampled interval describes uncertainty under independent within-group</span></span>
 <span class="source-line"><span class="syntax-string">          resampling; the small sample makes it wide/discrete.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — build a randomization-style null distribution::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: build a randomization-style null distribution::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import numpy as np</span></span>
 <span class="source-line"></span>
@@ -775,110 +775,110 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_stats_01_resampling_experiments.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — Define the experiment before analysis</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Define the experiment before analysis</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Write an `ExperimentPlan` containing: - assignment unit, - one primary metric</span></span>
 <span class="source-line"><span class="syntax-comment"># and window, - minimum sample per arm, - alpha, - intended analysis, - planned</span></span>
 <span class="source-line"><span class="syntax-comment"># stopping/looks, and - missing-outcome handling. Do this before computing outcomes.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — Complete standardized effect</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Complete standardized effect</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use the pooled sample standard deviation. Reject groups smaller than two and</span></span>
 <span class="source-line"><span class="syntax-comment"># zero pooled variance. Explain raw units and standardized units side by side.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — Bootstrap the difference</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Bootstrap the difference</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Resample each arm independently with replacement, compute 2,000 differences,</span></span>
 <span class="source-line"><span class="syntax-comment"># sort them, and select percentile endpoints. Repeat with the same seed and verify</span></span>
 <span class="source-line"><span class="syntax-comment"># equality. Change the seed and expect small endpoint variation, not a different</span></span>
 <span class="source-line"><span class="syntax-comment"># conclusion guaranteed by design.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — Permute assignments</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Permute assignments</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Pool outcomes and enumerate treatment-index combinations when feasible. Use a</span></span>
 <span class="source-line"><span class="syntax-comment"># two-sided comparison to the observed absolute difference. For large data, use seeded</span></span>
 <span class="source-line"><span class="syntax-comment"># Monte Carlo assignments and the plus-one p-value correction. State why permuting</span></span>
 <span class="source-line"><span class="syntax-comment"># individual rows is invalid if assignment occurred by account or site.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — Plan sample size</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Plan sample size</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain</span></span>
 <span class="source-line"><span class="syntax-comment"># why variance uncertainty, clustering, attrition, noncompliance, and a binary metric</span></span>
 <span class="source-line"><span class="syntax-comment"># require a more specific planner.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — Control a comparison family</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Control a comparison family</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Complete `holm_adjust` for three p-values. Preserve original order and enforce</span></span>
 <span class="source-line"><span class="syntax-comment"># monotonic adjusted values after sorting. Identify the family before viewing results;</span></span>
 <span class="source-line"><span class="syntax-comment"># splitting an inconvenient family after analysis defeats control.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — Check assignment and attrition</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: Check assignment and attrition</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Compute baseline standardized difference by arm. Then remove outcomes</span></span>
 <span class="source-line"><span class="syntax-comment"># selectively from one arm and explain how that affects causal credibility even if the</span></span>
 <span class="source-line"><span class="syntax-comment"># remaining p-value is small.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — Simulate peeking policy</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: Simulate peeking policy</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s</span></span>
 <span class="source-line"><span class="syntax-comment"># simple Bonferroni per-look split illustrates the budget. Compare it with a single final</span></span>
 <span class="source-line"><span class="syntax-comment"># look and research group-sequential designs before production use.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — Bound the claim</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: Bound the claim</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Complete `claim_scope`. Randomization, intact allocation, and no severe</span></span>
 <span class="source-line"><span class="syntax-comment"># attrition permit a causal interpretation under additional assumptions. Observational</span></span>
 <span class="source-line"><span class="syntax-comment"># grouping, compromised randomization, or severe differential attrition returns an</span></span>
 <span class="source-line"><span class="syntax-comment"># associational scope.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — bootstrap clustered assignments</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: bootstrap clustered assignments</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Extend the experiment fixture with multiple rows per account. Bootstrap</span></span>
-<span class="source-line"><span class="syntax-comment"># accounts—not rows—within each arm and compare interval width with the incorrect row</span></span>
+<span class="source-line"><span class="syntax-comment"># accounts (not rows) within each arm and compare interval width with the incorrect row</span></span>
 <span class="source-line"><span class="syntax-comment"># bootstrap.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — bootstrap a ratio metric</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: bootstrap a ratio metric</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Estimate treatment lift for revenue per active user, preserving each user&#x27;s</span></span>
 <span class="source-line"><span class="syntax-comment"># numerator and denominator. Handle a resample with zero denominator and compare ratio-of-</span></span>
 <span class="source-line"><span class="syntax-comment"># sums with mean-of-user-ratios.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — apply covariate adjustment without leakage</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: apply covariate adjustment without leakage</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment</span></span>
 <span class="source-line"><span class="syntax-comment"># coefficient without post-treatment information and compare unadjusted/adjusted variance</span></span>
 <span class="source-line"><span class="syntax-comment"># and mean effect.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 13 — separate intention-to-treat from treatment-on-treated</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13: separate intention-to-treat from treatment-on-treated</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Simulate assigned treatment with imperfect compliance. Compute the intention-to-</span></span>
 <span class="source-line"><span class="syntax-comment"># treat effect by assignment and explain why comparing actual takers with non-takers is</span></span>
 <span class="source-line"><span class="syntax-comment"># generally confounded.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 14 — perform missing-outcome sensitivity</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14: perform missing-outcome sensitivity</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create differential attrition by arm. Report complete-case results and bounded</span></span>
 <span class="source-line"><span class="syntax-comment"># best/worst-case outcomes under a declared feasible outcome range.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 15 — simulate sequential false positives</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15: simulate sequential false positives</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate</span></span>
 <span class="source-line"><span class="syntax-comment"># ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a</span></span>
 <span class="source-line"><span class="syntax-comment"># clearly labeled exploratory monitor.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 16 — pre-specify heterogeneous effects</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16: pre-specify heterogeneous effects</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Choose two domain-motivated subgroups before analysis, estimate effects with</span></span>
 <span class="source-line"><span class="syntax-comment"># uncertainty and support, and adjust the planned comparison family. Contrast this with</span></span>
 <span class="source-line"><span class="syntax-comment"># mining many cuts for the largest lift.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 17 — run clustered randomization inference</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 17: run clustered randomization inference</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: For a site-randomized experiment, permute site assignments while keeping all</span></span>
 <span class="source-line"><span class="syntax-comment"># rows within a site together. Compare with invalid row-level permutation and state the</span></span>
 <span class="source-line"><span class="syntax-comment"># sharp-null interpretation.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 18 — produce an auditable analysis packet</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 18: produce an auditable analysis packet</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Write a deterministic JSON/Markdown packet containing plan hash, data</span></span>
 <span class="source-line"><span class="syntax-comment"># fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval,</span></span>
 <span class="source-line"><span class="syntax-comment"># adjusted p-values, claim scope, code version, and limitations.</span></span>

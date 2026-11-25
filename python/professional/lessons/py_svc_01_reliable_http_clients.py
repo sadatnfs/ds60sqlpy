@@ -23,7 +23,7 @@ API/boundary anatomy:
 * response/schema validation: rejects malformed success bodies before trusted domain code
   consumes them.
 
-Micro-example A — apply both retryability and replay-safety gates::
+Micro-example A: apply both retryability and replay-safety gates::
 
     def may_retry(method, status, *, idempotency_key=None):
         transient = status in {429, 502, 503, 504}
@@ -44,7 +44,7 @@ Micro-example A — apply both retryability and replay-safety gates::
 Expected: A transient status is insufficient for an unsafe mutation without a stable idempotency
           identity.
 
-Micro-example B — reject a pagination cursor loop::
+Micro-example B: reject a pagination cursor loop::
 
     pages = {
         None: {"items": [1, 2], "next_cursor": "a"},
@@ -167,40 +167,40 @@ def worked_example() -> None:
 # Full acceptance checks and progressive hints:
 # companion-guides/py_svc_01_reliable_http_clients.md
 #
-# Exercise 1 — classify status
+# Exercise 1: classify status
 # Prompt: Implement `classify_status`. Treat 2xx as success and
 # 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this
 # course policy. Reject impossible values. Classification is configurable in real systems.
 # For example, a particular 409 may be retryable only when the API contract says so.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 2 — authorize replay
+# Exercise 2: authorize replay
 # Prompt: Implement `method_can_retry`: - GET, HEAD, PUT, DELETE, and OPTIONS are
 # replayable by HTTP semantics. - POST and PATCH require a non-empty idempotency key in
 # this lesson. An idempotency header helps only if the server documents and enforces it.
 # Never invent safety solely on the client side.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 3 — add bounded backoff
+# Exercise 3: add bounded backoff
 # Prompt: For one-based failed attempt `n`, start with
 # `base_delay * 2 ** (n - 1) + base_delay * jitter_fraction`, then cap the result. Inject
 # jitter and sleep so tests record delays without waiting. Bound numeric `Retry-After`.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 4 — keep identities stable
+# Exercise 4: keep identities stable
 # Prompt: Generate one correlation ID before the attempt loop. Generate or accept one
 # idempotency key per logical mutation. Assert every scripted attempt sees the same
 # values. Do not create a new idempotency key inside a retry loop; the server would see
 # each replay as a new operation.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 5 — paginate defensively
+# Exercise 5: paginate defensively
 # Prompt: Collect `items` until `next_cursor` is null. Require a list of objects, reject
 # blank cursors, remember seen cursors, and enforce a maximum page count. Treat the cursor
 # as opaque. URL-encode it rather than parsing or concatenating it manually.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 6 — configure and redact auth
+# Exercise 6: configure and redact auth
 # Prompt: Read `DS60_API_TOKEN`, `DS60_API_BASE_URL`, and a numeric timeout from an
 # injected environment mapping. Make the token field `repr=False`. Implement case-
 # insensitive redaction for authorization, cookies, proxy authorization, and API-key
@@ -208,7 +208,7 @@ def worked_example() -> None:
 # default.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 7 — prove policy with scripts
+# Exercise 7: prove policy with scripts
 # Prompt: Create deterministic scripts for: 1. 503 then 200 for GET, 2. 400 for GET, 3.
 # 503 for POST without a key, 4. 503 then 200 for POST with a key, 5. 429 with `Retry-
 # After`, 6. three transport timeouts, 7. two valid pages, and 8. a repeated cursor.
@@ -216,43 +216,43 @@ def worked_example() -> None:
 # redacted logs.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 8 — allocate an end-to-end timeout budget
+# Exercise 8: allocate an end-to-end timeout budget
 # Prompt: Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and
 # parsing budgets across at most three attempts. Reject a retry when the remaining budget
 # cannot support another useful attempt.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 9 — support Retry-After dates safely
+# Exercise 9: support Retry-After dates safely
 # Prompt: Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject
 # wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local
 # delay cap.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 10 — model a circuit breaker
+# Exercise 10: model a circuit breaker
 # Prompt: Design closed, open, and half-open states around the existing retrying client.
 # Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency
 # ownership.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 11 — bound concurrent requests
+# Exercise 11: bound concurrent requests
 # Prompt: Add a client-side bulkhead that caps active transport calls and defines whether
 # excess work waits with a deadline or fails immediately. Prove permits release on
 # success, exception, timeout, and cancellation.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 12 — close streaming responses
+# Exercise 12: close streaming responses
 # Prompt: Define a streaming-response protocol with explicit close and cancellation
 # semantics. Test partial consumption, parse failure, caller cancellation, and a body
 # larger than the configured byte limit.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 13 — inject a credential provider
+# Exercise 13: inject a credential provider
 # Prompt: Replace a static token field with a credential-provider protocol that can
 # refresh once after a documented authentication challenge. Preserve redaction and prevent
 # refresh loops.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 14 — build an adversarial transport contract suite
+# Exercise 14: build an adversarial transport contract suite
 # Prompt: Extend scripted tests with redirect loops, malformed JSON, wrong content type,
 # repeated/blank cursors, oversized bodies, connection reset after send, and credentials
 # embedded in mixed-case headers or query strings.

@@ -122,7 +122,7 @@ Construct a Markov chain targeting the posterior and retain its dependence in un
 
 ### stat-18-18
 
-**Metropolis–Hastings**
+**Metropolis-Hastings**
 
 Propose a move and correct using the target-density ratio and proposal asymmetry. Symmetric proposals simplify the ratio. Store repeated states after rejection; keeping accepted moves alone changes the sampled distribution.
 

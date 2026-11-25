@@ -220,7 +220,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>A Python concurrency lesson must cover the choice among async I/O, threads, and processes, plus queues and Windows process-start behavior.</td>
 </tr>
 <tr>
-<td>Python Day 18 explicitly identifies Parquet as engine-dependent; Days 52–56 cover Dask, MLflow, and orchestration.</td>
+<td>Python Day 18 explicitly identifies Parquet as engine-dependent; Days 52-56 cover Dask, MLflow, and orchestration.</td>
 <td>A new data-engine lesson should teach the local Parquet/Arrow/DuckDB boundary, not another pandas introduction.</td>
 </tr>
 <tr>
@@ -232,7 +232,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>A dedicated PostgreSQL types/search lesson can go beyond an isolated prompt.</td>
 </tr>
 <tr>
-<td>SQL Days 32–33 teach B-tree, composite, covering, and partial indexes; Day 39 covers SKIP LOCKED and advisory locks.</td>
+<td>SQL Days 32-33 teach B-tree, composite, covering, and partial indexes; Day 39 covers SKIP LOCKED and advisory locks.</td>
 <td>Index maintenance/type selection and queue-operation patterns need only extension work, not a restart.</td>
 </tr>
 <tr>
@@ -265,7 +265,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Teach CSV versus Parquet trade-offs, schema and null preservation, partition-aware layout, and a small local DuckDB query over Parquet. Explain predicate/column pushdown as an observed plan or measured result, not magic. PyArrow/DuckDB must be an explicit optional profile with a deterministic small local fixture and a pandas-only fallback.</p>
 <p><strong>Done when:</strong> a learner writes and reads Parquet locally, validates a schema round trip, queries it with SQL without a server, and can say when CSV is the more portable choice.</p>
 <ul>
-<li>[x] <strong>PY-SVC-01 - Reliable HTTP clients and external-service boundaries</strong> <em>(new; after Python Day 15; pairs with Bridge Days 3–4)</em></li>
+<li>[x] <strong>PY-SVC-01 - Reliable HTTP clients and external-service boundaries</strong> <em>(new; after Python Day 15; pairs with Bridge Days 3-4)</em></li>
 </ul>
 <p>Teach timeouts, status/error classification, pagination, retry eligibility, exponential backoff with jitter, rate limits, idempotency keys, request correlation IDs, and safe authentication configuration. The entire exercise should use a local fake server or injected transport; no public API key or network account is needed.</p>
 <p><strong>Done when:</strong> tests prove that only safe failures retry, pagination stops, secrets never appear in logs, and a timeout/error reports enough context for diagnosis without exposing credentials.</p>
@@ -278,7 +278,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li>[x] <strong>SQL-FOUND-02 - Versioned schema migrations and safe evolution</strong> <em>(new; after SQL-FOUND-01 and before advanced operations)</em></li>
 </ul>
-<p>Teach immutable ordered migrations, migration metadata, idempotent seed boundaries, expand–migrate–contract changes, data backfills, compatibility, transactional DDL limits, and forward fixes versus unsafe rollback. The existing capstones correctly warn about reviewed migrations but do not give a learner a controlled migration workflow.</p>
+<p>Teach immutable ordered migrations, migration metadata, idempotent seed boundaries, expand-migrate-contract changes, data backfills, compatibility, transactional DDL limits, and forward fixes versus unsafe rollback. The existing capstones correctly warn about reviewed migrations but do not give a learner a controlled migration workflow.</p>
 <p><strong>Done when:</strong> a clean disposable database upgrades through multiple migrations, verification queries prove its final version and invariants, and a simulated application remains compatible during an additive change.</p>
 <ul>
 <li>[x] <strong>SQL-SEC-01 - Schemas, roles, privileges, and row-level security</strong> <em>(new advanced module; after SQL-FOUND-01 and SQL Day 39)</em></li>
@@ -300,7 +300,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <p>Build bootstrap and permutation intervals/tests, effect sizes, power/sample planning, multiple-comparison control, A/B-test design, randomization checks, sequential-peeking risk, and the difference between experimental and observational claims. Existing Day 32 warns about several of these risks; this addition makes the decisions executable.</p>
 <ul>
-<li>[x] <strong>PY-ML-01 - Reproducible data/model delivery</strong> <em>(revise Days 53–55 or add a cumulative lab)</em></li>
+<li>[x] <strong>PY-ML-01 - Reproducible data/model delivery</strong> <em>(revise Days 53-55 or add a cumulative lab)</em></li>
 </ul>
 <p>Strengthen artifact lineage with data snapshot identifiers/content hashes, environment and feature-schema compatibility, model registry stages, promotion/rollback evidence, and a small compatibility test. This should extend local MLflow and container material rather than require a cloud account.</p>
 <ul>

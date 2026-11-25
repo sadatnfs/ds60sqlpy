@@ -250,7 +250,7 @@ uv run --no-sync python scripts/course.py sql notebook sql-01 --artifact solutio
 <li>executes the fixed <code>sql/postgres-60day/00_verify.sql</code>; and</li>
 <li>executes earlier members of the selected lesson&#x27;s declared stateful group.</li>
 </ol>
-<p>The third step matters for Days 52–54: opening Day 54 prepares Days 52 and 53 in order. Other lessons receive the clean seed schema without replaying dozens of unrelated scripts.</p>
+<p>The third step matters for Days 52-54: opening Day 54 prepares Days 52 and 53 in order. Other lessons receive the clean seed schema without replaying dozens of unrelated scripts.</p>
 <p>The notebook runner constrains paths and client-side <code>psql</code> commands; it is not an SQL sandbox. An editable exercise can still contain database statements with server-side effects, especially when PostgreSQL is running under a superuser role. Never paste untrusted SQL. Use only the disposable course database and a least-privileged course role for lessons.</p>
 <h3 id="when-to-use-jupysql-instead">When to use JupySQL instead<a class="heading-anchor" href="#when-to-use-jupysql-instead" aria-label="Link to this section">#</a></h3>
 <p>Use the guided notebook for complete course scripts, exercises, DDL, projects, and solutions. It preserves real <code>psql</code> behavior and shows a bounded transcript.</p>

@@ -44,7 +44,7 @@ def test_polars_manifest_and_teaching_contract() -> None:
         assert all(f"### {n}. " in guide for n in range(1, 7))
         prose = re.sub(r"```.*?```", "", guide, flags=re.S)
         assert len(prose.split()) >= 600
-        assert "—" not in guide
+        assert "\u2014" not in guide
         assert "## Diagnose errors and misleading results" in guide
 
 

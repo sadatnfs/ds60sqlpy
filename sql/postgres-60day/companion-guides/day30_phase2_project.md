@@ -68,7 +68,7 @@ authorize a reset.
 
 - **Level:** Intermediate
 - **Prerequisites:** [Day 29; pattern matching](day29_pattern_matching.md) and
-  the complete window/CTE sequence from Days 16–29
+  the complete window/CTE sequence from Days 16-29
 - **Artifacts:** [learner SQL](../day30_phase2_project.sql) ·
   [solution reasoning](../solutions/day30_solutions.md) ·
   [executable solution](../solutions/day30_solutions.sql)
@@ -324,7 +324,7 @@ For every result, write its row grain and expected shape first.
    **Inputs/evidence:** For sql-30 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`; keep `cohort_month` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-30 Exercise 5, expected output: One row per observed cohort/month with nullable guarded measures. The final columns are `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`. The final order is `cohort_month, month_offset`.
    **Verify:** For sql-30 Exercise 5, choose one complete partition from `orders`, `order_items`, and `customers`; hand-calculate its first, middle, and final window values for `order_month`, `active_customers`, `revenue`, and `revenue_per_active`, then verify output keys remain `cohort_month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-6. **Extension:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0–12.
+6. **Extension:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0-12.
    **Progressive hint:** Calculate violations and compare totals at the same scoped population.
    **Inputs/evidence:** For sql-30 Exercise 6, read from `orders`, `order_items`, and `customers`. Build the answer toward `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`; keep `order_id` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-30 Exercise 6, expected output: One row with zero retention violations and zero revenue difference. The final columns are `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`.

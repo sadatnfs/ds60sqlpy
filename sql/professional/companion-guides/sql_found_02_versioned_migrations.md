@@ -93,7 +93,7 @@ the script, run the explicit
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
 table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand–migrate–contract. Its worked SQL reads or creates `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`.
+on screen are not automatically stored. The key vocabulary for this lesson is Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand-migrate-contract. Its worked SQL reads or creates `pro_migration_lab.schema_migrations`, `pro_migration_lab.service_requests`, `pro_migration_lab.service_requests_api`.
 
 Before writing a query, complete this sentence: “One output row represents
 ___.” Joins can multiply rows, filters can remove them, grouping can collapse
@@ -150,7 +150,7 @@ ORDER BY
 
 - Explain why applied migrations are immutable, read a migration manifest, and
   separate repeatable seeds from schema versions.
-- Execute an expand–migrate–contract change and verify a backfill before
+- Execute an expand-migrate-contract change and verify a backfill before
   tightening constraints.
 - Identify PostgreSQL transactional-DDL boundaries and choose a forward fix
   when editing deployed history would be unsafe.
@@ -167,7 +167,7 @@ ORDER BY
   arbitrary user data. An idempotent seed converges on the same result.
 - **Idempotent:** safe to repeat with the same intended state, not merely
   “ignores every error.”
-- **Expand–migrate–contract:** add a compatible representation, backfill and
+- **Expand-migrate-contract:** add a compatible representation, backfill and
   move writers/readers, then remove the obsolete representation.
 - **Backfill:** a bounded update that populates a new representation for
   existing rows.
@@ -209,7 +209,7 @@ dependent view, and remove `urgency_label`. The stable view still exposes the
 same columns.
 
 Version 5 demonstrates a forward fix. The rank constraint created by migration
-2 allowed values 1–3. A later requirement needs rank 4. Editing migration 2
+2 allowed values 1-3. A later requirement needs rank 4. Editing migration 2
 would give clean installs different history from upgraded databases, so version
 5 replaces the constraint and adds `critical`.
 
@@ -228,7 +228,7 @@ syntax is technically transactional.
 
 Complete all eight prompts in the learner file. First build a deterministic
 manifest query. Then narrate the compatibility window and deployment order.
-Finally design versions 6–8 for `assigned_team` without modifying versions 1–5,
+Finally design versions 6-8 for `assigned_team` without modifying versions 1-5,
 then cover retry state, low-lock boundaries, drift evidence, and failed-phase
 recovery. Explain why a lossy migration cannot be universally reversed.
 
@@ -239,8 +239,8 @@ fixture verifier after each change.
 For every migration, record precondition, change, verification, compatibility
 window, recovery action, and cleanup:
 
-1. **Manifest:** return versions 1–5 once and in order with stable metadata.
-   **Inputs/evidence:** For sql-found-02 Exercise 1, read versions 1–5 from `pro_migration_lab.schema_migrations`, preserving the immutable migration identity fields `migration_id`, `migration_name`, and `content_tag`.
+1. **Manifest:** return versions 1-5 once and in order with stable metadata.
+   **Inputs/evidence:** For sql-found-02 Exercise 1, read versions 1-5 from `pro_migration_lab.schema_migrations`, preserving the immutable migration identity fields `migration_id`, `migration_name`, and `content_tag`.
    **Expected result/shape:** For sql-found-02 Exercise 1, expected output: exactly five rows at one-row-per-migration grain, columns `migration_id`, `migration_name`, and `content_tag`, ordered by `migration_id`; the independent invariant is the exact array `[1, 2, 3, 4, 5]`.
    **Verify:** For sql-found-02 Exercise 1, assert the exact ordered ID array, count five distinct IDs, compare each name/tag with the reviewed fixture manifest, and prove that a missing, duplicate, reordered, or altered identity fails rather than being silently accepted.
 2. **Compatibility:** explain the version-2 view and order schema, reader,
@@ -248,10 +248,10 @@ window, recovery action, and cleanup:
    **Inputs/evidence:** For sql-found-02 Exercise 2, inspect version-2 storage and `service_requests_api` before the backfill, then return a five-step deployment matrix covering expand, compatible code, backfill, validation, and contract.
    **Expected result/shape:** For sql-found-02 Exercise 2, expected output: three request rows showing NULL `expanded_storage` but unchanged `stable_api_value`, followed by five ordered rollout rows with `step_number`, compatibility, write policy, and promotion gate.
    **Verify:** For sql-found-02 Exercise 2, assert every stable API value equals `COALESCE(expanded_storage, legacy_storage)`, the API keeps its five-column interface, and the contract step is gated on zero old-writer traffic plus a complete backfill.
-3. **Forward series:** design versions 6–8 for `assigned_team` as separate
+3. **Forward series:** design versions 6-8 for `assigned_team` as separate
    expand, backfill, and contract steps.
    **Inputs/evidence:** For sql-found-02 Exercise 3, apply three new immutable migrations: nullable `assigned_team`, deterministic backfill, then default/NOT NULL/allowed-values CHECK; record metadata last inside each transaction.
-   **Expected result/shape:** For sql-found-02 Exercise 3, expected output: command tags for migrations 6–8; one row per request with `assigned_team`; three manifest rows; one column-catalog row proving text, NOT NULL, and `'general'` default; and one validated CHECK definition.
+   **Expected result/shape:** For sql-found-02 Exercise 3, expected output: command tags for migrations 6-8; one row per request with `assigned_team`; three manifest rows; one column-catalog row proving text, NOT NULL, and `'general'` default; and one validated CHECK definition.
    **Verify:** For sql-found-02 Exercise 3, assert manifest IDs are exactly `[1..8]`, every high/critical request is `response`, every other request is `general`, no NULL or disallowed value remains, the stable API projection is unchanged, and the catalog matches the promised contract.
 4. **Runner boundaries:** identify nontransactional operations and explain why
    lossy changes do not have universal “down” migrations.
@@ -281,7 +281,7 @@ window, recovery action, and cleanup:
 
 ## Self-check
 
-- Does a clean schema reach versions 1–5 in order?
+- Does a clean schema reach versions 1-5 in order?
 - Does a second `run_all.sql` execution skip applied migration bodies and leave
   the same rows?
 - Does the seed remain at the expected cardinality when run twice?
@@ -328,7 +328,7 @@ I have completed the direct catalog prerequisites: `sql-found-01`, `sql-39`. Ass
 - Guide: sql/professional/companion-guides/sql_found_02_versioned_migrations.md
 - Answer-free learner SQL: sql/professional/lessons/sql_found_02_versioned_migrations.sql
 
-Key terms to teach in context: Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand–migrate–contract. First define those terms in plain
+Key terms to teach in context: Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand-migrate-contract. First define those terms in plain
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run

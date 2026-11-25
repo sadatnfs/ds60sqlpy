@@ -40,7 +40,7 @@ PostgreSQL 17, while the curriculum is validated on PostgreSQL 16+.
 - Days 38 and 39 include genuinely concurrent exercises. Reproducing isolation
   anomalies, blocking, and deadlocks requires two or three `psql` sessions;
   one sequential file cannot demonstrate them faithfully.
-- Days 52–54 are the declared stateful sequence. Day 52 drops, rebuilds, and
+- Days 52-54 are the declared stateful sequence. Day 52 drops, rebuilds, and
   commits the course-owned `dwh` schema. Run Day 52 before Days 53 and 54.
   Days 53 and 54 demonstrate changes inside rollback-safe transactions.
 - Day 43 introduces backup and recovery concepts. Server-side `COPY`, WAL
@@ -53,7 +53,7 @@ PostgreSQL 17, while the curriculum is validated on PostgreSQL 16+.
   can rationally produce sequential scans even when an index is well designed.
   There is no portable fixed speedup or runtime guarantee.
 
-## Phase 1 - Relational querying and report foundations (Days 1–15)
+## Phase 1 - Relational querying and report foundations (Days 1-15)
 
 ### Core queries, joins, and sets
 
@@ -105,7 +105,7 @@ PostgreSQL 17, while the curriculum is validated on PostgreSQL 16+.
   extend monthly segment-country revenue with at least two documented
   dimensions and reconcile the result against line-item totals.
 
-## Phase 2 - Windows, CTEs, and semi-structured data (Days 16–30)
+## Phase 2 - Windows, CTEs, and semi-structured data (Days 16-30)
 
 ### Window functions
 
@@ -161,7 +161,7 @@ PostgreSQL 17, while the curriculum is validated on PostgreSQL 16+.
   extend cohort-month revenue with cohort size, retention rate, and a documented
   moving-average CLV heuristic.
 
-## Phase 3 - Plans, physical design, concurrency, and operations (Days 31–45)
+## Phase 3 - Plans, physical design, concurrency, and operations (Days 31-45)
 
 ### Plans, indexes, and query structure
 
@@ -216,7 +216,7 @@ PostgreSQL 17, while the curriculum is validated on PostgreSQL 16+.
   pre-aggregation. Report locally observed plans, rows, buffers, and timings;
   do not claim a universal percentage improvement.
 
-## Phase 4 - Applied PostgreSQL projects (Days 46–60)
+## Phase 4 - Applied PostgreSQL projects (Days 46-60)
 
 ### Project 1: e-commerce analytics
 

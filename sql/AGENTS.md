@@ -24,7 +24,7 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 - Daily lessons should use `BEGIN` and `ROLLBACK` unless persistence is an explicit objective.
 - Do not make a later lesson depend on objects rolled back by an earlier lesson.
 - Multi-part projects need an idempotent fixture or explicit, validated persistence instructions.
-- Days 52–54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned `dwh` schema, then Days 53 and 54 run in order.
+- Days 52-54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned `dwh` schema, then Days 53 and 54 run in order.
 - Superuser-only operations must be optional and labeled.
 - `sql-found-01` follows SQL Day 15 and is the direct prerequisite for Day 16.
   `sql-found-02` follows Day 39 and precedes schema-evolution and operational
@@ -108,7 +108,7 @@ Verify that:
 - `00_verify.sql` confirms deterministic counts, coverage, chronology, totals, and foreign keys.
 - Each independent lesson succeeds in a clean session.
 - Rollback leaves no unexpected persistent objects.
-- The Days 52–54 stateful sequence succeeds in order.
+- The Days 52-54 stateful sequence succeeds in order.
 - Catalog and solution availability are accurate.
 
 When an artifact filename, stateful group, or solution availability changes, run `python scripts/build_catalog.py` before validation.

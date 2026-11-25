@@ -704,7 +704,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* DuckDB projection/filter: pushes required columns and supported predicates near the scan;</span></span>
 <span class="source-line"><span class="syntax-string">  inspect plan and profile.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — observe CSV&#x27;s string-only boundary::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: observe CSV&#x27;s string-only boundary::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    import csv</span></span>
 <span class="source-line"><span class="syntax-string">    from pathlib import Path</span></span>
@@ -719,7 +719,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: Dates, units, prices, and blanks all arrive as strings and must be interpreted by an</span></span>
 <span class="source-line"><span class="syntax-string">          explicit contract.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — show why projection changes analytical work::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: show why projection changes analytical work::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    rows = [</span></span>
 <span class="source-line"><span class="syntax-string">        {&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 2, &quot;note&quot;: &quot;large free text&quot;},</span></span>
@@ -821,14 +821,14 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_data_01_arrow_duckdb.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — define the CSV contract</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: define the CSV contract</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `parse_nullable_text` and `total_revenue`. Parse dates, integers, and</span></span>
 <span class="source-line"><span class="syntax-comment"># prices in one place rather than scattering conversion across analysis code. Test blank</span></span>
 <span class="source-line"><span class="syntax-comment"># notes and a malformed number. For real money, prefer `Decimal` or integer minor units. A</span></span>
 <span class="source-line"><span class="syntax-comment"># binary `float` is used in the learner exercise only to keep its first step small.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — compare storage contracts</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: compare storage contracts</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | |</span></span>
 <span class="source-line"><span class="syntax-comment"># Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan</span></span>
 <span class="source-line"><span class="syntax-comment"># select columns efficiently? | | | | Does Python need an extra engine? | | | | Is</span></span>
@@ -836,21 +836,21 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># and for a repeated 50-million-row analytical scan. Explain each answer.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — build an Arrow schema</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: build an Arrow schema</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: With PyArrow installed, define non-null integer, date, region, category, units,</span></span>
 <span class="source-line"><span class="syntax-comment"># and decimal fields plus a nullable note. Create the table with this schema, write</span></span>
 <span class="source-line"><span class="syntax-comment"># Parquet, read it, and assert: - schema equality, - six rows, and - three null notes. Do</span></span>
 <span class="source-line"><span class="syntax-comment"># not infer the schema first and then claim it was guaranteed.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — make partitions deliberate</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: make partitions deliberate</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `partition_directory`. Reject `../north`, slashes, empty strings, and</span></span>
 <span class="source-line"><span class="syntax-comment"># unexpected case. Write one stable file per region at</span></span>
 <span class="source-line"><span class="syntax-comment"># `region=&lt;validated-value&gt;/part-000.csv`. Partitioning every high-cardinality value can</span></span>
 <span class="source-line"><span class="syntax-comment"># create millions of tiny files, so choose commonly filtered dimensions and plan sizes.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — query Parquet with DuckDB</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: query Parquet with DuckDB</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Use an in-memory connection and `read_parquet(?)`. Group revenue by region for</span></span>
 <span class="source-line"><span class="syntax-comment"># rows with at least two units. Bind path and threshold values as parameters. Then run</span></span>
 <span class="source-line"><span class="syntax-comment"># `EXPLAIN` on the same SQL. Find: - a Parquet scan, - a units filter, and - projected</span></span>
@@ -858,56 +858,56 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># formatting changes, so look for semantics rather than copying one exact rendering.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — explain pushdown honestly</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: explain pushdown honestly</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Pushdown does not mean every query reads zero irrelevant bytes. Row-group</span></span>
 <span class="source-line"><span class="syntax-comment"># statistics, file organization, filter selectivity, expression support, and engine</span></span>
 <span class="source-line"><span class="syntax-comment"># version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and</span></span>
 <span class="source-line"><span class="syntax-comment"># 3. what would require profiling or scan metrics to prove.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — exercise the fallback</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: exercise the fallback</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Run `summarize_with_csv_fallback` in an environment without PyArrow/DuckDB. If</span></span>
 <span class="source-line"><span class="syntax-comment"># pandas exists, it uses typed `read_csv`; otherwise it uses the standard library. Confirm</span></span>
 <span class="source-line"><span class="syntax-comment"># the same row count, null count, region set, and revenue across engines. Verify optional</span></span>
 <span class="source-line"><span class="syntax-comment"># package detection neither installs dependencies nor contacts the network.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — plan schema evolution</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: plan schema evolution</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create version 2 of the sales schema with one nullable additive column and one</span></span>
 <span class="source-line"><span class="syntax-comment"># proposed type change. Define which readers remain compatible and write a</span></span>
 <span class="source-line"><span class="syntax-comment"># migration/rejection policy.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — control file and row-group size</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: control file and row-group size</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Generate a larger local deterministic dataset and compare many tiny Parquet</span></span>
 <span class="source-line"><span class="syntax-comment"># files with fewer bounded files/row groups. Record metadata count, scan planning, file</span></span>
 <span class="source-line"><span class="syntax-comment"># sizes, and filtered query behavior.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — validate a dataset before querying</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: validate a dataset before querying</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Build a local validation report for schema equality, required/null counts,</span></span>
 <span class="source-line"><span class="syntax-comment"># unique row IDs, accepted regions, positive units, decimal range, date range, partition-</span></span>
 <span class="source-line"><span class="syntax-comment"># to-column agreement, and total row count.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — reconcile a local analytical join</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: reconcile a local analytical join</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create a small region lookup fixture, join it to sales in DuckDB, and reproduce</span></span>
 <span class="source-line"><span class="syntax-comment"># the result with standard-library or pandas logic. Include an unknown region and</span></span>
 <span class="source-line"><span class="syntax-comment"># duplicate lookup key.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — find a non-pushdown filter</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: find a non-pushdown filter</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Compare `units &gt;= ?` with a transformed predicate such as a function of units.</span></span>
 <span class="source-line"><span class="syntax-comment"># Inspect plans and scan evidence, then rewrite only when semantics remain identical.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 13 — publish a dataset atomically</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13: publish a dataset atomically</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Write partitioned output to a temporary version directory, validate it, create a</span></span>
 <span class="source-line"><span class="syntax-comment"># manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a</span></span>
 <span class="source-line"><span class="syntax-comment"># local current-version pointer.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 14 — reconcile decimals and timestamps across engines</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14: reconcile decimals and timestamps across engines</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Add boundary decimal values and timezone-aware timestamps to a local round trip.</span></span>
 <span class="source-line"><span class="syntax-comment"># Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit</span></span>
 <span class="source-line"><span class="syntax-comment"># normalization.</span></span>

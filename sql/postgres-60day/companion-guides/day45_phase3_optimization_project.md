@@ -68,7 +68,7 @@ authorize a reset.
 
 - **Level:** Advanced
 - **Prerequisites:** [Day 44; monitoring and diagnostics](day44_monitoring_diagnostics.md)
-  and the complete performance sequence from Days 31–44
+  and the complete performance sequence from Days 31-44
 - **Artifacts:** [learner SQL](../day45_phase3_optimization_project.sql) ·
   [solution reasoning](../solutions/day45_solutions.md) ·
   [executable solution](../solutions/day45_solutions.sql)

@@ -60,7 +60,7 @@ Holt updates both level and slope, then forecasts \(l_{T}+h\cdot b_{T}\). The tr
 
 ### stat-26-07
 
-**Holt–Winters methods**
+**Holt-Winters methods**
 
 Holt-Winters adds seasonal states to level and trend. Additive seasonality is natural for constant-sized seasonal effects; multiplicative seasonality models effects proportional to the level and imposes data constraints. The seasonal period and initialization need enough history. Zero or negative values complicate multiplicative forms. Good in-sample seasonal fit does not ensure a stable future seasonal shape.
 

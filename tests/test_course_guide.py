@@ -53,7 +53,7 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "evidence-based done condition" in rendered
     assert 'href="lesson-pages/sql-start-01.html">Start the first SQL lab' in rendered
     assert "Windows with WSL 2" in rendered
-    assert "relational design between Days 15–16" in rendered
+    assert "relational design between Days 15-16" in rendered
     assert "Companion guide: ${lesson.guide_path}" in rendered
     assert "Answer-free learner artifact: ${lesson.lesson_path}" in rendered
     assert "Treat every path under solutions/ as closed" in rendered

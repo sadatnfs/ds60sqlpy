@@ -221,7 +221,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 test the contracts behind composite, covering, and partial indexes.
+Prompts 3-6 test the contracts behind composite, covering, and partial indexes.
 For `(category, created_at)`, queries anchored on the leftmost equality have a
 more useful search prefix than `created_at` alone. `INCLUDE` columns can satisfy
 the output list without changing the index's search key.

@@ -269,7 +269,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 build read-only operational judgment. `query_start` measures the
+Prompts 3-6 build read-only operational judgment. `query_start` measures the
 current statement while `xact_start` measures the enclosing transaction; show
 both because long idle transactions can retain locks and old snapshots.
 

@@ -868,8 +868,8 @@ def build_html(payload: dict[str, Any]) -> str:
         </div>
         <div class="grid two" style="margin-top: 1rem">
           <div class="callout"><h3>Your first SQL lesson</h3><p>Begin with small queries,
-            then build toward relational design between Days 15–16 and migration
-            engineering between Days 39–40.</p>
+            then build toward relational design between Days 15-16 and migration
+            engineering between Days 39-40.</p>
             <a class="button" href="lesson-pages/sql-start-01.html">Start the first SQL lab</a></div>
           <div class="callout warning"><h3>Database boundary</h3><p>Use only
             <code>advanced_sql_training</code>. A contributor's <code>DS60_DATABASE_URL</code>
@@ -923,10 +923,10 @@ def build_html(payload: dict[str, Any]) -> str:
             <h3>New to both</h3>
             <ul>
               <li>Python starter labs and three tiny-table SQL starter labs</li>
-              <li>Python Days 1–15</li>
-              <li>SQL Days 1–15</li>
-              <li>Relational design between SQL Days 15–16</li>
-              <li>Migration engineering between SQL Days 39–40</li>
+              <li>Python Days 1-15</li>
+              <li>SQL Days 1-15</li>
+              <li>Relational design between SQL Days 15-16</li>
+              <li>Migration engineering between SQL Days 39-40</li>
               <li>Alternate Python/SQL and add the bridge</li>
             </ul>
             <button type="button" class="secondary" data-path-filter="new">Show the starting sequence</button>

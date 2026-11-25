@@ -423,7 +423,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li><strong>Level:</strong> Advanced</li>
 <li><strong>Catalog prerequisite:</strong> <code>sql-found-02</code></li>
-<li><strong>Prerequisites:</strong> Complete <a href="sql-found-02.html#guide">SQL-FOUND-02; versioned schema migrations</a>. That route already includes the window-function sequence from Days 16–22 and the transaction/locking sequence through SQL-39.</li>
+<li><strong>Prerequisites:</strong> Complete <a href="sql-found-02.html#guide">SQL-FOUND-02; versioned schema migrations</a>. That route already includes the window-function sequence from Days 16-22 and the transaction/locking sequence through SQL-39.</li>
 <li><strong>Artifacts:</strong> <a href="sql-40.html#learner">learner SQL</a> · <a href="sql-40.html#solution-1">solution reasoning</a> · <a href="sql-40.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -535,7 +535,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Validate that category revenue shares sum to one, allowing for rounding.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 3–6 distinguish continuous interpolation, observed-value percentiles, partitioned shares, leakage-free windows, and undefined dispersion. For <code>(10,20,100,200)</code>, <code>percentile_disc(0.5)</code> returns an observed middle choice, while <code>percentile_cont(0.5)</code> interpolates between the two central values.</p>
+<p>Prompts 3-6 distinguish continuous interpolation, observed-value percentiles, partitioned shares, leakage-free windows, and undefined dispersion. For <code>(10,20,100,200)</code>, <code>percentile_disc(0.5)</code> returns an observed middle choice, while <code>percentile_cont(0.5)</code> interpolates between the two central values.</p>
 <p>Monthly category share partitions by month; ranking should add a stable category tie-break. A forecasting window ends at <code>1 PRECEDING</code>, and a constant series uses <code>NULLIF(sd, 0)</code> so “undefined” is not mislabeled as a score of zero.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

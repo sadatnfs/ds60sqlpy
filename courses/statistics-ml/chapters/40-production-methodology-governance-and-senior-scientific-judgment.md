@@ -50,7 +50,7 @@ Point-in-time correctness restricts features to information available at the pre
 
 ### stat-40-02
 
-**Training–serving consistency**
+**Training-serving consistency**
 
 Training-serving consistency aligns feature definitions, transformations, missingness and model inputs across development and operation. A shared schema alone does not establish semantic parity. Compare representative raw-to-feature examples and version the preprocessing pipeline. Monitor differences in units, category vocabularies and time windows, especially when independent teams implement the same feature name.
 
@@ -122,7 +122,7 @@ Canary deployment exposes a limited fraction or scope to a candidate under expli
 
 ### stat-40-14
 
-**Champion–challenger evaluation**
+**Champion-challenger evaluation**
 
 Champion-challenger evaluation compares the incumbent with one or more candidate systems under matched data and decision conditions. Repeatedly selecting challengers on the same holdout can overfit evaluation. Pair cases where possible and distinguish offline replay from live policy effects. Include operational cost, latency and critical regressions so a small average metric gain does not conceal a worse system.
 

@@ -127,7 +127,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Probability-proportional-to-size sampling:** Selects groups with probabilities related to their sizes.
 - **Unequal-probability sampling:** Allows different population members to have different selection probabilities.
 - **Survey weights:** Corrects for selection probabilities and sometimes nonresponse or population imbalances.
-- **Horvitz–Thompson estimation:** Estimates population totals using inverse inclusion probabilities.
+- **Horvitz-Thompson estimation:** Estimates population totals using inverse inclusion probabilities.
 - **Hájek estimation:** Uses normalized weighting to estimate population quantities.
 - **Poststratification:** Adjusts sample estimates to known population subgroup totals.
 - **Raking:** Iteratively adjusts weights to match multiple population margins.
@@ -138,7 +138,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Nonresponse bias:** Occurs when respondents differ systematically from nonrespondents.
 - **Convenience sampling:** Uses readily available observations, often limiting representativeness.
 - **Selection bias:** Arises when inclusion mechanisms distort relationships or population representation.
-- **Capture–recapture estimation:** Estimates population size from overlap between partially observed samples.
+- **Capture-recapture estimation:** Estimates population size from overlap between partially observed samples.
 - **Adaptive sampling:** Changes data collection based on observations already collected.
 - **Optimal allocation:** Distributes sampling effort to improve precision under cost constraints.
 - **Measurement study design:** Plans how, when, and with what precision variables will be measured.
@@ -159,7 +159,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Empirical cumulative distribution functions:** Displays the fraction of observations at or below each value.
 - **Histograms and density estimates:** Visualizes distribution shapes.
 - **Box plots and violin plots:** Compares location, spread, and distribution shape across groups.
-- **Quantile–quantile plots:** Compares observed quantiles with a reference distribution.
+- **Quantile-quantile plots:** Compares observed quantiles with a reference distribution.
 - **Scatterplots and conditional plots:** Examines relationships, nonlinearities, and subgroup differences.
 - **Correlation analysis:** Measures association while requiring care about confounding and nonlinear relationships.
 - **Partial correlation:** Measures linear association after accounting for specified other variables.
@@ -169,7 +169,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Data leakage:** Allows information unavailable at prediction or decision time to influence model development.
 - **Measurement invariance:** Tests whether a measurement system behaves comparably across groups or time.
 - **Interrater reliability:** Measures agreement between people producing labels or judgments.
-- **Test–retest reliability:** Measures consistency when the same construct is measured repeatedly.
+- **Test-retest reliability:** Measures consistency when the same construct is measured repeatedly.
 
 ## 7. Missing Data, Measurement Error, and Robust Statistics
 
@@ -215,7 +215,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Estimating equations:** Defines estimates as solutions to equations with suitable expectation properties.
 - **Sufficient statistics:** Retains all sample information about a parameter within a specified model.
 - **Fisher information:** Quantifies information about parameters contained in a likelihood.
-- **Cramér–Rao bounds:** Provides variance lower bounds for estimators under regularity conditions.
+- **Cramér-Rao bounds:** Provides variance lower bounds for estimators under regularity conditions.
 - **Asymptotic normality:** Approximates an estimator’s distribution by a normal distribution in large samples.
 - **Delta method:** Approximates uncertainty for functions of asymptotically normal estimators.
 - **Confidence intervals:** Uses procedures designed to cover the target parameter at a stated repeated-sampling rate.
@@ -250,15 +250,15 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Welch’s ANOVA:** Compares means while allowing unequal group variances.
 - **Analysis of covariance:** Compares groups while adjusting for additional covariates.
 - **Multivariate analysis of variance:** Tests group differences across several outcomes jointly.
-- **Mann–Whitney U test:** Compares distributions or probabilistic ordering; a median interpretation requires additional assumptions.
+- **Mann-Whitney U test:** Compares distributions or probabilistic ordering; a median interpretation requires additional assumptions.
 - **Wilcoxon signed-rank test:** Tests paired differences using ranks under symmetry assumptions.
 - **Sign test:** Tests whether positive and negative differences occur with equal probability.
-- **Kruskal–Wallis test:** Compares multiple independent groups using ranks.
+- **Kruskal-Wallis test:** Compares multiple independent groups using ranks.
 - **Friedman test:** Compares multiple conditions within matched blocks using ranks.
-- **Kolmogorov–Smirnov test:** Compares cumulative distributions using their largest discrepancy.
-- **Anderson–Darling test:** Tests distributional fit with particular sensitivity to tail discrepancies.
-- **Shapiro–Wilk test:** Tests compatibility with a normal distribution.
-- **Levene’s and Brown–Forsythe tests:** Tests equality of group variances.
+- **Kolmogorov-Smirnov test:** Compares cumulative distributions using their largest discrepancy.
+- **Anderson-Darling test:** Tests distributional fit with particular sensitivity to tail discrepancies.
+- **Shapiro-Wilk test:** Tests compatibility with a normal distribution.
+- **Levene’s and Brown-Forsythe tests:** Tests equality of group variances.
 - **Likelihood-ratio test:** Compares nested models through their maximized likelihoods.
 - **Wald test:** Tests parameter restrictions using estimates and their covariance.
 - **Score test:** Tests restrictions using likelihood derivatives evaluated under the null.
@@ -273,8 +273,8 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **False discovery rate:** Measures the expected proportion of false rejections among rejected hypotheses.
 - **Bonferroni correction:** Controls family-wise error using adjusted testing thresholds.
 - **Holm’s procedure:** Controls family-wise error through sequentially adjusted thresholds.
-- **Benjamini–Hochberg procedure:** Controls false discovery rate under appropriate dependence conditions.
-- **Benjamini–Yekutieli procedure:** Controls false discovery rate under more general dependence.
+- **Benjamini-Hochberg procedure:** Controls false discovery rate under appropriate dependence conditions.
+- **Benjamini-Yekutieli procedure:** Controls false discovery rate under more general dependence.
 - **Adjusted p-values:** Expresses multiplicity corrections on the p-value scale.
 - **Simultaneous confidence intervals:** Provides joint coverage for multiple parameters.
 - **Hierarchical testing:** Organizes hypotheses into families or trees with structured testing rules.
@@ -309,10 +309,10 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Ordinal regression:** Models outcomes whose categories have a meaningful order.
 - **Poisson regression:** Models conditional count means, commonly using a log link.
 - **Negative binomial regression:** Models overdispersed counts.
-- **Quasi-likelihood models:** Specifies mean–variance relationships without requiring a full probability distribution.
+- **Quasi-likelihood models:** Specifies mean-variance relationships without requiring a full probability distribution.
 - **Zero-inflated models:** Combines a structural-zero process with a count model.
 - **Hurdle models:** Separately models zero versus positive outcomes and the positive outcome distribution.
-- **Gamma regression:** Models positive continuous outcomes with suitable mean–variance behavior.
+- **Gamma regression:** Models positive continuous outcomes with suitable mean-variance behavior.
 - **Tweedie models:** Models outcomes that can combine exact zeros and positive continuous values.
 - **Beta regression:** Models continuous outcomes within the open unit interval.
 - **Fractional response models:** Models fractional outcomes, including settings permitting zeros and ones.
@@ -373,7 +373,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Stepped-wedge designs:** Introduces interventions across clusters at different scheduled times.
 - **Response surface methodology:** Models responses over experimental settings to locate favorable operating regions.
 - **Central composite designs:** Adds experimental points to estimate quadratic response surfaces.
-- **Box–Behnken designs:** Estimates quadratic surfaces using a structured set of factor combinations.
+- **Box-Behnken designs:** Estimates quadratic surfaces using a structured set of factor combinations.
 - **Optimal experimental design:** Chooses observations or settings to maximize a statistical information criterion.
 - **D-optimal design:** Targets precision through the determinant of an information matrix.
 - **A-optimal design:** Targets average parameter variance.
@@ -426,7 +426,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Stable unit treatment value assumptions:** Addresses treatment versions and interference between units.
 - **Directed acyclic graphs:** Represents hypothesized causal relationships without directed cycles.
 - **Structural causal models:** Represents variables as functions of their causes and external disturbances.
-- **Confounding:** Occurs when common causes distort treatment–outcome comparisons.
+- **Confounding:** Occurs when common causes distort treatment-outcome comparisons.
 - **Colliders:** Variables caused by two other variables whose conditioning can induce association.
 - **Mediators:** Variables through which some of a treatment’s effect may operate.
 - **Backdoor adjustment:** Identifies covariate adjustment sets that block noncausal paths under a causal graph.
@@ -500,7 +500,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Prior distributions:** Encodes uncertainty about parameters before incorporating current data.
 - **Likelihoods:** Describes how observed data depend on model parameters.
 - **Posterior distributions:** Combines prior information with observed data.
-- **Conjugate models:** Uses prior–likelihood combinations with analytically convenient posterior distributions.
+- **Conjugate models:** Uses prior-likelihood combinations with analytically convenient posterior distributions.
 - **Weakly informative priors:** Regularizes estimates while allowing a broad range of plausible values.
 - **Prior elicitation:** Translates domain knowledge into probability distributions.
 - **Prior predictive checks:** Simulates data before fitting to assess the implications of chosen priors.
@@ -514,7 +514,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Bayes factors:** Compares models through marginal likelihood ratios and can be sensitive to prior choices.
 - **Bayesian model averaging:** Averages predictions or quantities across models using posterior model weights.
 - **Markov chain Monte Carlo:** Generates dependent draws approximating a target probability distribution.
-- **Metropolis–Hastings:** Constructs a Markov chain through proposals and probabilistic acceptance.
+- **Metropolis-Hastings:** Constructs a Markov chain through proposals and probabilistic acceptance.
 - **Gibbs sampling:** Iteratively samples from conditional distributions.
 - **Hamiltonian Monte Carlo:** Uses gradients and simulated dynamics to explore continuous distributions.
 - **No-U-Turn sampling:** Adaptively determines trajectory lengths within Hamiltonian Monte Carlo.
@@ -532,7 +532,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 
 - **Empirical risk minimization:** Fits models by minimizing average training loss.
 - **Regularized risk minimization:** Balances training fit against a complexity penalty.
-- **Bias–variance tradeoff:** Describes competing sources of prediction error associated with model flexibility.
+- **Bias-variance tradeoff:** Describes competing sources of prediction error associated with model flexibility.
 - **Overfitting:** Learns sample-specific patterns that do not generalize.
 - **Underfitting:** Uses insufficient flexibility to capture relevant structure.
 - **Nearest-neighbor methods:** Predicts using nearby observations under a chosen distance measure.
@@ -555,7 +555,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Multioutput learning:** Predicts multiple outcomes jointly.
 - **Learning to rank:** Learns orderings rather than only numeric values or classes.
 - **Cost-sensitive learning:** Accounts for unequal consequences of different prediction errors.
-- **Positive–unlabeled learning:** Learns from labeled positives and unlabeled examples under explicit labeling assumptions.
+- **Positive-unlabeled learning:** Learns from labeled positives and unlabeled examples under explicit labeling assumptions.
 - **Semi-supervised learning:** Uses both labeled and unlabeled data.
 - **Active learning:** Chooses which observations should receive labels next.
 - **Transfer learning:** Reuses learned representations or parameters across tasks.
@@ -640,7 +640,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Specificity and sensitivity:** Measures correct negative and positive identification rates.
 - **F-scores:** Combines precision and recall with a chosen relative weighting.
 - **ROC curves and AUC:** Summarizes ranking across false-positive and true-positive rates.
-- **Precision–recall curves:** Summarizes performance across positive prediction thresholds.
+- **Precision-recall curves:** Summarizes performance across positive prediction thresholds.
 - **Calibration curves:** Compares predicted probabilities with observed outcome frequencies.
 - **Threshold optimization:** Selects decision cutoffs using costs, benefits, or operational constraints.
 - **Top-k and ranking metrics:** Evaluates performance among the highest-ranked predictions.
@@ -711,7 +711,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Differencing:** Transforms observations into changes to address certain nonstationary patterns.
 - **Seasonal differencing:** Removes differences relative to a previous seasonal period.
 - **Unit roots:** Describes a form of persistent nonstationarity.
-- **Augmented Dickey–Fuller tests:** Tests a unit-root null under specified time-series models.
+- **Augmented Dickey-Fuller tests:** Tests a unit-root null under specified time-series models.
 - **KPSS tests:** Tests stationarity around a level or trend.
 - **Cointegration:** Describes stationary combinations of individually nonstationary series.
 - **Granger causality:** Tests whether past values improve prediction beyond a specified information set; it does not establish intervention causality.
@@ -722,7 +722,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Wavelet analysis:** Studies behavior localized in both time and frequency.
 - **Time-series decomposition:** Separates trend, seasonal, and residual components.
 - **STL decomposition:** Uses local regression to estimate seasonal and trend components.
-- **Ljung–Box tests:** Checks whether a collection of autocorrelations is jointly consistent with zero.
+- **Ljung-Box tests:** Checks whether a collection of autocorrelations is jointly consistent with zero.
 - **Structural breaks:** Represents changes in a series’ underlying parameters or mechanisms.
 
 ## 26. Classical Forecasting Methods
@@ -733,7 +733,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Moving-average smoothing:** Averages nearby observations to reduce short-term variation.
 - **Simple exponential smoothing:** Recursively updates a level estimate using exponentially decreasing weights.
 - **Holt’s method:** Adds a trend component to exponential smoothing.
-- **Holt–Winters methods:** Adds seasonal components to level-and-trend forecasting.
+- **Holt-Winters methods:** Adds seasonal components to level-and-trend forecasting.
 - **Damped-trend methods:** Gradually reduces extrapolated trend growth over longer horizons.
 - **ETS models:** Provides a state-space framework for error, trend, and seasonal components.
 - **Autoregressive models:** Predicts using lagged values of the series.
@@ -785,7 +785,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Pinball loss:** Evaluates quantile forecasts.
 - **Continuous ranked probability score:** Evaluates an entire univariate predictive distribution.
 - **Prediction interval coverage and width:** Assesses whether forecast intervals are reliable and useful.
-- **Diebold–Mariano tests:** Compares forecast losses while accounting for appropriate temporal dependence.
+- **Diebold-Mariano tests:** Compares forecast losses while accounting for appropriate temporal dependence.
 
 ## 28. Survival Analysis, Duration Models, and Reliability
 
@@ -796,8 +796,8 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Left censoring:** Knows an event occurred before a threshold without observing its exact time.
 - **Interval censoring:** Knows an event occurred within a time interval.
 - **Left truncation:** Includes units only if they survive or remain eligible until an entry time.
-- **Kaplan–Meier estimation:** Estimates survival curves from right-censored data.
-- **Nelson–Aalen estimation:** Estimates cumulative hazard.
+- **Kaplan-Meier estimation:** Estimates survival curves from right-censored data.
+- **Nelson-Aalen estimation:** Estimates cumulative hazard.
 - **Log-rank tests:** Compares survival experiences across groups.
 - **Cox proportional hazards models:** Models relative hazards without specifying a baseline hazard shape.
 - **Proportional-hazards diagnostics:** Checks whether hazard ratios remain compatible with the model’s temporal assumptions.
@@ -809,10 +809,10 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Competing risks:** Handles different events that prevent each other from occurring first.
 - **Cause-specific hazard models:** Models event-specific instantaneous risk among currently event-free units.
 - **Cumulative incidence functions:** Estimates the probability of a specific event in the presence of competing events.
-- **Fine–Gray models:** Models covariate relationships with the subdistribution hazard.
+- **Fine-Gray models:** Models covariate relationships with the subdistribution hazard.
 - **Recurrent-event models:** Handles events that can happen repeatedly to the same unit.
 - **Multistate models:** Models transitions among multiple states.
-- **Joint longitudinal–survival models:** Combines repeated measurements with event-time outcomes.
+- **Joint longitudinal-survival models:** Combines repeated measurements with event-time outcomes.
 - **Restricted mean survival time:** Summarizes expected event-free time up to a specified horizon.
 - **Reliability engineering:** Studies component and system failure behavior.
 - **Accelerated life testing:** Infers operating-condition reliability from tests conducted under higher stress.
@@ -888,7 +888,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 
 - **Collaborative filtering:** Recommends using patterns in users’ interactions with items.
 - **Content-based recommendation:** Recommends using item attributes and user preferences.
-- **Matrix factorization:** Represents user–item interactions using lower-dimensional latent factors.
+- **Matrix factorization:** Represents user-item interactions using lower-dimensional latent factors.
 - **Implicit-feedback models:** Learns from behavior such as views or purchases rather than explicit ratings.
 - **Factorization machines:** Models interactions between sparse input features through shared latent representations.
 - **Two-tower retrieval models:** Learns separate query and candidate representations for efficient matching.
@@ -944,7 +944,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Reference-free evaluation:** Assesses quality without requiring a fixed target answer.
 - **Human evaluation design:** Defines sampling, rubrics, raters, and analysis for human judgments.
 - **Pairwise preference testing:** Compares alternative outputs through direct preference judgments.
-- **Bradley–Terry models:** Estimates relative strengths from pairwise comparison outcomes.
+- **Bradley-Terry models:** Estimates relative strengths from pairwise comparison outcomes.
 - **Interrater agreement analysis:** Quantifies consistency among evaluators.
 - **Judge-model validation:** Checks whether automated evaluators agree with relevant human standards.
 - **Position and verbosity bias:** Detects evaluation preferences driven by presentation rather than actual quality.
@@ -957,13 +957,13 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Robustness and adversarial evaluation:** Tests failure under difficult, misleading, or manipulated inputs.
 - **Agent trajectory evaluation:** Assesses intermediate actions, tool choices, and final task completion.
 - **Repeated-trial reliability:** Estimates how consistently a system succeeds across repeated runs.
-- **Cost–latency–quality analysis:** Evaluates tradeoffs between output quality and operational resources.
+- **Cost-latency-quality analysis:** Evaluates tradeoffs between output quality and operational resources.
 - **End-to-end system evaluation:** Measures the complete workflow rather than isolated model components.
 
 ## 35. Bandits, Reinforcement Learning, and Adaptive Decisions
 
 - **Multi-armed bandits:** Allocates repeated choices while learning their rewards.
-- **Exploration–exploitation tradeoffs:** Balances learning about alternatives against using currently promising options.
+- **Exploration-exploitation tradeoffs:** Balances learning about alternatives against using currently promising options.
 - **Epsilon-greedy policies:** Randomizes some choices while otherwise choosing the estimated best action.
 - **Upper confidence bound methods:** Selects actions using estimates plus uncertainty bonuses.
 - **Thompson sampling:** Samples plausible reward models and acts optimally under the sampled model.
@@ -977,7 +977,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Dynamic programming:** Solves sequential problems through recursive subproblems.
 - **Q-learning:** Learns action values from temporal-difference updates.
 - **Policy gradients:** Optimizes parameterized policies using reward-based gradients.
-- **Actor–critic methods:** Combines policy learning with value estimation.
+- **Actor-critic methods:** Combines policy learning with value estimation.
 - **Model-based reinforcement learning:** Uses learned or specified environment dynamics.
 - **Offline reinforcement learning:** Learns policies from previously collected interaction data.
 - **Importance-sampling policy evaluation:** Reweights logged trajectories to evaluate another policy.
@@ -995,7 +995,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Convex optimization:** Optimizes convex objectives over convex feasible sets.
 - **Nonconvex optimization:** Handles objectives or constraints with potentially many local optima.
 - **Lagrange multipliers:** Incorporates constraints into optimization conditions.
-- **Karush–Kuhn–Tucker conditions:** Characterizes candidate constrained optima under suitable assumptions.
+- **Karush-Kuhn-Tucker conditions:** Characterizes candidate constrained optima under suitable assumptions.
 - **Duality:** Relates optimization problems to companion problems that provide bounds or alternative solutions.
 - **Gradient descent:** Updates parameters in the direction of decreasing objective value.
 - **Stochastic gradient descent:** Estimates update directions from subsets or random observations.
@@ -1068,7 +1068,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Cannibalization analysis:** Measures whether gains in one offering displace another.
 - **Unit economics:** Estimates contribution and costs at a meaningful operational unit.
 - **Decomposition analysis:** Separates aggregate changes into components such as volume, mix, rate, and price.
-- **Oaxaca–Blinder decomposition:** Decomposes group mean differences using modeled characteristics and coefficients.
+- **Oaxaca-Blinder decomposition:** Decomposes group mean differences using modeled characteristics and coefficients.
 - **Index-number methods:** Separates changes in aggregate value into price and quantity components.
 - **Seasonal adjustment:** Removes estimated seasonal patterns to improve comparisons.
 
@@ -1108,7 +1108,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 ## 40. Production Methodology, Governance, and Senior Scientific Judgment
 
 - **Point-in-time correctness:** Ensures features contain only information available when a prediction would have been made.
-- **Training–serving consistency:** Keeps production feature computation aligned with model development.
+- **Training-serving consistency:** Keeps production feature computation aligned with model development.
 - **Data contracts:** Defines expectations about schemas, meanings, quality, and update behavior.
 - **Dataset versioning:** Preserves the exact data used to produce a result.
 - **Model versioning:** Records model artifacts and their relationships to code, data, and settings.
@@ -1120,7 +1120,7 @@ You do not need research-level mastery of every specialty. For the areas relevan
 - **Retraining policies:** Defines when models should be updated and what evidence justifies updates.
 - **Shadow deployment:** Runs a model alongside production without using its outputs for live decisions.
 - **Canary deployment:** Introduces a model to a limited operational scope before broader release.
-- **Champion–challenger evaluation:** Compares an incumbent system with candidate replacements.
+- **Champion-challenger evaluation:** Compares an incumbent system with candidate replacements.
 - **Rollback criteria:** Defines conditions requiring a deployment to be reversed.
 - **Human-in-the-loop systems:** Integrates people into prediction, review, escalation, or decision processes.
 - **Feedback-loop management:** Accounts for deployed decisions changing future observations and labels.

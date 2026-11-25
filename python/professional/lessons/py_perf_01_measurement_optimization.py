@@ -19,7 +19,7 @@ API/boundary anatomy:
 * scale curve + budget: measures several input sizes and checks latency/memory against an
   explicit threshold.
 
-Micro-example A — report repeat timing instead of one lucky run::
+Micro-example A: report repeat timing instead of one lucky run::
 
     import statistics
     import timeit
@@ -39,7 +39,7 @@ Micro-example A — report repeat timing instead of one lucky run::
 
 Expected: Repeated timings vary; median and range reveal noise that one measurement hides.
 
-Micro-example B — contrast quadratic and linear duplicate detection::
+Micro-example B: contrast quadratic and linear duplicate detection::
 
     def has_duplicate_quadratic(values):
         return any(values[i] in values[:i] for i in range(len(values)))
@@ -158,13 +158,13 @@ def self_check() -> None:
 # Full acceptance checks and progressive hints:
 # companion-guides/py_perf_01_measurement_optimization.md
 #
-# Exercise 1 — Define semantics before speed
+# Exercise 1: Define semantics before speed
 # Prompt: For `[4, 1, 3, 2, 3, 4]`, the answer is `3`: the duplicate whose *second*
 # occurrence appears first. Complete `first_duplicate_linear` with a set and prove
 # equivalence for empty, unique, immediate, and competing duplicates.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 2 — Build a representative timing plan
+# Exercise 2: Build a representative timing plan
 # Prompt: Choose a workload size large enough to rise above timer noise but small enough
 # for quick study. Warm up separately, then collect at least five repeated batches with
 # `timeit`. Record Python version, platform, input size, and plan. Do not assert
@@ -172,48 +172,48 @@ def self_check() -> None:
 # schedulers make that flaky.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 3 — Ask cProfile a different question
+# Exercise 3: Ask cProfile a different question
 # Prompt: Profile one complete representative call and sort by cumulative time. Locate the
 # call path, not just the leaf with the largest self time. Reduce the workload if
 # profiling overhead dominates, and do not compare profiled seconds directly with
 # unprofiled `timeit` seconds.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 4 — Measure allocation pressure
+# Exercise 4: Measure allocation pressure
 # Prompt: Compare materialized-list and generator sums with `tracemalloc`. Assert equal
 # results and report bounds (`peak >= current >= 0`). Explain why `tracemalloc` may not
 # see memory allocated inside every native library.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 5 — Compare optional vectorization
+# Exercise 5: Compare optional vectorization
 # Prompt: With NumPy installed, compare a Python loop with `np.square(array).sum()`.
 # Include conversion from Python values when that conversion exists in the real workflow.
 # Small input can favor the loop; already-resident large arrays can favor vectorized
 # native work. Measure both representative cases.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 6 — Model process transfer
+# Exercise 6: Model process transfer
 # Prompt: Serialize a safe local JSON payload and measure its byte length. Complete
 # `estimated_transfer_bytes`. Four workers each receiving two copies move eight payload
 # equivalents before computation. Real process protocols may add framing, copies, or
 # shared-memory complexity.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 7 — Evaluate caching
+# Exercise 7: Evaluate caching
 # Prompt: Use `cached_fibonacci.cache_info()` to observe hits. Then evaluate a real
 # candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules,
 # - key cardinality, and - whether retained objects prevent memory release. Caching a low-
 # reuse, high-cardinality result can make performance worse.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 8 — Bound native/FFI work
+# Exercise 8: Bound native/FFI work
 # Prompt: Use the policy to prefer an available algorithm improvement. If a measured
 # hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++
 # extensions, and `ctypes`/`cffi`; record build wheels, ABI, ownership, error, and safety
 # obligations before choosing one.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 9 — Apply the evidence decision
+# Exercise 9: Apply the evidence decision
 # Prompt: Complete `choose_next_step` in priority order: 1. fix unequal behavior, 2.
 # reduce peak memory beyond budget, 3. reduce transfer consuming at least 30 percent, 4.
 # optimize a hotspot consuming at least 50 percent, or 5. keep the current implementation.
@@ -221,54 +221,54 @@ def self_check() -> None:
 # selected action so a reviewer can reproduce the decision.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 10 — compare timing distributions
+# Exercise 10: compare timing distributions
 # Prompt: Run interleaved repeated batches for baseline and candidate, report median,
 # spread, paired ratios/differences, environment, and correctness. Avoid a binary CI speed
 # assertion.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 11 — diagnose warmup, GC, and environment noise
+# Exercise 11: diagnose warmup, GC, and environment noise
 # Prompt: Measure cold import/first call separately from steady state. Repeat with garbage
 # collection controlled, background load noted, and process affinity/power assumptions
 # documented rather than hidden.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 12 — trade algorithm speed for memory
+# Exercise 12: trade algorithm speed for memory
 # Prompt: Compare set-based first-duplicate search with a sorted/indexed alternative under
 # a strict memory budget. Preserve 'first second occurrence' semantics and report
 # time/peak memory across unique-heavy and duplicate-early inputs.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 13 — test vectorized dtype boundaries
+# Exercise 13: test vectorized dtype boundaries
 # Prompt: Compare Python integer sum-of-squares with NumPy int32, int64, float, and object
 # arrays near overflow. Detect silent overflow and choose a validated dtype.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 14 — evaluate shared-memory process input
+# Exercise 14: evaluate shared-memory process input
 # Prompt: Compare normal process serialization with read-only shared memory for one large
 # numeric payload. Include setup/copy, worker mapping, cleanup, spawn compatibility, and
 # ownership failure cases.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 15 — separate I/O concurrency from CPU optimization
+# Exercise 15: separate I/O concurrency from CPU optimization
 # Prompt: Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential,
 # async/thread, and process designs. Explain why each model helps one workload and may
 # hurt another.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 16 — prevent a cache stampede
+# Exercise 16: prevent a cache stampede
 # Prompt: Model many callers missing one expensive cache key. Add single-flight ownership,
 # bounded wait, success publication, failure cleanup, and stale/retry policy with injected
 # time.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 17 — review an FFI ownership boundary
+# Exercise 17: review an FFI ownership boundary
 # Prompt: Specify one batched native function: accepted buffer dtype/layout, length,
 # ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception
 # containment, and platform wheel matrix.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 18 — design a continuous performance gate
+# Exercise 18: design a continuous performance gate
 # Prompt: Define a stable local/CI benchmark artifact with workload version, correctness
 # hash, environment, raw timings, peak memory, practical regression budget, comparison
 # policy, and an investigation path instead of an immediate flaky fail.

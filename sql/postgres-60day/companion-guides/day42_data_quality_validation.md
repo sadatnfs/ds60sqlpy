@@ -239,7 +239,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 progress from constraint semantics to reconciliations and diagnostic
+Prompts 3-6 progress from constraint semantics to reconciliations and diagnostic
 evidence. SQL CHECK constraints pass both TRUE and UNKNOWN, so nullable fields
 need a separate `NOT NULL` rule when NULL is invalid.
 

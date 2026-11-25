@@ -146,7 +146,7 @@ warning. The runner then:
 2. executes the fixed `sql/postgres-60day/00_verify.sql`; and
 3. executes earlier members of the selected lesson's declared stateful group.
 
-The third step matters for Days 52–54: opening Day 54 prepares Days 52 and 53
+The third step matters for Days 52-54: opening Day 54 prepares Days 52 and 53
 in order. Other lessons receive the clean seed schema without replaying dozens
 of unrelated scripts.
 

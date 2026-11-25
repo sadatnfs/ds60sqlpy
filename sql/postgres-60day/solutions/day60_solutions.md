@@ -171,7 +171,7 @@ represented order month; it does not manufacture missing months.
 The learner file contains three runnable outputs:
 
 - Finance: YTD actual, budget, and variance at `(month, category)` grain.
-- Marketing: active customers by signup cohort and lifecycle month 0–6. A full
+- Marketing: active customers by signup cohort and lifecycle month 0-6. A full
   retention rate additionally needs the cohort-size denominator from Day 47.
 - Operations: an `EXPLAIN` of recent units by product category.
 
@@ -251,7 +251,7 @@ decision.
   only in a deliberate migration after reviewing object names and ownership.
 - `CREATE VIEW` without `OR REPLACE` is intentional in the reference transaction
   and expects a clean course setup.
-- Days 59–60 are sign-off checkpoints, so some deliverables are documentation
+- Days 59-60 are sign-off checkpoints, so some deliverables are documentation
   and measured evidence rather than new SQL exercises.
 
 ## Exercise 1: Identify clock dependence

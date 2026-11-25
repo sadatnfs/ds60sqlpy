@@ -702,7 +702,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* response/schema validation: rejects malformed success bodies before trusted domain code</span></span>
 <span class="source-line"><span class="syntax-string">  consumes them.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — apply both retryability and replay-safety gates::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: apply both retryability and replay-safety gates::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    def may_retry(method, status, *, idempotency_key=None):</span></span>
 <span class="source-line"><span class="syntax-string">        transient = status in {429, 502, 503, 504}</span></span>
@@ -723,7 +723,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: A transient status is insufficient for an unsafe mutation without a stable idempotency</span></span>
 <span class="source-line"><span class="syntax-string">          identity.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — reject a pagination cursor loop::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: reject a pagination cursor loop::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    pages = {</span></span>
 <span class="source-line"><span class="syntax-string">        None: {&quot;items&quot;: [1, 2], &quot;next_cursor&quot;: &quot;a&quot;},</span></span>
@@ -846,40 +846,40 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_svc_01_reliable_http_clients.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — classify status</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: classify status</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `classify_status`. Treat 2xx as success and</span></span>
 <span class="source-line"><span class="syntax-comment"># 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this</span></span>
 <span class="source-line"><span class="syntax-comment"># course policy. Reject impossible values. Classification is configurable in real systems.</span></span>
 <span class="source-line"><span class="syntax-comment"># For example, a particular 409 may be retryable only when the API contract says so.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — authorize replay</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: authorize replay</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `method_can_retry`: - GET, HEAD, PUT, DELETE, and OPTIONS are</span></span>
 <span class="source-line"><span class="syntax-comment"># replayable by HTTP semantics. - POST and PATCH require a non-empty idempotency key in</span></span>
 <span class="source-line"><span class="syntax-comment"># this lesson. An idempotency header helps only if the server documents and enforces it.</span></span>
 <span class="source-line"><span class="syntax-comment"># Never invent safety solely on the client side.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — add bounded backoff</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: add bounded backoff</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: For one-based failed attempt `n`, start with</span></span>
 <span class="source-line"><span class="syntax-comment"># `base_delay * 2 ** (n - 1) + base_delay * jitter_fraction`, then cap the result. Inject</span></span>
 <span class="source-line"><span class="syntax-comment"># jitter and sleep so tests record delays without waiting. Bound numeric `Retry-After`.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — keep identities stable</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: keep identities stable</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Generate one correlation ID before the attempt loop. Generate or accept one</span></span>
 <span class="source-line"><span class="syntax-comment"># idempotency key per logical mutation. Assert every scripted attempt sees the same</span></span>
 <span class="source-line"><span class="syntax-comment"># values. Do not create a new idempotency key inside a retry loop; the server would see</span></span>
 <span class="source-line"><span class="syntax-comment"># each replay as a new operation.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — paginate defensively</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: paginate defensively</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Collect `items` until `next_cursor` is null. Require a list of objects, reject</span></span>
 <span class="source-line"><span class="syntax-comment"># blank cursors, remember seen cursors, and enforce a maximum page count. Treat the cursor</span></span>
 <span class="source-line"><span class="syntax-comment"># as opaque. URL-encode it rather than parsing or concatenating it manually.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — configure and redact auth</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: configure and redact auth</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Read `DS60_API_TOKEN`, `DS60_API_BASE_URL`, and a numeric timeout from an</span></span>
 <span class="source-line"><span class="syntax-comment"># injected environment mapping. Make the token field `repr=False`. Implement case-</span></span>
 <span class="source-line"><span class="syntax-comment"># insensitive redaction for authorization, cookies, proxy authorization, and API-key</span></span>
@@ -887,7 +887,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># default.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — prove policy with scripts</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: prove policy with scripts</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create deterministic scripts for: 1. 503 then 200 for GET, 2. 400 for GET, 3.</span></span>
 <span class="source-line"><span class="syntax-comment"># 503 for POST without a key, 4. 503 then 200 for POST with a key, 5. 429 with `Retry-</span></span>
 <span class="source-line"><span class="syntax-comment"># After`, 6. three transport timeouts, 7. two valid pages, and 8. a repeated cursor.</span></span>
@@ -895,43 +895,43 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># redacted logs.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — allocate an end-to-end timeout budget</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: allocate an end-to-end timeout budget</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and</span></span>
 <span class="source-line"><span class="syntax-comment"># parsing budgets across at most three attempts. Reject a retry when the remaining budget</span></span>
 <span class="source-line"><span class="syntax-comment"># cannot support another useful attempt.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — support Retry-After dates safely</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: support Retry-After dates safely</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject</span></span>
 <span class="source-line"><span class="syntax-comment"># wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local</span></span>
 <span class="source-line"><span class="syntax-comment"># delay cap.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — model a circuit breaker</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: model a circuit breaker</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Design closed, open, and half-open states around the existing retrying client.</span></span>
 <span class="source-line"><span class="syntax-comment"># Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency</span></span>
 <span class="source-line"><span class="syntax-comment"># ownership.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — bound concurrent requests</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: bound concurrent requests</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Add a client-side bulkhead that caps active transport calls and defines whether</span></span>
 <span class="source-line"><span class="syntax-comment"># excess work waits with a deadline or fails immediately. Prove permits release on</span></span>
 <span class="source-line"><span class="syntax-comment"># success, exception, timeout, and cancellation.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — close streaming responses</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: close streaming responses</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Define a streaming-response protocol with explicit close and cancellation</span></span>
 <span class="source-line"><span class="syntax-comment"># semantics. Test partial consumption, parse failure, caller cancellation, and a body</span></span>
 <span class="source-line"><span class="syntax-comment"># larger than the configured byte limit.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 13 — inject a credential provider</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13: inject a credential provider</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Replace a static token field with a credential-provider protocol that can</span></span>
 <span class="source-line"><span class="syntax-comment"># refresh once after a documented authentication challenge. Preserve redaction and prevent</span></span>
 <span class="source-line"><span class="syntax-comment"># refresh loops.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 14 — build an adversarial transport contract suite</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14: build an adversarial transport contract suite</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Extend scripted tests with redirect loops, malformed JSON, wrong content type,</span></span>
 <span class="source-line"><span class="syntax-comment"># repeated/blank cursors, oversized bodies, connection reset after send, and credentials</span></span>
 <span class="source-line"><span class="syntax-comment"># embedded in mixed-case headers or query strings.</span></span>

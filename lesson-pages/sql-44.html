@@ -534,7 +534,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>The executable solution remains portable by checking for the extension view, using dynamic SQL only when it exists, and catching only the defined installed-but-not-preloaded SQLSTATE around that optional read.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 3–6 build read-only operational judgment. <code>query_start</code> measures the current statement while <code>xact_start</code> measures the enclosing transaction; show both because long idle transactions can retain locks and old snapshots.</p>
+<p>Prompts 3-6 build read-only operational judgment. <code>query_start</code> measures the current statement while <code>xact_start</code> measures the enclosing transaction; show both because long idle transactions can retain locks and old snapshots.</p>
 <p>Aggregate connection counts instead of exposing full SQL text in a shared report. For historical workload, examine both <code>mean_exec_time</code> and <code>total_exec_time</code>: one reveals expensive calls, the other cumulative load. Never cancel a session as part of this practice.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

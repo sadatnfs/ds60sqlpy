@@ -41,7 +41,7 @@ def test_solution_counter_accepts_labeled_exercises() -> None:
     source = """\
 # Solutions
 
-## Exercise 1 — Prediction
+## Exercise 1: Prediction
 
 Reasoning.
 

@@ -225,7 +225,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>In the classroom you do not run this file yourself. The <strong>Course database</strong> panel above each SQL lesson loads these tables automatically before your first run (or through <strong>Load course tables</strong>), and <strong>Reset training data</strong> restores the original rows after a confirmation. The commands below are for an explicitly prepared local database outside the classroom.</li>
 <li>Run setup and its executable invariant checks from the repository root: <code>psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql</code>, then run the same command with <code>00_verify.sql</code>.</li>
 <li>Re-running <code>00_setup.sql</code> drops and recreates the disposable <code>training</code> schema. Never run it against a database that contains data you care about.</li>
-<li>Most lesson scripts use <code>BEGIN</code> and <code>ROLLBACK</code>. The stated exception is the Days 52–54 warehouse project: Day 52 resets and commits the course-owned <code>dwh</code> schema for Days 53 and 54, so run those lessons in order.</li>
+<li>Most lesson scripts use <code>BEGIN</code> and <code>ROLLBACK</code>. The stated exception is the Days 52-54 warehouse project: Day 52 resets and commits the course-owned <code>dwh</code> schema for Days 53 and 54, so run those lessons in order.</li>
 </ul>
 <p>Naming and conventions used throughout the curriculum</p>
 <ul>

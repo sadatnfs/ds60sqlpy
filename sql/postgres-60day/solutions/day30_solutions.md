@@ -441,7 +441,7 @@ cardinality contract.
 
 ## Exercise 6: Extension
 
-**Prompt:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0–12.
+**Prompt:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0-12.
 
 **Reasoning:** Calculate violations and compare totals at the same scoped population.
 

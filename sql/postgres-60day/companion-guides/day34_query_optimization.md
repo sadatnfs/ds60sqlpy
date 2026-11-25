@@ -240,7 +240,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 make semantic equivalence the first optimization gate. Compare
+Prompts 3-6 make semantic equivalence the first optimization gate. Compare
 `MATERIALIZED` and `NOT MATERIALIZED` as planner boundaries, then verify a
 one-row-per-order pre-aggregation against the direct join with `EXCEPT` in both
 directions.

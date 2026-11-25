@@ -304,7 +304,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 make aggregate grain and subtotal identity explicit. A two-column
+Prompts 3-6 make aggregate grain and subtotal identity explicit. A two-column
 `CUBE` emits detail, both one-dimensional subtotals, and a grand total; the
 listed `GROUPING SETS` intentionally omits detail. Use `GROUPING(column)` rather
 than `column IS NULL` to detect a subtotal.

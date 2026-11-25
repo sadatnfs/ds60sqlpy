@@ -9,7 +9,7 @@
 
 
 These named modules extend the numbered PostgreSQL track without renumbering
-Days 1–60. They teach database responsibilities that are normally encountered
+Days 1-60. They teach database responsibilities that are normally encountered
 in application and production work: owning a relational model, evolving it
 through reviewed migrations, and enforcing least privilege.
 

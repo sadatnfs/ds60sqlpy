@@ -60,7 +60,7 @@ Base weights invert inclusion probabilities; later adjustments may address nonre
 
 ### stat-05-09
 
-**Horvitz–Thompson estimation**
+**Horvitz-Thompson estimation**
 
 Estimate a finite population total by summing observed \(\frac{y_i}{\pi_i}\). Design unbiasedness follows because \(\mathbb{E}[I_i]=\pi_i\). Zero inclusion probability for some population units prevents identification of their contribution.
 
@@ -126,7 +126,7 @@ Conditioning on inclusion can distort associations when inclusion depends on cau
 
 ### stat-05-20
 
-**Capture–recapture estimation**
+**Capture-recapture estimation**
 
 Two lists with sizes n1 and n2 and overlap m suggest population size near \(\frac{n_{1}\cdot n_{2}}{m}\). Dependence between captures or heterogeneous capture probabilities can strongly bias this estimate; tiny overlap is unstable.
 

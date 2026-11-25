@@ -44,7 +44,7 @@ class ProjectSummary:
 
 @dataclass(frozen=True)
 class InstallProof:
-    """Evidence that a wheel—not the source tree—supplied the import."""
+    """Evidence that a wheel, not the source tree, supplied the import."""
 
     wheel: Path
     import_origin: Path

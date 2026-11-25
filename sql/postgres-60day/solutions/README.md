@@ -4,8 +4,8 @@ This folder contains worked solutions for the PostgreSQL exercises.
 
 Current artifact coverage:
 
-- Markdown explanations: Days 1–60
-- Executable `.sql` solutions: Days 1–60
+- Markdown explanations: Days 1-60
+- Executable `.sql` solutions: Days 1-60
 
 The classroom lists references per lesson. Prepared contributors can also use
 `uv run --no-sync python scripts/course.py catalog --track sql` from the root.
@@ -19,7 +19,7 @@ The classroom lists references per lesson. Prepared contributors can also use
 - Days 38 and 39 include runnable single-session work plus explicit manual
   two-session instructions because isolation anomalies and deadlocks require
   genuine concurrency.
-- Days 52–54 are the declared stateful solution sequence. Day 52 resets and
+- Days 52-54 are the declared stateful solution sequence. Day 52 resets and
   commits the course-owned `dwh` schema; run Days 53 and 54 after it.
 
 In the classroom, choose the solution artifact when ready to compare, then use

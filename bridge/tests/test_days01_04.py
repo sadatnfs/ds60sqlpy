@@ -1,4 +1,4 @@
-"""Fast, fake-backed checks for bridge reference solutions Days 1–4."""
+"""Fast, fake-backed checks for bridge reference solutions Days 1-4."""
 
 from __future__ import annotations
 

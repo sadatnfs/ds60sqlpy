@@ -25,7 +25,7 @@ SET search_path TO training, public;
 -- Exercise 1: Query writing
 -- Prompt: Assign customers to four stored-spend buckets.
 -- Why: Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker.
--- Expected: One row per ordering customer with bucket 1–4.
+-- Expected: One row per ordering customer with bucket 1-4.
 -- Review the selected keys, grain, NULL behavior, and ordering before
 -- treating the output as evidence.
 -- Clause-by-clause reading:

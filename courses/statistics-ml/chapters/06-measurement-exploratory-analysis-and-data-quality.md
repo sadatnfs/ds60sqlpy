@@ -96,7 +96,7 @@ Box plots compress distributions into quantiles and outlier rules; violins add e
 
 ### stat-06-15
 
-**Quantile–quantile plots**
+**Quantile-quantile plots**
 
 Pair sample quantiles with reference quantiles. Curvature or tail departure suggests distributional mismatch. Estimated reference parameters alter formal testing calibration, even though the visual diagnostic remains informative.
 
@@ -156,7 +156,7 @@ Agreement metrics compare labelers beyond or alongside raw agreement. Cohen's ka
 
 ### stat-06-25
 
-**Test–retest reliability**
+**Test-retest reliability**
 
 Repeated measurement should yield consistent scores when the construct is stable. High correlation can coexist with a systematic shift between tests; examine differences and agreement as well as rank stability.
 

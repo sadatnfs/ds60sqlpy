@@ -651,7 +651,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">* `__iter__` / `__next__` / `__enter__` / `__exit__`: participates in Python-managed lifecycle</span></span>
 <span class="source-line"><span class="syntax-string">  and must honor exhaustion, cleanup, and exception rules.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example A — show structural compatibility without inheritance::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example A: show structural compatibility without inheritance::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    from typing import Protocol</span></span>
 <span class="source-line"></span>
@@ -672,7 +672,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-string">Expected: `PlainRecord` never inherits from `Named`; static structural matching uses its</span></span>
 <span class="source-line"><span class="syntax-string">          available member.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-string">Micro-example B — honor iterator exhaustion and partial batches::</span></span>
+<span class="source-line"><span class="syntax-string">Micro-example B: honor iterator exhaustion and partial batches::</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-string">    iterator = iter([(&quot;a&quot;, &quot;b&quot;), (&quot;c&quot;,)])</span></span>
 <span class="source-line"><span class="syntax-string">    assert next(iterator) == (&quot;a&quot;, &quot;b&quot;)</span></span>
@@ -759,97 +759,97 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"><span class="syntax-comment"># Full acceptance checks and progressive hints:</span></span>
 <span class="source-line"><span class="syntax-comment"># companion-guides/py_lang_01_typing_data_model.md</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1 — Complete and type the overloaded parser</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Complete and type the overloaded parser</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement the three promised return behaviors. Reject boolean text other than</span></span>
 <span class="source-line"><span class="syntax-comment"># `true` and `false`. In VS Code, inspect the inferred types of</span></span>
 <span class="source-line"><span class="syntax-comment"># `parse_scalar(&quot;12&quot;, &quot;int&quot;)` and `parse_scalar(&quot;true&quot;, &quot;bool&quot;)`. A variable typed as</span></span>
 <span class="source-line"><span class="syntax-comment"># arbitrary `str` needs a broader overload or prior narrowing.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2 — Implement the iterator protocol</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Implement the iterator protocol</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Complete `Batches.__next__`. Return tuples, advance the offset, and raise</span></span>
 <span class="source-line"><span class="syntax-comment"># `StopIteration` only after exhaustion. Test empty input and a final partial batch.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3 — Reason about variance</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Reason about variance</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Assign `SequenceReader[str]` to `Reader[object]`; this is safe because callers</span></span>
 <span class="source-line"><span class="syntax-comment"># only read. Explain why a mutable repository of strings cannot be treated as a repository</span></span>
 <span class="source-line"><span class="syntax-comment"># of objects: a caller might store an integer into it.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4 — Model events with TypedDict</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Model events with TypedDict</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Add a third event with a unique literal `kind`. Update `describe_event` and let</span></span>
 <span class="source-line"><span class="syntax-comment"># the checker identify unhandled or invalid fields. Add runtime validation at the JSON</span></span>
 <span class="source-line"><span class="syntax-comment"># boundary; TypedDict alone does not validate decoded data.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5 — Exercise context-manager failure</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Exercise context-manager failure</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Append inside `Transaction`, then raise. Verify the target remains unchanged and</span></span>
 <span class="source-line"><span class="syntax-comment"># the exception propagates. Returning true from `__exit__` would suppress it; this</span></span>
 <span class="source-line"><span class="syntax-comment"># implementation deliberately returns false.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6 — Trace descriptor lookup</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Trace descriptor lookup</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Compare `Customer.name` with `Customer(&quot;Ada&quot;).name`. Explain why the descriptor</span></span>
 <span class="source-line"><span class="syntax-comment"># returns itself for class access. Corrupt the private field deliberately and observe the</span></span>
 <span class="source-line"><span class="syntax-comment"># runtime type guard.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 7 — Draw the MRO</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7: Draw the MRO</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Print `ApiRecord.__mro__`. Predict the label before calling it. Every mixin uses</span></span>
 <span class="source-line"><span class="syntax-comment"># cooperative `super()`; directly naming a parent would skip or duplicate work.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 8 — Bound metaclass use</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8: Bound metaclass use</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Add a second `Handler` with `__init_subclass__`. Survey how a metaclass could</span></span>
 <span class="source-line"><span class="syntax-comment"># enforce the same rule, then state why the hook is preferable here. Use a metaclass only</span></span>
 <span class="source-line"><span class="syntax-comment"># when class-creation behavior cannot be expressed by descriptors, decorators, or subclass</span></span>
 <span class="source-line"><span class="syntax-comment"># hooks.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 9 — design a structural Protocol</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 9: design a structural Protocol</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Define a minimal generic `Serializer[T]` Protocol and implement JSON and text</span></span>
 <span class="source-line"><span class="syntax-comment"># serializers without inheritance. Add a consumer and let mypy reject one incompatible</span></span>
 <span class="source-line"><span class="syntax-comment"># implementation.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 10 — preserve signatures with ParamSpec</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 10: preserve signatures with ParamSpec</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Write a timing decorator that preserves arbitrary positional/keyword parameters</span></span>
 <span class="source-line"><span class="syntax-comment"># and return type, injects a log sink/clock for tests, and re-raises the wrapped exception</span></span>
 <span class="source-line"><span class="syntax-comment"># unchanged.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 11 — narrow decoded data safely</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 11: narrow decoded data safely</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement a `TypeGuard` that validates a decoded JSON object as a specific</span></span>
 <span class="source-line"><span class="syntax-comment"># TypedDict, including exact required keys, value types, and the bool-versus-int edge</span></span>
 <span class="source-line"><span class="syntax-comment"># case.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 12 — choose frozen, slots, and hash semantics</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 12: choose frozen, slots, and hash semantics</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Create a small value-object dataclass and compare mutable, frozen, slotted, and</span></span>
 <span class="source-line"><span class="syntax-comment"># `unsafe_hash` choices. Use it as a dictionary key and show which combinations preserve</span></span>
 <span class="source-line"><span class="syntax-comment"># hash invariants.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 13 — implement cooperative equality</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 13: implement cooperative equality</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Implement `__eq__` for a value type so unrelated types receive `NotImplemented`,</span></span>
 <span class="source-line"><span class="syntax-comment"># subclasses behave deliberately, and hashing remains consistent. Contrast this with</span></span>
 <span class="source-line"><span class="syntax-comment"># returning `False` immediately.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 14 — evolve a typed serialization boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 14: evolve a typed serialization boundary</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Version a discriminated TypedDict union, add an optional field to one event, and</span></span>
 <span class="source-line"><span class="syntax-comment"># parse old/new payloads into immutable domain objects. Define unknown-version and</span></span>
 <span class="source-line"><span class="syntax-comment"># unknown-kind failures.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 15 — trace weak references and caches</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 15: trace weak references and caches</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Compare a normal dictionary cache with `WeakValueDictionary` for objects that</span></span>
 <span class="source-line"><span class="syntax-comment"># support weak references. Drop strong references, force collection only as an</span></span>
 <span class="source-line"><span class="syntax-comment"># observation, and state when cache disappearance is acceptable.</span></span>
 <span class="source-line"><span class="syntax-comment"># Verify: add a boundary check and explain the failure policy.</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 16 — review typing compatibility</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 16: review typing compatibility</span></span>
 <span class="source-line"><span class="syntax-comment"># Prompt: Change a public function from accepting `Sequence[str]` to `list[str]`, and</span></span>
 <span class="source-line"><span class="syntax-comment"># another return from `list[str]` to `Sequence[str]`. Analyze source compatibility for</span></span>
 <span class="source-line"><span class="syntax-comment"># callers and implement a deprecation-safe alternative.</span></span>

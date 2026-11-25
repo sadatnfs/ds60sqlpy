@@ -70,7 +70,7 @@ Pairwise preference testing asks which of two outputs better satisfies a rubric,
 
 ### stat-34-06
 
-**Bradley–Terry models**
+**Bradley-Terry models**
 
 The Bradley-Terry model assigns a latent strength s_i to each system and models \(\Pr(i\text{ beats }j)=\operatorname{logistic}(s_i-s_j)\). One reference level or sum constraint is needed for identifiability. The comparison graph should connect systems adequately, and repeated tasks/raters create dependence beyond a simple independent model. Ties and nontransitive preferences need explicit extensions or diagnostics rather than forced binary labels.
 
@@ -148,7 +148,7 @@ Repeated-trial reliability estimates how often a system succeeds across repeated
 
 ### stat-34-19
 
-**Cost–latency–quality analysis**
+**Cost-latency-quality analysis**
 
 Cost-latency-quality analysis compares task performance with compute, token use, elapsed time and human correction effort. Tail latency matters when users or downstream jobs wait for the slowest responses. Pareto analysis identifies alternatives not dominated on all objectives. A cheap model that requires frequent expert repair may be more expensive end to end, so define the accounting boundary and expected task mix.
 

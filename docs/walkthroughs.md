@@ -91,7 +91,9 @@ reference corpus does not run them.
 | `observe` | Nonempty, at most 600 characters. |
 
 Authored text (titles, explanations, observations and expected output) must not contain
-em or en dashes. Excerpts are copied from source and are not checked for dashes.
+em or en dashes. The loader does not check excerpts, which are copied from source, but
+`scripts/check_no_dashes.py` rejects dashes in every tracked file, so sources and
+excerpts stay free of them too.
 
 One invalid entry makes the whole track's file fail to load, so no lesson in that track
 offers a walkthrough until it is fixed. CI catches this before release.

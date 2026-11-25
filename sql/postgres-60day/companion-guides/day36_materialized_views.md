@@ -238,7 +238,7 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Expanded practice lab
 
-Prompts 3–6 focus on the materialized view's data contract. A new base row is
+Prompts 3-6 focus on the materialized view's data contract. A new base row is
 invisible until refresh, so record both data time and refresh time. Concurrent
 refresh requires a qualifying unique index and cannot be demonstrated as a
 first population inside this rollback-only lesson.

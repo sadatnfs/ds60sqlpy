@@ -210,7 +210,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Minimize average observed loss over a model class. Training improvement can reflect memorization, so the risk target must be evaluated separately. Sampling and label availability define whose errors the objective actually emphasizes.</p>
 <h4 id="stat-19-02">Regularized risk minimization<a class="heading-anchor" href="#stat-19-02" aria-label="Link to this section">#</a></h4>
 <p>Add a complexity penalty to training loss or constrain the model class. Regularization trades some fit for stability. Its strength depends on feature scale, sample size and the loss normalization used by the implementation.</p>
-<h4 id="stat-19-03">Bias–variance tradeoff<a class="heading-anchor" href="#stat-19-03" aria-label="Link to this section">#</a></h4>
+<h4 id="stat-19-03">Bias-variance tradeoff<a class="heading-anchor" href="#stat-19-03" aria-label="Link to this section">#</a></h4>
 <p>For squared loss, prediction error decomposes into irreducible noise, squared bias and variance under a specified sampling setup. More flexible models often reduce bias while increasing variability, but the pattern is not universally monotonic.</p>
 <h4 id="stat-19-04">Overfitting<a class="heading-anchor" href="#stat-19-04" aria-label="Link to this section">#</a></h4>
 <p>A model captures sample-specific noise or leakage and performs worse on relevant unseen data. Diagnose through honest validation, learning curves and duplicate/group checks. A train-test gap alone does not identify which mechanism caused it.</p>
@@ -256,7 +256,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Optimize order-related losses across query-specific candidates. Group queries in validation and evaluate position-sensitive utility. A low pointwise regression loss does not guarantee the correct ordering of important pairs.</p>
 <h4 id="stat-19-25">Cost-sensitive learning<a class="heading-anchor" href="#stat-19-25" aria-label="Link to this section">#</a></h4>
 <p>Weight errors or training observations according to consequences. Altered class weights can change probability interpretation. Separate learning a risk score from choosing an operational threshold where feasible.</p>
-<h4 id="stat-19-26">Positive–unlabeled learning<a class="heading-anchor" href="#stat-19-26" aria-label="Link to this section">#</a></h4>
+<h4 id="stat-19-26">Positive-unlabeled learning<a class="heading-anchor" href="#stat-19-26" aria-label="Link to this section">#</a></h4>
 <p>Learn with confirmed positives and unlabeled cases containing both classes. Identification depends on how positives become labeled or on class-prior information. Treating every unlabeled case as negative can bias the model.</p>
 <h4 id="stat-19-27">Semi-supervised learning<a class="heading-anchor" href="#stat-19-27" aria-label="Link to this section">#</a></h4>
 <p>Use unlabeled data with assumptions connecting feature structure to labels, such as cluster smoothness. Unlabeled examples can hurt when that assumption is wrong or their distribution differs from the labeled target population.</p>

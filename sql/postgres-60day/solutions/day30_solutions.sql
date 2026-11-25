@@ -304,7 +304,7 @@ ORDER BY
 
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
--- Prompt: Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0–12.
+-- Prompt: Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0-12.
 -- Why: Calculate violations and compare totals at the same scoped population.
 -- Expected: One row with zero retention violations and zero revenue difference.
 -- Review the selected keys, grain, NULL behavior, and ordering before

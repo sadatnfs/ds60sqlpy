@@ -72,7 +72,7 @@ Lagrange multipliers incorporate constraints into an augmented objective so feas
 
 ### stat-36-08
 
-**Karush–Kuhn–Tucker conditions**
+**Karush-Kuhn-Tucker conditions**
 
 KKT conditions combine feasibility, nonnegative inequality multipliers, stationarity of the Lagrangian and complementary slackness. They are necessary under constraint qualifications and sufficient for suitable convex problems. Complementary slackness means an inactive inequality has zero multiplier, not that every active constraint must have a positive multiplier. Checking residuals helps diagnose a solver result but cannot certify a nonconvex global optimum alone.
 

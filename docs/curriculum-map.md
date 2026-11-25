@@ -22,13 +22,13 @@ catalogs or infer lesson counts from this overview. Windows contributors use WSL
 
 ### New to programming and databases
 
-1. Complete Python Days 1–15 in catalog order, including the four inserted
+1. Complete Python Days 1-15 in catalog order, including the four inserted
    foundation practice modules.
 2. Start with `sql-start-01` through `sql-start-03`, then complete SQL Days
-   1–15, beginning with small temporary-table examples.
-3. Continue Python Days 16–30.
+   1-15, beginning with small temporary-table examples.
+3. Continue Python Days 16-30.
 4. Complete `sql-found-01` for relational design, then continue SQL Days
-   16–30.
+   16-30.
 5. Add the engineering bridge after Python Day 15 and SQL Day 15 when you want
    application-oriented integration practice.
 6. After SQL Day 39, complete `sql-found-02` for versioned schema evolution
@@ -37,7 +37,7 @@ catalogs or infer lesson counts from this overview. Windows contributors use WSL
 
 ### Comfortable with another programming language
 
-Review Python Days 1–9, then focus on testing, tooling, data work, and
+Review Python Days 1-9, then focus on testing, tooling, data work, and
 projects. Begin SQL with `sql-start-01` through `sql-start-03`, then Day 1,
 unless a placement check demonstrates those foundations. Take the relational-design and migration modules only
 after their declared catalog prerequisites.
@@ -48,11 +48,11 @@ Use the SQL companion guides and project lessons as a diagnostic. Do not skip Po
 
 ### Focused on data science
 
-Follow the Python track in order through Day 45. Days 46–60 introduce larger optional dependencies and production topics; inspect the catalog and environment doctor before installing heavy extras.
+Follow the Python track in order through Day 45. Days 46-60 introduce larger optional dependencies and production topics; inspect the catalog and environment doctor before installing heavy extras.
 
 ### Focused on data or backend engineering
 
-Complete Python Days 1–15 and SQL Days 1–15, then follow the
+Complete Python Days 1-15 and SQL Days 1-15, then follow the
 [engineering bridge](../bridge/README.md). Continue the main tracks alongside
 it when a bridge lesson identifies a deeper Python or PostgreSQL prerequisite.
 Use the [professional paths](professional-paths.md) after the shared bridge.
@@ -64,17 +64,17 @@ Track guide: [python/ds-60day/README.md](../python/ds-60day/README.md)
 
 | Range | Phase | Main outcomes |
 | --- | --- | --- |
-| Days 1–15 | Core Python and engineering habits | Syntax, functions, collections, files, modules, tests, debugging, OOP, tooling, and a CLI project |
-| Days 16–30 | Data manipulation and visualization | NumPy, pandas, pipelines, EDA, visualization, feature engineering, validation, and a preprocessing project |
-| Days 31–45 | Statistics and machine learning | Probability, inference, linear algebra, scikit-learn, evaluation, model families, interpretation, deployment, and an end-to-end project |
-| Days 46–60 | Advanced and production topics | Deep learning, NLP, forecasting, scale, MLOps, monitoring, containers, orchestration, ethics, refactoring, and a capstone |
+| Days 1-15 | Core Python and engineering habits | Syntax, functions, collections, files, modules, tests, debugging, OOP, tooling, and a CLI project |
+| Days 16-30 | Data manipulation and visualization | NumPy, pandas, pipelines, EDA, visualization, feature engineering, validation, and a preprocessing project |
+| Days 31-45 | Statistics and machine learning | Probability, inference, linear algebra, scikit-learn, evaluation, model families, interpretation, deployment, and an end-to-end project |
+| Days 46-60 | Advanced and production topics | Deep learning, NLP, forecasting, scale, MLOps, monitoring, containers, orchestration, ethics, refactoring, and a capstone |
 
 Artifacts currently present:
 
-- Learner notebooks: Days 1–60
-- Companion guides: Days 1–60
-- Markdown solutions: Days 1–60
-- Solution notebooks: Days 1–60
+- Learner notebooks: Days 1-60
+- Companion guides: Days 1-60
+- Markdown solutions: Days 1-60
+- Solution notebooks: Days 1-60
 - Additional foundation, NumPy/pandas, algorithm and professional modules listed
   by the current catalog, each with its declared guide and solution artifacts
 
@@ -87,17 +87,17 @@ Track guide: [sql/postgres-60day/README.md](../sql/postgres-60day/README.md)
 
 | Range | Phase | Main outcomes |
 | --- | --- | --- |
-| Days 1–15 | Relational querying | SELECT, filtering, aggregation, joins, set operations, subqueries, DML, CASE, functions, and a report project |
-| Days 16–30 | Analytical SQL | Window functions, CTEs, recursion, pivots, JSON/XML, patterns, and a project |
-| Days 31–45 | Performance and operations | Plans, indexes, optimization, partitioning, transactions, locks, data quality, backup concepts, monitoring, and an optimization project |
-| Days 46–60 | Applied projects | E-commerce, finance, data warehousing, BI, and a final integrated capstone |
+| Days 1-15 | Relational querying | SELECT, filtering, aggregation, joins, set operations, subqueries, DML, CASE, functions, and a report project |
+| Days 16-30 | Analytical SQL | Window functions, CTEs, recursion, pivots, JSON/XML, patterns, and a project |
+| Days 31-45 | Performance and operations | Plans, indexes, optimization, partitioning, transactions, locks, data quality, backup concepts, monitoring, and an optimization project |
+| Days 46-60 | Applied projects | E-commerce, finance, data warehousing, BI, and a final integrated capstone |
 
 Artifacts currently present:
 
-- Lesson scripts: Days 1–60
-- Companion guides: Days 1–60
-- Markdown solutions: Days 1–60
-- Executable solution SQL: Days 1–60
+- Lesson scripts: Days 1-60
+- Companion guides: Days 1-60
+- Markdown solutions: Days 1-60
+- Executable solution SQL: Days 1-60
 - Starter, relational-engineering, analytical and professional modules at their
   declared prerequisite checkpoints; consult the current SQL subject README
 
@@ -147,9 +147,9 @@ Do not infer that a solution format exists because another format exists. Ask th
 
 A useful lesson rhythm is:
 
-1. 10–20 minutes: recall prerequisites and read
-2. 20–40 minutes: predict and run examples
-3. 30–60 minutes: exercises
+1. 10-20 minutes: recall prerequisites and read
+2. 20-40 minutes: predict and run examples
+3. 30-60 minutes: exercises
 4. 10 minutes: self-check and notes
 
 Project lessons often need multiple sessions. Heavy machine-learning setup may need a separate connected preparation session.

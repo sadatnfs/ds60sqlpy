@@ -423,7 +423,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li><strong>Level:</strong> Advanced</li>
 <li><strong>Catalog prerequisites:</strong> <code>sql-35</code> and <code>sql-types-01</code></li>
-<li><strong>Prerequisites:</strong> SQL Days 31–34 on plans and B-tree indexes, <a href="sql-35.html#guide">SQL Day 35 query pitfalls</a>, plus <a href="sql-types-01.html#guide">SQL-TYPES-01</a> for array/range operators.</li>
+<li><strong>Prerequisites:</strong> SQL Days 31-34 on plans and B-tree indexes, <a href="sql-35.html#guide">SQL Day 35 query pitfalls</a>, plus <a href="sql-types-01.html#guide">SQL-TYPES-01</a> for array/range operators.</li>
 <li><strong>Artifacts:</strong> <a href="sql-ops-01.html#learner">learner SQL</a> · <a href="sql-ops-01.html#solution-1">solution reasoning</a> · <a href="sql-ops-01.html#solution-2">executable solution</a></li>
 </ul>
 <p>Run from the repository root:</p>
@@ -499,7 +499,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>GiST supports point distance/nearest-neighbour operations.</li>
 <li>SP-GiST partitions text search space for its supported operators.</li>
 <li>An expression index stores <code>lower(message)</code>.</li>
-<li>A partial index stores only severity 4–5 rows.</li>
+<li>A partial index stores only severity 4-5 rows.</li>
 </ul>
 <p>A query must match the indexed expression and operator. <code>lower(message) = ...</code> can use the expression index; plain <code>message = ...</code> is a different expression. A partial-index query must logically imply <code>severity &gt;= 4</code>; a parameterized predicate whose value is unknown at planning time may not.</p>
 <p><code>CREATE STATISTICS ... (dependencies, mcv)</code> supplies correlation evidence after <code>ANALYZE</code>. It improves estimates; it cannot force a join type or index. Compare estimated versus observed rows with representative, safe <code>EXPLAIN (ANALYZE)</code> only when executing the query is acceptable. Remember that <code>ANALYZE</code> after a write actually performs the write query.</p>

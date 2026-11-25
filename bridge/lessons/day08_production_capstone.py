@@ -100,8 +100,8 @@ def validate_database_transport(database_url: str) -> None:
 # 4. [Recovery test] With four records and batch size two, fail write two, assert only
 #    checkpoint two persists, then resume from two with a healthy sink.
 #    Hint: Extraction on retry must receive the last durable checkpoint.
-#    Verify: With sequences 1–4 and batch size two, fail write two; assert checkpoint `2`, then
-#    restart and assert only sequences 3–4 are written and checkpoint becomes `4`.
+#    Verify: With sequences 1-4 and batch size two, fail write two; assert checkpoint `2`, then
+#    restart and assert only sequences 3-4 are written and checkpoint becomes `4`.
 # 5. [Record validation] Reject duplicate IDs, non-positive/non-increasing sequences, and
 #    non-finite/non-positive money before any sink effect.
 #    Hint: Check global order/uniqueness after validating individual records.

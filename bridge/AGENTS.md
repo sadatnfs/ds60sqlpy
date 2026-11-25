@@ -5,7 +5,7 @@ This file governs everything under `bridge/`.
 ## Purpose and prerequisites
 
 The bridge connects the Python and PostgreSQL tracks without becoming a second
-beginner course. Day 1 follows Python Day 15 and SQL Day 15. Days 2–8 are
+beginner course. Day 1 follows Python Day 15 and SQL Day 15. Days 2-8 are
 sequential. Preserve this dependency chain when changing lesson order.
 
 ## Artifact contract
@@ -37,7 +37,7 @@ solution surfaces with aligned, distinct numbered prompts.
 
 ## Database and security rules
 
-- Target Python 3.11–3.12, PostgreSQL 16+, and Psycopg 3.
+- Target Python 3.11-3.12, PostgreSQL 16+, and Psycopg 3.
 - Read the disposable course connection string from `DS60_DATABASE_URL`.
 - Never commit or log credentials.
 - Keep Psycopg imports inside optional live-DB boundaries when possible so core

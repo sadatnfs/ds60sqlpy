@@ -244,7 +244,7 @@ performance evidence, and a written handoff.
 ## Deliverable 3: Stakeholder outputs
 
 - Finance: current-year budget versus actual by month/category.
-- Marketing: active customers by signup cohort and lifecycle month 0–6. Select
+- Marketing: active customers by signup cohort and lifecycle month 0-6. Select
   the six latest *distinct* signup months before expanding the lifecycle grid.
   Count every signup once in `cohort_size`, count a customer at most once per
   activity month, and report
@@ -268,7 +268,7 @@ steps. Evidence must support every sign-off claim.
 ## State and safety
 
 The learner file ends with `ROLLBACK`; its views and indexes do not persist.
-Replace it with `COMMIT` only as a deliberate reviewed migration. Days 59–60 are
+Replace it with `COMMIT` only as a deliberate reviewed migration. Days 59-60 are
 capstone criteria/checkpoints, so measured evidence and documentation are part
 of the deliverable, not optional stretch work.
 

@@ -35,10 +35,10 @@ The current course is stronger than a title-only audit suggests:
 | --- | --- |
 | Python Day 10 teaches parametrization, pytest.raises, and tmp_path; Bridge Day 5 adds database fakes and rollback fixtures. | A testing extension must start with fixture design, isolation boundaries, and property-based testing - not repeat assertions. |
 | Bridge Day 7 uses asyncio TaskGroup, cancellation, and bounded database concurrency. | A Python concurrency lesson must cover the choice among async I/O, threads, and processes, plus queues and Windows process-start behavior. |
-| Python Day 18 explicitly identifies Parquet as engine-dependent; Days 52–56 cover Dask, MLflow, and orchestration. | A new data-engine lesson should teach the local Parquet/Arrow/DuckDB boundary, not another pandas introduction. |
+| Python Day 18 explicitly identifies Parquet as engine-dependent; Days 52-56 cover Dask, MLflow, and orchestration. | A new data-engine lesson should teach the local Parquet/Arrow/DuckDB boundary, not another pandas introduction. |
 | Python Day 44 creates a local FastAPI service but explicitly defers authentication, rate limiting, TLS, secrets, audit logs, and rollback. | Client reliability and service hardening remain valid gaps. |
 | SQL Day 28 teaches JSON/JSONB basics and Day 29 includes a small full-text-search exercise. | A dedicated PostgreSQL types/search lesson can go beyond an isolated prompt. |
-| SQL Days 32–33 teach B-tree, composite, covering, and partial indexes; Day 39 covers SKIP LOCKED and advisory locks. | Index maintenance/type selection and queue-operation patterns need only extension work, not a restart. |
+| SQL Days 32-33 teach B-tree, composite, covering, and partial indexes; Day 39 covers SKIP LOCKED and advisory locks. | Index maintenance/type selection and queue-operation patterns need only extension work, not a restart. |
 | SQL Day 43 teaches logical COPY and client-side \copy staging and explicitly excludes production PITR; Day 44 safely reads pg_stat_activity and optional pg_stat_statements. | Disaster recovery and deeper operations can be added without weakening the existing safe defaults. |
 
 The external references below helped calibrate the scope. They are design references, not a requirement that learners browse while studying:
@@ -70,7 +70,7 @@ The external references below helped calibrate the scope. They are design refere
 
   **Done when:** a learner writes and reads Parquet locally, validates a schema round trip, queries it with SQL without a server, and can say when CSV is the more portable choice.
 
-- [x] **PY-SVC-01 - Reliable HTTP clients and external-service boundaries** *(new; after Python Day 15; pairs with Bridge Days 3–4)*
+- [x] **PY-SVC-01 - Reliable HTTP clients and external-service boundaries** *(new; after Python Day 15; pairs with Bridge Days 3-4)*
 
   Teach timeouts, status/error classification, pagination, retry eligibility, exponential backoff with jitter, rate limits, idempotency keys, request correlation IDs, and safe authentication configuration. The entire exercise should use a local fake server or injected transport; no public API key or network account is needed.
 
@@ -86,7 +86,7 @@ The external references below helped calibrate the scope. They are design refere
 
 - [x] **SQL-FOUND-02 - Versioned schema migrations and safe evolution** *(new; after SQL-FOUND-01 and before advanced operations)*
 
-  Teach immutable ordered migrations, migration metadata, idempotent seed boundaries, expand–migrate–contract changes, data backfills, compatibility, transactional DDL limits, and forward fixes versus unsafe rollback. The existing capstones correctly warn about reviewed migrations but do not give a learner a controlled migration workflow.
+  Teach immutable ordered migrations, migration metadata, idempotent seed boundaries, expand-migrate-contract changes, data backfills, compatibility, transactional DDL limits, and forward fixes versus unsafe rollback. The existing capstones correctly warn about reviewed migrations but do not give a learner a controlled migration workflow.
 
   **Done when:** a clean disposable database upgrades through multiple migrations, verification queries prove its final version and invariants, and a simulated application remains compatible during an additive change.
 
@@ -112,7 +112,7 @@ The external references below helped calibrate the scope. They are design refere
 
   Build bootstrap and permutation intervals/tests, effect sizes, power/sample planning, multiple-comparison control, A/B-test design, randomization checks, sequential-peeking risk, and the difference between experimental and observational claims. Existing Day 32 warns about several of these risks; this addition makes the decisions executable.
 
-- [x] **PY-ML-01 - Reproducible data/model delivery** *(revise Days 53–55 or add a cumulative lab)*
+- [x] **PY-ML-01 - Reproducible data/model delivery** *(revise Days 53-55 or add a cumulative lab)*
 
   Strengthen artifact lineage with data snapshot identifiers/content hashes, environment and feature-schema compatibility, model registry stages, promotion/rollback evidence, and a small compatibility test. This should extend local MLflow and container material rather than require a cloud account.
 

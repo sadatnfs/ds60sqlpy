@@ -507,7 +507,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Compare result keys and totals before comparing timing.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
-<p>Prompts 3–6 cover four common production surprises: leading-wildcard searches, deep <code>OFFSET</code> pages, fanout, and nullable counts. Keyset pagination must use a unique deterministic tuple such as <code>(order_date, order_id)</code> and repeat the same ordering in the seek predicate.</p>
+<p>Prompts 3-6 cover four common production surprises: leading-wildcard searches, deep <code>OFFSET</code> pages, fanout, and nullable counts. Keyset pagination must use a unique deterministic tuple such as <code>(order_date, order_id)</code> and repeat the same ordering in the seek predicate.</p>
 <p>Fix fanout at the grain boundary instead of hiding it with <code>DISTINCT</code>. <code>COUNT(*)</code> counts rows; <code>COUNT(email)</code> counts only non-NULL emails. Neither is universally “correct”, the metric definition decides.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>

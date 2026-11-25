@@ -28,7 +28,7 @@ DS60 applies that pattern by requiring:
 - an explanation of the runtime or memory behavior when it matters.
 
 The official tutorial documents the current Python release, while DS60 targets
-Python 3.11–3.12. Authors must verify that adopted syntax exists in the course
+Python 3.11-3.12. Authors must verify that adopted syntax exists in the course
 baseline rather than copying version-current examples blindly.
 
 ### CS50P: concrete setup, progressive revision, and evidence

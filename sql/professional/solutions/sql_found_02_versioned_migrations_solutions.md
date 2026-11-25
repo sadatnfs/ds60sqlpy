@@ -20,7 +20,7 @@ ordering with the explanation before comparing syntax.
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand–migrate–contract. Its worked-model focus is:
+The lesson's main concepts are Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand-migrate-contract. Its worked-model focus is:
 The fixture owns one schema and five ordered files. Every migration starts a transaction, checks `schema_migrations`, performs its body only when absent, records metadata last, and commits. A failed statement prevents the metadata row from lying about a partial migration.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
@@ -54,8 +54,8 @@ Run the complete solution from the repository root:
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql
 ```
 
-It resets the isolated fixture, verifies versions 1–5, implements exercise
-versions 6–8, checks them, and removes `pro_migration_lab`.
+It resets the isolated fixture, verifies versions 1-5, implements exercise
+versions 6-8, checks them, and removes `pro_migration_lab`.
 
 ## Exercise 1: Deterministic manifest
 
@@ -85,7 +85,7 @@ different bytes.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-02 Exercise 1, read versions 1–5 from `pro_migration_lab.schema_migrations`, preserving the immutable migration identity fields `migration_id`, `migration_name`, and `content_tag`.
+- **Inputs/evidence:** For sql-found-02 Exercise 1, read versions 1-5 from `pro_migration_lab.schema_migrations`, preserving the immutable migration identity fields `migration_id`, `migration_name`, and `content_tag`.
 - **Expected result/shape:** For sql-found-02 Exercise 1, expected output: exactly five rows at one-row-per-migration grain, columns `migration_id`, `migration_name`, and `content_tag`, ordered by `migration_id`; the independent invariant is the exact array `[1, 2, 3, 4, 5]`.
 - **Independent verification:** For sql-found-02 Exercise 1, assert the exact ordered ID array, count five distinct IDs, compare each name/tag with the reviewed fixture manifest, and prove that a missing, duplicate, reordered, or altered identity fails rather than being silently accepted.
 
@@ -115,7 +115,7 @@ evidence. The tiny fixture proves logic, not production timing.
 - **Expected result/shape:** For sql-found-02 Exercise 2, expected output: three request rows showing NULL `expanded_storage` but unchanged `stable_api_value`, followed by five ordered rollout rows with `step_number`, compatibility, write policy, and promotion gate.
 - **Independent verification:** For sql-found-02 Exercise 2, assert every stable API value equals `COALESCE(expanded_storage, legacy_storage)`, the API keeps its five-column interface, and the contract step is gated on zero old-writer traffic plus a complete backfill.
 
-## Exercise 3: Versions 6–8
+## Exercise 3: Versions 6-8
 
 The solution uses three separate transactions:
 
@@ -129,13 +129,13 @@ transaction containing all three statements would be atomic, but it would not
 allow independently deployed application versions or a large online backfill
 to coexist.
 
-The exercise uses migrations 6–8 rather than changing a prior file. Metadata is
+The exercise uses migrations 6-8 rather than changing a prior file. Metadata is
 inserted last in each transaction so a failed body cannot advertise success.
 
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-found-02 Exercise 3, apply three new immutable migrations: nullable `assigned_team`, deterministic backfill, then default/NOT NULL/allowed-values CHECK; record metadata last inside each transaction.
-- **Expected result/shape:** For sql-found-02 Exercise 3, expected output: command tags for migrations 6–8; one row per request with `assigned_team`; three manifest rows; one column-catalog row proving text, NOT NULL, and `'general'` default; and one validated CHECK definition.
+- **Expected result/shape:** For sql-found-02 Exercise 3, expected output: command tags for migrations 6-8; one row per request with `assigned_team`; three manifest rows; one column-catalog row proving text, NOT NULL, and `'general'` default; and one validated CHECK definition.
 - **Independent verification:** For sql-found-02 Exercise 3, assert manifest IDs are exactly `[1..8]`, every high/critical request is `response`, every other request is `general`, no NULL or disallowed value remains, the stable API projection is unchanged, and the catalog matches the promised contract.
 
 ## Exercise 4: Boundaries and recovery

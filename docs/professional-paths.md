@@ -1,6 +1,6 @@
 # Professional and specialization paths
 
-The historical Days 1–60 remain stable. Named modules add the relational
+The historical Days 1-60 remain stable. Named modules add the relational
 foundations and professional practice that do not fit honestly into one more
 linear countdown. The generated catalog is the source of truth for exact
 prerequisites and artifact paths:
@@ -24,12 +24,12 @@ the [three tiny-table starter labs](../sql/professional/README.md#learning-path)
 The named relational-engineering modules then deepen responsibilities at the
 point where their prerequisites make sense:
 
-1. Complete SQL Days 1–15.
+1. Complete SQL Days 1-15.
 2. Take [`sql-found-01` - relational design, DDL, and constraints](../sql/professional/companion-guides/sql_found_01_relational_design.md).
 3. Complete the transaction and locking sequence through SQL Day 39.
 4. Take [`sql-found-02` - versioned migrations and safe evolution](../sql/professional/companion-guides/sql_found_02_versioned_migrations.md).
 
-Both named scripts use isolated disposable schemas; SQL Days 1–60 continue to
+Both named scripts use isolated disposable schemas; SQL Days 1-60 continue to
 query the seeded `training` schema.
 
 ## Professional Python engineering lane

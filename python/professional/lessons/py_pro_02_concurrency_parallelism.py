@@ -22,7 +22,7 @@ API/boundary anatomy:
 * structured result: associates each input with success/failure/cancellation so no work
   disappears.
 
-Micro-example A — state the execution choice from the blocking behavior::
+Micro-example A: state the execution choice from the blocking behavior::
 
     def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
         if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
@@ -39,7 +39,7 @@ Micro-example A — state the execution choice from the blocking behavior::
 Expected: The decision follows where time is spent, not a belief that one primitive is
           universally faster.
 
-Micro-example B — prove an async concurrency ceiling::
+Micro-example B: prove an async concurrency ceiling::
 
     import asyncio
 
@@ -171,7 +171,7 @@ async def worked_example() -> None:
 # Full acceptance checks and progressive hints:
 # companion-guides/py_pro_02_concurrency_parallelism.md
 #
-# Exercise 1 — choose a model
+# Exercise 1: choose a model
 # Prompt: Implement `choose_execution_model` in the learner artifact. For each case, write
 # one sentence explaining the choice: - an async database driver, - a synchronous file
 # metadata API, - image transforms written in pure Python, - three tiny computations.
@@ -179,7 +179,7 @@ async def worked_example() -> None:
 # without `await` is still CPU work and blocks the event loop.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 2 — build a bounded async map
+# Exercise 2: build a bounded async map
 # Prompt: Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one
 # producer, 3. a fixed number of consumers, 4. indexed items so results retain input
 # order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place
@@ -187,14 +187,14 @@ async def worked_example() -> None:
 # `CancelledError` unless cleanup requires it; if caught, re-raise it.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 3 — add per-item timeouts
+# Exercise 3: add per-item timeouts
 # Prompt: Wrap each worker call with `asyncio.timeout`. Test one worker slower than the
 # limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally` block
 # returns the active count to zero. Prediction: what happens to sibling consumers when one
 # item times out?
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 4 — adapt blocking I/O
+# Exercise 4: adapt blocking I/O
 # Prompt: Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.
 # Compare sequential and threaded elapsed time with generous bounds, then verify ordered
 # results rather than treating speed as the correctness assertion. Explain why a thread
@@ -202,54 +202,54 @@ async def worked_example() -> None:
 # accept more requests.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 5 — isolate CPU work
+# Exercise 5: isolate CPU work
 # Prompt: Make the CPU function a top-level function with serializable arguments and
 # results. Use `multiprocessing.get_context("spawn")` with `ProcessPoolExecutor`, and
 # create processes only beneath an `if __name__ == "__main__":` guard. Run the solution
 # with `--with-processes`; explain when startup makes a small workload slower.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 6 — reason about shared state
+# Exercise 6: reason about shared state
 # Prompt: Implement `deterministic_lost_update`. Force two workers to read the same
 # snapshot, then apply both writes. Compare with two serialized increments. List three
 # repairs: - one owner task/process receives update messages, - a lock protects the
 # complete read/modify/write unit, or - an external system performs an atomic update.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 7 — prove cancellation cleanup
+# Exercise 7: prove cancellation cleanup
 # Prompt: Cancel `bounded_map` while workers are active. Instrument acquired resources and
 # prove active count, queued acknowledgements, and child tasks return to zero before the
 # parent finishes.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 8 — inspect structured failures
+# Exercise 8: inspect structured failures
 # Prompt: Run multiple workers that fail with different typed exceptions. Use `except*` to
 # handle one expected category while preserving unexpected failures and their original
 # tracebacks.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 9 — stream a backpressured producer
+# Exercise 9: stream a backpressured producer
 # Prompt: Adapt `bounded_map` from a finite Sequence to an async iterator whose length is
 # unknown. Preserve output order without retaining every input or creating one task per
 # item.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 10 — trace context across boundaries
+# Exercise 10: trace context across boundaries
 # Prompt: Set a request ID in `contextvars`, then observe propagation through an async
 # task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any
 # explicit propagation visible.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 11 — design graceful executor shutdown
+# Exercise 11: design graceful executor shutdown
 # Prompt: Own a thread or process pool through a context manager. Stop accepting new work,
 # wait with a bounded policy, cancel pending futures when allowed, and report unfinished
 # work without hanging interpreter exit.
 # Verify: add a boundary check and explain the failure policy.
 #
-# Exercise 12 — make an evidence-based model decision
+# Exercise 12: make an evidence-based model decision
 # Prompt: Benchmark sequential, bounded asyncio/threads, and spawned processes on
 # representative I/O and CPU fixtures. Record correctness, startup, throughput, peak
-# active work, transfer size, and cleanup—not just fastest elapsed time.
+# active work, transfer size, and cleanup, not just fastest elapsed time.
 # Verify: add a boundary check and explain the failure policy.
 #
 # === End numbered professional practice ===
