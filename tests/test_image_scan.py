@@ -25,6 +25,20 @@ PG_ID = "sha256:" + "c" * 64
 REVISION = "1" * 40
 OUTSIDE_CACHE = Path("/tmp/ds60-image-scan-test-cache")
 
+# CLI tests that read the committed policy run on the day of its newest review, so adding an
+# entry reviewed after the fixture DB date cannot make it look future-dated; the fake Trivy DB
+# times move by the same whole days to stay fresh.
+_COMMITTED = json.loads((scan.ROOT / "docker/cve-policy.json").read_text("utf-8"))
+_NEWEST_REVIEW = max(
+    (date.fromisoformat(item["reviewed_at"]) for item in _COMMITTED["entries"]), default=TODAY
+)
+POLICY_SHIFT = timedelta(days=max(0, (_NEWEST_REVIEW - TODAY).days))
+POLICY_NOW = NOW + POLICY_SHIFT
+POLICY_VERSION = copy.deepcopy(VERSION)
+for _db in ("VulnerabilityDB", "JavaDB"):
+    _updated = scan.parse_time(VERSION[_db]["UpdatedAt"]) + POLICY_SHIFT
+    POLICY_VERSION[_db]["UpdatedAt"] = scan.iso(_updated)
+
 
 def fixture(name: str) -> dict[str, Any]:
     data: dict[str, Any] = json.loads((FIXTURES / f"{name}.json").read_text("utf-8"))
@@ -197,8 +211,10 @@ def test_fixable_low_finding_blocks() -> None:
 def test_tracer_scan_writes_bound_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    runner = FakeDocker({LAB_ID: "fixable"}, tags={"ds60sqlpy-lab:1.4.3": LAB_ID})
-    monkeypatch.setattr(scan, "utc_now", lambda: NOW)
+    runner = FakeDocker(
+        {LAB_ID: "fixable"}, tags={"ds60sqlpy-lab:1.4.3": LAB_ID}, version=POLICY_VERSION
+    )
+    monkeypatch.setattr(scan, "utc_now", lambda: POLICY_NOW)
     output = tmp_path / "evidence.json"
     code = scan.main(
         [
@@ -226,8 +242,10 @@ def test_tracer_scan_writes_bound_evidence(
     assert evidence["scanner"] == {
         "image": scan.TRIVY_IMAGE,
         "version": "0.76.2",
-        "db_updated_at": scan.iso(DB_TIME),
-        "java_db_updated_at": scan.iso(scan.parse_time(VERSION["JavaDB"]["UpdatedAt"])),
+        "db_updated_at": scan.iso(DB_TIME + POLICY_SHIFT),
+        "java_db_updated_at": scan.iso(
+            POLICY_SHIFT + scan.parse_time(VERSION["JavaDB"]["UpdatedAt"])
+        ),
     }
     policy_bytes = (scan.ROOT / "docker/cve-policy.json").read_bytes()
     assert evidence["policy_sha256"] == scan.sha256_bytes(policy_bytes)
@@ -243,8 +261,8 @@ def test_tracer_scan_writes_bound_evidence(
 
 
 def test_clean_scan_exits_zero(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    runner = FakeDocker({LAB_ID: "clean"}, tags={"lab:clean": LAB_ID})
-    monkeypatch.setattr(scan, "utc_now", lambda: NOW)
+    runner = FakeDocker({LAB_ID: "clean"}, tags={"lab:clean": LAB_ID}, version=POLICY_VERSION)
+    monkeypatch.setattr(scan, "utc_now", lambda: POLICY_NOW)
     args = ["scan", "--image", "lab:clean", "--cache", str(OUTSIDE_CACHE)]
     args += ["--output", str(tmp_path / "e.json"), "--reports", str(tmp_path / "r")]
     assert scan.main(args, runner) == 0
@@ -556,8 +574,10 @@ def snapshot_args(tmp_path: Path, path: Path) -> list[str]:
 def test_revision_tested_mode_scans_ids_and_copies_context(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(scan, "utc_now", lambda: NOW)
-    runner = FakeDocker({LAB_ID: "clean", WORKER_ID: "clean"}, labels={LAB_ID: REVISION})
+    monkeypatch.setattr(scan, "utc_now", lambda: POLICY_NOW)
+    runner = FakeDocker(
+        {LAB_ID: "clean", WORKER_ID: "clean"}, labels={LAB_ID: REVISION}, version=POLICY_VERSION
+    )
     path = snapshot_file(tmp_path)
     assert scan.main(snapshot_args(tmp_path, path), runner) == 0
     evidence = json.loads((tmp_path / "evidence.json").read_text("utf-8"))
@@ -576,8 +596,10 @@ def test_revision_tested_mode_scans_ids_and_copies_context(
 
 
 def test_revision_mismatch_fails_scan(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(scan, "utc_now", lambda: NOW)
-    runner = FakeDocker({LAB_ID: "clean", WORKER_ID: "clean"}, labels={WORKER_ID: "2" * 40})
+    monkeypatch.setattr(scan, "utc_now", lambda: POLICY_NOW)
+    runner = FakeDocker(
+        {LAB_ID: "clean", WORKER_ID: "clean"}, labels={WORKER_ID: "2" * 40}, version=POLICY_VERSION
+    )
     assert scan.main(snapshot_args(tmp_path, snapshot_file(tmp_path)), runner) == 2
     evidence = json.loads((tmp_path / "evidence.json").read_text("utf-8"))
     assert evidence["images"][0]["blocking"] == []

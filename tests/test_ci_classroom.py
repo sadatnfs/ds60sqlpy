@@ -305,7 +305,7 @@ def test_r_group_qualifies_compiled_package_builds(
     work, commands = prepared("r", tmp_path, monkeypatch)
     work.qualify()
     probe = script_calls(commands, "scripts/check_r_toolchain.py")
-    assert len(probe) == 1 and "work/r-toolchain-receipt.json" in probe[0]
+    assert len(probe) == 1 and "work/r-toolchain-receipts.json" in probe[0]
     assert "--confirm-disposable" in probe[0] and "--check-persistence" not in probe[0]
     assert set(work.completed) == ci_classroom.required_checks("r")
     assert "scripts/check_r_toolchain.py" not in ci_classroom.required_checks("python-core")

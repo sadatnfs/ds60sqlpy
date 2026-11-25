@@ -294,7 +294,7 @@ class ClassroomCI:
                 extra=["--profiles", " ".join(self.profiles)],
             )
         if self.group == "r":
-            self.check("scripts/check_r_toolchain.py", "r-toolchain-receipt.json")
+            self.check("scripts/check_r_toolchain.py", "r-toolchain-receipts.json")
         if self.group == "data-engineering":
             self.run(
                 [
