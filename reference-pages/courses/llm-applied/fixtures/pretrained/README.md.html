@@ -195,28 +195,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="optional-pretrained-model-adaptation-fully-local-after-preparation">Optional pretrained-model adaptation, fully local after preparation<a class="heading-anchor" href="#optional-pretrained-model-adaptation-fully-local-after-preparation" aria-label="Link to this section">#</a></h2>
 <p>This recipe fine-tunes a small real pretrained language model on a deliberately tiny authored dataset. It is separate from the ordinary classroom. After the explicit dependency and model downloads, training and generation run with Docker networking disabled. No API account, API key or GPU is required.</p>
-<p>The pinned model is <code>HuggingFaceTB/SmolLM2-135M-Instruct</code>, revision <code>12fd25f77366fa6b3b4b768ec3050bf629380bac</code>. Its model card identifies the license as Apache 2.0. The weights are 269, 060, 552 bytes, about 257 MiB. Review the <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct/tree/12fd25f77366fa6b3b4b768ec3050bf629380bac">pinned model card</a> for its intended scope and limitations.</p>
+<p>The pinned model is <code>HuggingFaceTB/SmolLM2-135M-Instruct</code>, revision <code>12fd25f77366fa6b3b4b768ec3050bf629380bac</code>. Its model card identifies the license as Apache 2.0. The weights are 269,060,552 bytes, about 257 MiB. Review the <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct/tree/12fd25f77366fa6b3b4b768ec3050bf629380bac">pinned model card</a> for its intended scope and limitations.</p>
 <h3 id="what-has-actually-been-tested">What has actually been tested<a class="heading-anchor" href="#what-has-actually-been-tested" aria-label="Link to this section">#</a></h3>
-<p>On 23 October 2026, the Linux arm64 Docker image built successfully with a full hashed dependency lock. Pinned acquisition recorded 13 files. Both full fine-tuning and LoRA completed exactly 10 CPU updates with maximum sequence length 128, and the saved LoRA adapter reloaded for offline generation.</p>
+<p>On 23 October 2026, the Linux arm64 Docker image built successfully with a full hashed dependency lock for the 2.0.0 pins. Pinned acquisition recorded 13 files. On 18 November 2026, the 2.1.0 pins (Torch 2.15, Transformers 5.23, TRL 1.18 and PEFT 0.21) were re-executed against the same pinned model files in a Python 3.12 environment on a macOS arm64 host. Both full fine-tuning and LoRA completed exactly 10 CPU updates with maximum sequence length 128, and the saved LoRA adapter reloaded for offline generation. The 2.1.0 Docker image itself has not yet been rebuilt and requalified; its locks are regenerated on a public CI runner.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Check</th>
 <th>Observed result</th>
 </tr></thead><tbody>
 <tr>
 <td>Full fine-tuning</td>
-<td>134, 515, 008 trainable parameters;10 updates</td>
+<td>134,515,008 trainable parameters; 10 updates</td>
 </tr>
 <tr>
 <td>LoRA</td>
-<td>230, 400 trainable parameters;10 updates</td>
+<td>230,400 trainable parameters; 10 updates</td>
 </tr>
 <tr>
 <td>LoRA held-out token loss</td>
-<td>6.721148 before;6.474194 after</td>
+<td>6.721160 before; 6.474203 after</td>
 </tr>
 <tr>
 <td>Full fine-tuning held-out token loss</td>
-<td>6.721148 before;0.008058 after</td>
+<td>6.721160 before; 0.008039 after</td>
 </tr>
 <tr>
 <td>Saved-adapter generation</td>
@@ -233,7 +233,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-text">docker compose --progress plain -f compose.classroom.yaml --profile llm-torch-cpu --parallel 1 build llm-worker</code></pre>
 <p>Then build the separate recipe image:</p>
 <pre class="highlighted-code"><code class="language-text">docker build --progress=plain -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained</code></pre>
-<p>The image reuses local <code>ds60sqlpy-worker-llm-torch-cpu:2.0.0</code>, then installs the complete <code>requirements.arm64.lock</code> or <code>requirements.amd64.lock</code> with required hashes and binary wheels. Torch 2.9.1 is CPU-only. Transformers 4.57.1, TRL 0.24.0 and PEFT 0.17.1 are explicit version choices. No CUDA dependency tree is installed by this recipe. <code>pip check</code> must pass during the build. The classroom base carries no pip, so the build uses Python&#x27;s bundled pip for this one install and removes it afterwards. The recipe runs as the unprivileged <code>nobody</code> account (UID 65534); its <code>/models</code> mount point is owned by that account, so a new or empty learning volume becomes writable on first use. A volume written by an older root-run recipe stays root-owned; create a fresh volume for this image. The recipe intentionally pins the Transformers 4.57 line; an upgrade to 5.x must rerun the chat-template prefix and label-mask checks before any training result is reused.</p>
+<p>The image reuses local <code>ds60sqlpy-worker-llm-torch-cpu:2.0.0</code>, then installs the complete <code>requirements.arm64.lock</code> or <code>requirements.amd64.lock</code> with required hashes and binary wheels. Torch 2.15.0 is CPU-only. Transformers 5.23.0, TRL 1.18.0 and PEFT 0.21.3 are explicit version choices. No CUDA dependency tree is installed by this recipe. <code>pip check</code> must pass during the build. The classroom base carries no pip, so the build uses Python&#x27;s bundled pip for this one install and removes it afterwards. The recipe runs as the unprivileged <code>nobody</code> account (UID 65534); its <code>/models</code> mount point is owned by that account, so a new or empty learning volume becomes writable on first use. A volume written by an older root-run recipe stays root-owned; create a fresh volume for this image. The recipe intentionally pins the Transformers 5.23 line. Transformers 5 returns a mapping from <code>apply_chat_template</code> by default, so the script passes <code>return_dict=False</code> to compare plain token ID lists. Any later upgrade must rerun the chat-template prefix and label-mask checks before a training result is reused.</p>
 <p>The <a href="pyproject.toml.html">direct declaration</a>, <a href="requirements.arm64.lock.html">full arm64 lock</a> and <a href="requirements.amd64.lock.html">full amd64 lock</a> are distinct: the declaration expresses intended top-level dependencies, while a lock records every resolved package and accepted artifact hashes. Maintainers regenerate locks with <code>python courses/llm-applied/fixtures/pretrained/lock_dependencies.py</code> using uv. Changing a lock requires a fresh image build and runtime qualification.</p>
 <h3 id="2-acquire-the-pinned-model-deliberately">2. Acquire the pinned model deliberately<a class="heading-anchor" href="#2-acquire-the-pinned-model-deliberately" aria-label="Link to this section">#</a></h3>
 <p>Create a named Docker volume for downloaded assets and saved training outputs:</p>
@@ -266,7 +266,7 @@ docker cp ds60-pretrained-export:/models/run-lora-001 ./run-lora-001-export
 docker cp ds60-pretrained-export:/models/run-full-001 ./run-full-001-export
 docker rm ds60-pretrained-export</code></pre>
 <p>The helper need not run. Its mount is read-only. Verify the copied receipt and model files before moving them to another machine. Retain the pinned base identity and dependency lock with the adapter; an adapter alone is not the complete model. If a local export destination exists, choose a new destination name instead of mixing two runs.</p>
-<p>Sources: <a href="https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating">Transformers 4.57 chat templates</a>, <a href="https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer">TRL 0.24 SFTTrainer</a>, and <a href="https://huggingface.co/docs/peft/v0.17.0/en/package_reference/lora">PEFT LoRA configuration</a>.</p></article>
+<p>Sources: <a href="https://huggingface.co/docs/transformers/v5.23.0/en/chat_templating">Transformers 5.23 chat templates</a>, <a href="https://huggingface.co/docs/trl/v1.18.0/en/sft_trainer">TRL 1.18 SFTTrainer</a>, and <a href="https://huggingface.co/docs/peft/v0.21.0/en/package_reference/lora">PEFT LoRA configuration</a>.</p></article>
   </main>
 </body>
 </html>

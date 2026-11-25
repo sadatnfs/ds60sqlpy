@@ -107,7 +107,7 @@ Masking a prompt target removes that position's direct loss term. It does not re
 
 Truncation must be inspected after alignment. A maximum concatenated length of two retains `[1, 2]` and no answer target, so the helper rejects it. A limit of four retains `[1, 2, 5, 6]`, giving labels `[-100, 5, 6]`. That passes the helper's at-least-one-answer-target rule but loses the final token 3. If 3 is an end marker, the truncated example no longer teaches the complete stopping behavior. Acceptance of some supervised content is weaker than preservation of the full answer.
 
-The helper treats max_length as a sequence-length bound for this literal-token fixture. The actual model context, chat-template overhead, role tokens and generation markers must be counted under the intended tokenizer. A character boundary in raw text is not necessarily a token boundary. TRL's versioned SFT documentation distinguishes training formats and loss-mask behavior; the optional pretrained recipe checks the concrete template used there. [TRL 0.24.0 SFTTrainer](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer).
+The helper treats max_length as a sequence-length bound for this literal-token fixture. The actual model context, chat-template overhead, role tokens and generation markers must be counted under the intended tokenizer. A character boundary in raw text is not necessarily a token boundary. TRL's versioned SFT documentation distinguishes training formats and loss-mask behavior; the optional pretrained recipe checks the concrete template used there. [TRL 1.18.0 SFTTrainer](https://huggingface.co/docs/trl/v1.18.0/en/sft_trainer).
 
 Packing introduces another independence boundary. Two examples in separate batch rows have separate attention contexts. Concatenating them into one longer row can let tokens from the second example attend to the first unless the packing/attention policy prevents it. An answer-only loss mask by itself does not define that attention boundary. State whether cross-example context is allowed and test the resulting positions rather than assuming that a label sentinel blocks attention.
 
@@ -227,7 +227,7 @@ If *Align an answer-only record* cannot be reconstructed without the solution, r
 
 ## Sources and verification status
 
-Reference for sft record: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer), reviewed 2026-10-22. The fixtures for *Align an answer-only record*, *Preserve prompt context without prompt loss* and *Reject an empty answer* and the six exercises are original course material.
+Reference for sft record: [TRL SFTTrainer 1.18.0](https://huggingface.co/docs/trl/v1.18.0/en/sft_trainer), reviewed 2026-11-18. The fixtures for *Align an answer-only record*, *Preserve prompt context without prompt loss* and *Reject an empty answer* and the six exercises are original course material.
 
 Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 

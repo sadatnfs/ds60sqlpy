@@ -212,7 +212,7 @@ If *Inspect the pinned artifact contract* cannot be reconstructed without the so
 
 ## Sources and verification status
 
-Reference for pinned revision: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer), reviewed 2026-10-22. The fixtures for *Inspect the pinned artifact contract*, *Separate acquisition from execution* and *Verify chat-template boundaries* and the six exercises are original course material.
+Reference for pinned revision: [TRL SFTTrainer 1.18.0](https://huggingface.co/docs/trl/v1.18.0/en/sft_trainer), reviewed 2026-11-18. The fixtures for *Inspect the pinned artifact contract*, *Separate acquisition from execution* and *Verify chat-template boundaries* and the six exercises are original course material.
 
 Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 

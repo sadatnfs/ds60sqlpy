@@ -6,8 +6,9 @@ TORCH_IMPORT = (
 )
 RAG = ("Retrieval-Augmented Generation", "https://arxiv.org/abs/2005.11401")
 HF = (
-    "Hugging Face chat templates4.57.1",
-    "https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating",
+    "Hugging Face chat templates 5.23.0",
+    "https://huggingface.co/docs/transformers/v5.23.0/en/chat_templating",
+    "2026-11-18",
 )
 NP = ("NumPy reference", "https://numpy.org/doc/stable/reference/")
 DOCS = """DOCUMENTS = [
@@ -1142,7 +1143,7 @@ assert not accepted""",
             "A correct tensor mask cannot make a fabricated target trustworthy. Data governance and numerical correctness are independent prerequisites for adaptation.",
         ),
     ],
-    ("TRL SFTTrainer0.24.0", "https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer"),
+    ("TRL SFTTrainer 1.18.0", "https://huggingface.co/docs/trl/v1.18.0/en/sft_trainer", "2026-11-18"),
     imports="",
     helper="""def prepare(prompt,answer,max_length):
     if not prompt or not answer or max_length<2: raise ValueError('prompt and answer targets required')
@@ -1722,7 +1723,7 @@ Required next evidence: local asset verification,mask inspection,actual run rece
             "An optional recipe remains valuable without pretending it has executed. The status must distinguish code review,asset preparation,training and task-quality acceptance.",
         ),
     ],
-    ("TRL SFTTrainer0.24.0", "https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer"),
+    ("TRL SFTTrainer 1.18.0", "https://huggingface.co/docs/trl/v1.18.0/en/sft_trainer", "2026-11-18"),
     imports="",
     decisions="""Use the optional recipe only after the default tiny-model lessons make the data,mask and optimization mechanics understandable. Prepare a separate environment so experimentation does not silently replace the classroom runtime. The supplied recipe includes complete platform-specific dependency locks with hashes; changing those locks requires new environment preparation and qualification. Record Python,OS,architecture,Torch and accelerator information with the run.
 

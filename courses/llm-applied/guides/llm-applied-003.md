@@ -98,7 +98,7 @@ Utility itself can be nonadditive. Two passages may be useful only together when
 
 Serialization and authority are separate. JSON encoding keeps an embedded quote or newline inside a string value instead of corrupting the artifact structure. A model reading that string can still respond to its semantic content. The test that AUTHORIZED_OPERATIONS remains unchanged proves the local Python constant was not modified; no model is invoked in that example, and no adversarial-model resistance is measured. Enforcement belongs in the application component that decides which operation can actually run.
 
-The intended chat format is also part of the model interface. Role/content objects are converted into token sequences with model-specific control tokens, so a tokenizer and template need compatible identities. The versioned Transformers documentation shows that different chat models can require different formatting despite related base architectures. The offline fixture does not execute that tokenizer; the optional pretrained recipe later validates the actual format. [Transformers 4.57.1 chat templates](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating).
+The intended chat format is also part of the model interface. Role/content objects are converted into token sequences with model-specific control tokens, so a tokenizer and template need compatible identities. The versioned Transformers documentation shows that different chat models can require different formatting despite related base architectures. The offline fixture does not execute that tokenizer; the optional pretrained recipe later validates the actual format. [Transformers 5.23.0 chat templates](https://huggingface.co/docs/transformers/v5.23.0/en/chat_templating).
 
 Prompt changes consume evaluation information even without gradient updates. If a failure on final question family B motivates adding a B demonstration, B has entered system selection. Renaming the prompt file does not restore independence. Use a development set for revision, a validation policy for comparison and a separately retained final assessment when a fresh generalization claim is needed.
 
@@ -238,7 +238,7 @@ If *Construct a prompt artifact* cannot be reconstructed without the solution, r
 
 ## Sources and verification status
 
-Reference for prompt template: [Hugging Face chat templates 4.57.1](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating), reviewed 2026-10-22. The fixtures for *Construct a prompt artifact*, *Preserve untrusted text as data* and *Reserve response capacity* and the six exercises are original course material.
+Reference for prompt template: [Hugging Face chat templates 5.23.0](https://huggingface.co/docs/transformers/v5.23.0/en/chat_templating), reviewed 2026-11-18. The fixtures for *Construct a prompt artifact*, *Preserve untrusted text as data* and *Reserve response capacity* and the six exercises are original course material.
 
 Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 

@@ -13,7 +13,7 @@ from verify_assets import verify_assets
 def read_records(path: Path) -> list[dict]:
     rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
     if not 1 <= len(rows) <= 32:
-        raise ValueError("This optional fixture accepts1..32 records per partition")
+        raise ValueError("This optional fixture accepts 1..32 records per partition")
     ids = [row["id"] for row in rows]
     if len(set(ids)) != len(ids):
         raise ValueError("Duplicate record IDs")
@@ -69,15 +69,18 @@ def main() -> None:
     template_checks = []
     for row in training + evaluation:
         prompt_ids = tokenizer.apply_chat_template(
-            row["prompt"], tokenize=True, add_generation_prompt=True
+            row["prompt"], tokenize=True, add_generation_prompt=True, return_dict=False
         )
         full_ids = tokenizer.apply_chat_template(
-            row["prompt"] + row["completion"], tokenize=True, add_generation_prompt=False
+            row["prompt"] + row["completion"],
+            tokenize=True,
+            add_generation_prompt=False,
+            return_dict=False,
         )
         if full_ids[: len(prompt_ids)] != prompt_ids or len(full_ids) <= len(prompt_ids):
             raise ValueError("Chat template does not preserve the checked prompt/completion prefix")
         if len(full_ids) > 128:
-            raise ValueError("Fixture exceeds128 tokens; do not silently truncate answer targets")
+            raise ValueError("Fixture exceeds 128 tokens; do not silently truncate answer targets")
         template_checks.append(
             {"id": row["id"], "prompt_tokens": len(prompt_ids), "total_tokens": len(full_ids)}
         )
@@ -130,12 +133,18 @@ def main() -> None:
         processing_class=tokenizer,
         peft_config=adapter,
     )
+    # TRL 1.x stores per-row labels with -100 over the prompt tokens.
     for row in trainer.train_dataset:
-        mask = row.get("completion_mask")
-        if mask is None or not any(mask) or all(mask):
+        labels = row.get("labels")
+        if labels is None or len(labels) != len(row["input_ids"]):
+            raise ValueError("Processed data must retain per-token labels for the prompt and answer")
+        completion_mask = [int(label != -100) for label in labels]
+        if not any(completion_mask) or all(completion_mask):
             raise ValueError("Processed data must retain prompt and completion participation masks")
-        first = mask.index(1)
-        if any(mask[:first]) or not all(mask[first:]):
+        if any(label != token for label, token in zip(labels, row["input_ids"]) if label != -100):
+            raise ValueError("Active labels must copy their input tokens; the model owns the shift")
+        first = completion_mask.index(1)
+        if any(completion_mask[:first]) or not all(completion_mask[first:]):
             raise ValueError("Expected one contiguous completion under this fixture contract")
     batch = next(iter(trainer.get_train_dataloader()))
     active = batch["labels"] != -100

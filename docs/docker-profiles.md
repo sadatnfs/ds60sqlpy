@@ -95,7 +95,7 @@ can declare additional package groups.
 | --- | --- |
 | `ml` | XGBoost, LightGBM, SHAP, LIME, pmdarima, imbalance tools, Numba |
 | `production` | FastAPI, Dask, MLflow, Prefect, Pydantic, Uvicorn |
-| `deep-learning` | PyTorch and torchvision for the relevant Python examples |
+| `deep-learning` | PyTorch and torchvision for the relevant Python examples. Intel Macs skip this group because PyTorch no longer publishes patched Intel macOS wheels; use the `pytorch` worker instead. |
 | `nlp` | Transformers, datasets, evaluate, spaCy, accelerate |
 | `geo` | GeoPandas, geodatasets, contextily, NetworkX |
 | `advanced` | All five groups above |

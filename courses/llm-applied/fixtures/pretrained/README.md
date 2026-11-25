@@ -7,23 +7,28 @@ Docker networking disabled. No API account, API key or GPU is required.
 
 The pinned model is `HuggingFaceTB/SmolLM2-135M-Instruct`, revision
 `12fd25f77366fa6b3b4b768ec3050bf629380bac`. Its model card identifies the license
-as Apache 2.0. The weights are 269, 060, 552 bytes, about 257 MiB. Review the
+as Apache 2.0. The weights are 269,060,552 bytes, about 257 MiB. Review the
 [pinned model card](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct/tree/12fd25f77366fa6b3b4b768ec3050bf629380bac)
 for its intended scope and limitations.
 
 ## What has actually been tested
 
 On 23 October 2026, the Linux arm64 Docker image built successfully with a full
-hashed dependency lock. Pinned acquisition recorded 13 files. Both full
-fine-tuning and LoRA completed exactly 10 CPU updates with maximum sequence
-length 128, and the saved LoRA adapter reloaded for offline generation.
+hashed dependency lock for the 2.0.0 pins. Pinned acquisition recorded 13 files.
+On 18 November 2026, the 2.1.0 pins (Torch 2.15, Transformers 5.23, TRL 1.18
+and PEFT 0.21) were re-executed against the same pinned model files in a
+Python 3.12 environment on a macOS arm64 host. Both full fine-tuning and LoRA
+completed exactly 10 CPU updates with maximum sequence length 128, and the saved
+LoRA adapter reloaded for offline generation. The 2.1.0 Docker image itself
+has not yet been rebuilt and requalified; its locks are regenerated on a
+public CI runner.
 
 | Check | Observed result |
 | --- | --- |
-| Full fine-tuning | 134, 515, 008 trainable parameters;10 updates |
-| LoRA | 230, 400 trainable parameters;10 updates |
-| LoRA held-out token loss | 6.721148 before;6.474194 after |
-| Full fine-tuning held-out token loss | 6.721148 before;0.008058 after |
+| Full fine-tuning | 134,515,008 trainable parameters; 10 updates |
+| LoRA | 230,400 trainable parameters; 10 updates |
+| LoRA held-out token loss | 6.721160 before; 6.474203 after |
+| Full fine-tuning held-out token loss | 6.721160 before; 0.008039 after |
 | Saved-adapter generation | Executed offline; factual answer was not accepted |
 
 These results establish that the preparation, masks, optimization and saved
@@ -74,16 +79,18 @@ docker build --progress=plain -f courses/llm-applied/fixtures/pretrained/Dockerf
 
 The image reuses local `ds60sqlpy-worker-llm-torch-cpu:2.0.0`, then installs the
 complete `requirements.arm64.lock` or `requirements.amd64.lock` with required
-hashes and binary wheels. Torch 2.9.1 is CPU-only. Transformers 4.57.1,
-TRL 0.24.0 and PEFT 0.17.1 are explicit version choices. No CUDA dependency tree is
+hashes and binary wheels. Torch 2.15.0 is CPU-only. Transformers 5.23.0,
+TRL 1.18.0 and PEFT 0.21.3 are explicit version choices. No CUDA dependency tree is
 installed by this recipe. `pip check` must pass during the build. The classroom
 base carries no pip, so the build uses Python's bundled pip for this one install
 and removes it afterwards. The recipe runs as the unprivileged `nobody` account
 (UID 65534); its `/models` mount point is owned by that account, so a new or
 empty learning volume becomes writable on first use. A volume written by an
 older root-run recipe stays root-owned; create a fresh volume for this image. The recipe
-intentionally pins the Transformers 4.57 line; an upgrade to 5.x must rerun the
-chat-template prefix and label-mask checks before any training result is reused.
+intentionally pins the Transformers 5.23 line. Transformers 5 returns a mapping
+from `apply_chat_template` by default, so the script passes `return_dict=False`
+to compare plain token ID lists. Any later upgrade must rerun the chat-template
+prefix and label-mask checks before a training result is reused.
 
 The [direct declaration](pyproject.toml), [full arm64 lock](requirements.arm64.lock)
 and [full amd64 lock](requirements.amd64.lock) are distinct: the declaration
@@ -211,6 +218,6 @@ identity and dependency lock with the adapter; an adapter alone is not the
 complete model. If a local export destination exists, choose a new destination
 name instead of mixing two runs.
 
-Sources: [Transformers 4.57 chat templates](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating),
-[TRL 0.24 SFTTrainer](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer),
-and [PEFT LoRA configuration](https://huggingface.co/docs/peft/v0.17.0/en/package_reference/lora).
+Sources: [Transformers 5.23 chat templates](https://huggingface.co/docs/transformers/v5.23.0/en/chat_templating),
+[TRL 1.18 SFTTrainer](https://huggingface.co/docs/trl/v1.18.0/en/sft_trainer),
+and [PEFT LoRA configuration](https://huggingface.co/docs/peft/v0.21.0/en/package_reference/lora).

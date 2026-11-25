@@ -402,7 +402,7 @@ def lesson_prose(id, p, s, plan, reading, learner, solution):
         "decision; state which evidence would reopen it."
     )
     out["sources"] = (
-        f"Reference for {t[0].lower()}: [{s['source'][0]}]({s['source'][1]}), reviewed 2026-10-22. "
+        f"Reference for {t[0].lower()}: [{s['source'][0]}]({s['source'][1]}), reviewed {s['source'][2] if len(s['source']) > 2 else '2026-10-22'}. "
         f"The fixtures for *{a['title']}*, *{b['title']}* and "
         f"*{c['title']}* and the six exercises are original course material.\n\n"
         "Execution gates are described in [validation](../../../docs/validation.md); "

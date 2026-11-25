@@ -1,49 +1,58 @@
-name: Relock Python dependencies
+name: Relock dependencies
 
-# Re-locks uv.lock against public PyPI with targeted upgrades and uploads the
-# result for review. Nothing is committed or pushed by this workflow.
+# Regenerates a dependency lock on a GitHub runner against the public upstream
+# index and uploads the result for review. Nothing is committed or pushed.
+#   uv-lock     uv.lock with targeted --upgrade-package names
+#   pretrained  optional llm-applied pretrained recipe hash locks
+#   go-fixture  Go client fixture go.mod/go.sum with module@version upgrades
 on:
   workflow_dispatch:
     inputs:
-      packages:
-        description: Space-separated package names to pass to uv lock --upgrade-package
+      target:
+        description: Lock to regenerate
         required: true
-        default: >-
-          anyio certifi filelock jupyter-server jupyterlab msgpack nbconvert
-          notebook packaging pillow pip prefect setuptools soupsieve sqlparse
-          tornado urllib3 virtualenv
+        default: uv-lock
+        type: choice
+        options:
+          - uv-lock
+          - pretrained
+          - go-fixture
+      packages:
+        description: >-
+          uv-lock: space-separated package names. go-fixture: space-separated
+          module@version pairs. Ignored for pretrained.
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
 concurrency:
-  group: relock-python
+  group: relock-${{ inputs.target }}
   cancel-in-progress: false
 
 jobs:
   relock:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Install uv
+        if: inputs.target != 'go-fixture'
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           # Same uv as the CI lock check so the lock format matches.
           version: "0.11.6"
           enable-cache: false
-      - name: Relock with targeted upgrades
+      - name: Relock uv.lock with targeted upgrades
+        if: inputs.target == 'uv-lock'
         env:
           PACKAGES: ${{ inputs.packages }}
         run: |
           set -euo pipefail
           read -r -a names <<<"$PACKAGES"
-          if [ "${#names[@]}" -eq 0 ]; then
-            echo "No package names given." >&2
-            exit 1
-          fi
           args=()
           for name in "${names[@]}"; do
             if ! [[ "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
@@ -58,7 +67,8 @@ jobs:
             --default-index https://pypi.org/simple "${args[@]}"
           uv lock --check --config-file "$empty_config" \
             --default-index https://pypi.org/simple
-      - name: Check recorded sources
+      - name: Check uv.lock sources
+        if: inputs.target == 'uv-lock'
         run: |
           set -euo pipefail
           if grep -n packagefeedproxy uv.lock; then
@@ -74,10 +84,74 @@ jobs:
             exit 1
           fi
           git diff --stat -- uv.lock
+      - name: Relock pretrained recipe
+        if: inputs.target == 'pretrained'
+        env:
+          UV_NO_CONFIG: "1"
+        run: |
+          set -euo pipefail
+          python3 courses/llm-applied/fixtures/pretrained/lock_dependencies.py
+          cd courses/llm-applied/fixtures/pretrained
+          for lock in requirements.amd64.lock requirements.arm64.lock; do
+            if grep -n packagefeedproxy "$lock"; then
+              echo "$lock records a proxy URL." >&2
+              exit 1
+            fi
+            grep -q -x -- '--index-url https://pypi.org/simple' "$lock"
+            grep -q -x -- '--extra-index-url https://download.pytorch.org/whl/cpu' "$lock"
+            grep -E '^(torch|transformers|trl|peft|accelerate)==' "$lock"
+          done
+          git diff --stat -- .
+      - name: Relock Go fixture
+        if: inputs.target == 'go-fixture'
+        env:
+          MODULES: ${{ inputs.packages }}
+          GO_IMAGE: golang:1.27.4-trixie@sha256:f18c3d73a184fb0582828510722e723b63a93f7188d11dd223d9be6f6880e65d
+        run: |
+          set -euo pipefail
+          read -r -a modules <<<"$MODULES"
+          if [ "${#modules[@]}" -eq 0 ]; then
+            echo "No module@version pairs given." >&2
+            exit 1
+          fi
+          for module in "${modules[@]}"; do
+            if ! [[ "$module" =~ ^[A-Za-z0-9][A-Za-z0-9./_-]*@v[0-9][A-Za-z0-9.+-]*$ ]]; then
+              echo "Refusing module: $module" >&2
+              exit 1
+            fi
+          done
+          fixture="$GITHUB_WORKSPACE/courses/go/fixtures/client-go-project"
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp -e GOPATH=/tmp/go -e GOCACHE=/tmp/cache \
+            -e GOFLAGS=-mod=mod -e "MODULES=${modules[*]}" \
+            -v "$fixture:/src" -w /src "$GO_IMAGE" \
+            sh -c 'go get $MODULES && go mod tidy && go mod verify && go vet ./... && go test ./...'
+          git diff --stat -- "$fixture"
       - name: Upload uv.lock
+        if: inputs.target == 'uv-lock'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: relocked-uv-lock
           path: uv.lock
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload pretrained locks
+        if: inputs.target == 'pretrained'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: relocked-pretrained
+          path: |
+            courses/llm-applied/fixtures/pretrained/requirements.amd64.lock
+            courses/llm-applied/fixtures/pretrained/requirements.arm64.lock
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload Go fixture module files
+        if: inputs.target == 'go-fixture'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: relocked-go-fixture
+          path: |
+            courses/go/fixtures/client-go-project/go.mod
+            courses/go/fixtures/client-go-project/go.sum
           if-no-files-found: error
           retention-days: 14

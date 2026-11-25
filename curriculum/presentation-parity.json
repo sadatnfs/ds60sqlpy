@@ -58,7 +58,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-003_solutions.md",
       "historical_sha256": "4e775351aa61698442c14aeac79dbee8217cc7f048371a691ff30cb33fb1f77d",
-      "presentation_sha256": "c4547305c9c5f69107608073ec48805c426d120424bc059d9c5988607fecfe5a",
+      "presentation_sha256": "40f32b4e9d952045bff69d9e307b0c5dbf41d9963f7f1c68828390c5a595dbab",
       "code_block_sha256": [
         "a6120c26245c506326e6d6a59deac0f241455220a9f215c942925881fa253248",
         "038aeffa108d9e12f1a667ab4c9c8a1901cd462150960b28e5c31984f7d5603e",
@@ -80,6 +80,12 @@
           "previous_sha256": "a0968ea79955743b3c8a54a0de3c84d9efc1251a24213e1aa3b239dd6dd0e125",
           "updated_sha256": "c4547305c9c5f69107608073ec48805c426d120424bc059d9c5988607fecfe5a",
           "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "930d28debb83e1ac8c8fc7c94179d58e8058b1eb",
+          "previous_sha256": "c4547305c9c5f69107608073ec48805c426d120424bc059d9c5988607fecfe5a",
+          "updated_sha256": "40f32b4e9d952045bff69d9e307b0c5dbf41d9963f7f1c68828390c5a595dbab",
+          "reason": "Prose-only reference refresh to tested Transformers 5.23.0 and TRL 1.18.0 documentation; code fences byte-identical"
         }
       ]
     },
@@ -318,7 +324,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-014_solutions.md",
       "historical_sha256": "9772400a0eafae378f900f79e805db2ec5a0455bbd25aa0e0bdcc51fe558d6a3",
-      "presentation_sha256": "5e8646223d3b4f26604a980fc61594c29621f21d20a038e6bd96a7697b4a0b0a",
+      "presentation_sha256": "f2cd403d2d36789bad78fc1e597dc2d72301e6ce404a2369d06222c44dce2d0c",
       "code_block_sha256": [
         "f0e05f5e521d9707442c4cb584d830b5cea65f0ebda7347ee21cf67d856d9c51",
         "c9e7963e11a3f08172b09107da0be9fd40f7902c2c3ecd5b558ba79542f7588f",
@@ -340,6 +346,12 @@
           "previous_sha256": "73fdeca6667fe84ae5d1c633ed49210395d140a959acd5fe42ab6dfe4720565f",
           "updated_sha256": "5e8646223d3b4f26604a980fc61594c29621f21d20a038e6bd96a7697b4a0b0a",
           "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "930d28debb83e1ac8c8fc7c94179d58e8058b1eb",
+          "previous_sha256": "5e8646223d3b4f26604a980fc61594c29621f21d20a038e6bd96a7697b4a0b0a",
+          "updated_sha256": "f2cd403d2d36789bad78fc1e597dc2d72301e6ce404a2369d06222c44dce2d0c",
+          "reason": "Prose-only reference refresh to tested Transformers 5.23.0 and TRL 1.18.0 documentation; code fences byte-identical"
         }
       ]
     },

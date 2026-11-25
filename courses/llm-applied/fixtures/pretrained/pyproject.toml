@@ -3,14 +3,14 @@ name = "ds60-pretrained-recipe"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-  "torch==2.9.1+cpu",
-  "transformers==4.57.1",
-  "trl==0.24.0",
-  "peft==0.17.1",
-  "datasets==4.3.0",
-  "accelerate==1.11.0",
-  "safetensors==0.6.2",
-  "huggingface-hub==0.35.3",
+  "torch==2.15.0+cpu",
+  "transformers==5.23.0",
+  "trl==1.18.0",
+  "peft==0.21.3",
+  "datasets==5.2.0",
+  "accelerate==1.16.0",
+  "safetensors==0.8.0",
+  "huggingface-hub==2.4.0",
   "numpy==2.2.6",
 ]
 [tool.uv.sources]

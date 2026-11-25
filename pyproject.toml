@@ -78,13 +78,12 @@ sql-notebooks = ["jupysql>=0.10.17", "pandas>=2.2", "psycopg[binary]>=3.2", "sql
 deep-learning = [
   # Keep contributor dependencies platform-specific. These host pins do not
   # qualify GPU access or the separately prepared Linux classroom workers.
-  "numpy>=1.26.4,<2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
-  "torch==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
-  "torch==2.11.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
-  "torch>=2.3; sys_platform != 'darwin'",
-  "torchvision==0.17.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
-  "torchvision==0.26.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
-  "torchvision>=0.18; sys_platform != 'darwin'",
+  # PyTorch publishes no Intel macOS wheels after 2.2.2, which has unpatched
+  # security advisories, so Intel Macs use the Docker PyTorch worker instead.
+  "torch==2.14.1; sys_platform == 'darwin' and platform_machine == 'arm64'",
+  "torch>=2.14; sys_platform != 'darwin'",
+  "torchvision==0.29.1; sys_platform == 'darwin' and platform_machine == 'arm64'",
+  "torchvision>=0.29; sys_platform != 'darwin'",
 ]
 nlp = ["accelerate>=1.0", "datasets>=3.0", "evaluate>=0.4", "spacy>=3.7", "transformers>=4.44"]
 geo = ["contextily>=1.6", "geodatasets>=2024.8", "geopandas>=1.0", "networkx>=3.3"]
