@@ -51,12 +51,12 @@ they do not rebuild or push anything.
 
 ```bash
 DS60_HUB_ACCOUNT=yourname
-docker pull "$DS60_HUB_ACCOUNT/ds60sqlpy:2.0.0-worker-data-platforms-python"
-docker tag "$DS60_HUB_ACCOUNT/ds60sqlpy:2.0.0-worker-data-platforms-python" \
-  ds60sqlpy-worker-data-platforms-python:2.0.0
-docker pull "$DS60_HUB_ACCOUNT/ds60sqlpy:2.0.0-worker-rust-stable"
-docker tag "$DS60_HUB_ACCOUNT/ds60sqlpy:2.0.0-worker-rust-stable" \
-  ds60sqlpy-worker-rust-stable:2.0.0
+docker pull "$DS60_HUB_ACCOUNT/ds60sqlpy:2.1.0-worker-data-platforms-python"
+docker tag "$DS60_HUB_ACCOUNT/ds60sqlpy:2.1.0-worker-data-platforms-python" \
+  ds60sqlpy-worker-data-platforms-python:2.1.0
+docker pull "$DS60_HUB_ACCOUNT/ds60sqlpy:2.1.0-worker-rust-stable"
+docker tag "$DS60_HUB_ACCOUNT/ds60sqlpy:2.1.0-worker-rust-stable" \
+  ds60sqlpy-worker-rust-stable:2.1.0
 ```
 
 Rust is needed only for `ipc-check`. The standard Flight client/server path needs

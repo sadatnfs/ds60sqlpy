@@ -511,7 +511,7 @@ def snapshot_file(tmp_path: Path) -> Path:
             "namespace": "sadatnfs",
             "repository": "sadatnfs/ds60sqlpy",
             "source_repository": "sadatnfs/ds60sqlpy",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "revision": REVISION,
             "run_id": "1",
             "run_attempt": "1",

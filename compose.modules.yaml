@@ -41,7 +41,7 @@ x-worker: &worker
 services:
   python-web-worker:
     <<: *worker
-    image: ${DS60_WORKER_PYTHON_WEB_IMAGE:-ds60sqlpy-worker-python-web:2.0.0}
+    image: ${DS60_WORKER_PYTHON_WEB_IMAGE:-ds60sqlpy-worker-python-web:2.1.0}
     profiles: [python-web]
     mem_limit: 1g
     build:
@@ -54,7 +54,7 @@ services:
       DS60_WORKER_PROFILE: python-web
   dbt-worker:
     <<: *worker
-    image: ${DS60_WORKER_DBT_DUCKDB_IMAGE:-ds60sqlpy-worker-dbt-duckdb:2.0.0}
+    image: ${DS60_WORKER_DBT_DUCKDB_IMAGE:-ds60sqlpy-worker-dbt-duckdb:2.1.0}
     profiles: [dbt-duckdb]
     mem_limit: 3g
     tmpfs:
@@ -69,7 +69,7 @@ services:
       DS60_WORKER_PROFILE: dbt-duckdb
   data-platforms-worker:
     <<: *worker
-    image: ${DS60_WORKER_DATA_PLATFORMS_PYTHON_IMAGE:-ds60sqlpy-worker-data-platforms-python:2.0.0}
+    image: ${DS60_WORKER_DATA_PLATFORMS_PYTHON_IMAGE:-ds60sqlpy-worker-data-platforms-python:2.1.0}
     profiles: [data-platforms-python]
     build:
       context: .
@@ -81,7 +81,7 @@ services:
       DS60_WORKER_PROFILE: data-platforms-python
   data-engineering-worker:
     <<: *worker
-    image: ${DS60_WORKER_DATA_ENGINEERING_IMAGE:-ds60sqlpy-worker-data-engineering:2.0.0}
+    image: ${DS60_WORKER_DATA_ENGINEERING_IMAGE:-ds60sqlpy-worker-data-engineering:2.1.0}
     profiles: [data-engineering]
     mem_limit: 3g
     tmpfs:
@@ -96,7 +96,7 @@ services:
       DS60_WORKER_PROFILE: data-engineering
   stan-worker:
     <<: *worker
-    image: ${DS60_WORKER_STAN_CPU_IMAGE:-ds60sqlpy-worker-stan-cpu:2.0.0}
+    image: ${DS60_WORKER_STAN_CPU_IMAGE:-ds60sqlpy-worker-stan-cpu:2.1.0}
     profiles: [stan-cpu]
     mem_limit: 3g
     tmpfs:
@@ -111,7 +111,7 @@ services:
       DS60_WORKER_PROFILE: stan-cpu
   julia-worker:
     <<: *worker
-    image: ${DS60_WORKER_JULIA_IMAGE:-ds60sqlpy-worker-julia:2.0.0}
+    image: ${DS60_WORKER_JULIA_IMAGE:-ds60sqlpy-worker-julia:2.1.0}
     profiles: [julia]
     mem_limit: 3g
     tmpfs:
@@ -125,7 +125,7 @@ services:
       DS60_WORKER_PROFILE: julia
   jax-worker:
     <<: *worker
-    image: ${DS60_WORKER_JAX_CPU_IMAGE:-ds60sqlpy-worker-jax-cpu:2.0.0}
+    image: ${DS60_WORKER_JAX_CPU_IMAGE:-ds60sqlpy-worker-jax-cpu:2.1.0}
     profiles: [jax-cpu]
     mem_limit: 3g
     build:
@@ -138,7 +138,7 @@ services:
       DS60_WORKER_PROFILE: jax-cpu
   bayesian-worker:
     <<: *worker
-    image: ${DS60_WORKER_BAYESIAN_CPU_IMAGE:-ds60sqlpy-worker-bayesian-cpu:2.0.0}
+    image: ${DS60_WORKER_BAYESIAN_CPU_IMAGE:-ds60sqlpy-worker-bayesian-cpu:2.1.0}
     profiles: [bayesian-cpu]
     mem_limit: 3g
     build:
@@ -151,7 +151,7 @@ services:
       DS60_WORKER_PROFILE: bayesian-cpu
   r-worker:
     <<: *worker
-    image: ${DS60_WORKER_R_STATISTICS_IMAGE:-ds60sqlpy-worker-r-statistics:2.0.0}
+    image: ${DS60_WORKER_R_STATISTICS_IMAGE:-ds60sqlpy-worker-r-statistics:2.1.0}
     profiles: [r-statistics]
     mem_limit: 3g
     build:
@@ -163,18 +163,18 @@ services:
       DS60_WORKER_PROFILE: r-statistics
   python-core-worker:
     <<: *worker
-    image: ${DS60_WORKER_PYTHON_CORE_IMAGE:-ds60sqlpy-worker-python-core:2.0.0}
+    image: ${DS60_WORKER_PYTHON_CORE_IMAGE:-ds60sqlpy-worker-python-core:2.1.0}
     profiles: [python-core]
     build:
       context: .
       dockerfile: docker/workers/Dockerfile.python-core
       args:
-        DS60_CORE_IMAGE: ${DS60_CORE_IMAGE:-ds60sqlpy-lab:2.0.0}
+        DS60_CORE_IMAGE: ${DS60_CORE_IMAGE:-ds60sqlpy-lab:2.1.0}
     environment:
       DS60_WORKER_PROFILE: python-core
   cpp-worker:
     <<: *worker
-    image: ${DS60_WORKER_CPP20_IMAGE:-ds60sqlpy-worker-cpp20:2.0.0}
+    image: ${DS60_WORKER_CPP20_IMAGE:-ds60sqlpy-worker-cpp20:2.1.0}
     profiles: [cpp20]
     build:
       context: .
@@ -185,7 +185,7 @@ services:
       DS60_WORKER_PROFILE: cpp20
   tensorflow-worker:
     <<: *worker
-    image: ${DS60_WORKER_TENSORFLOW_CPU_IMAGE:-ds60sqlpy-worker-tensorflow-cpu:2.0.0}
+    image: ${DS60_WORKER_TENSORFLOW_CPU_IMAGE:-ds60sqlpy-worker-tensorflow-cpu:2.1.0}
     profiles: [tensorflow-cpu]
     mem_limit: 3g
     build:
@@ -198,7 +198,7 @@ services:
       DS60_WORKER_PROFILE: tensorflow-cpu
   llm-worker:
     <<: *worker
-    image: ${DS60_WORKER_LLM_TORCH_CPU_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:2.0.0}
+    image: ${DS60_WORKER_LLM_TORCH_CPU_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:2.1.0}
     profiles: [llm-torch-cpu]
     mem_limit: 3g
     build:
@@ -211,7 +211,7 @@ services:
       DS60_WORKER_PROFILE: llm-torch-cpu
   scala-worker:
     <<: *worker
-    image: ${DS60_WORKER_SCALA_JVM_IMAGE:-ds60sqlpy-worker-scala-jvm:2.0.0}
+    image: ${DS60_WORKER_SCALA_JVM_IMAGE:-ds60sqlpy-worker-scala-jvm:2.1.0}
     profiles: [scala-jvm]
     build:
       context: .
@@ -223,7 +223,7 @@ services:
       DS60_WORKER_PROFILE: scala-jvm
   spark-scala-worker:
     <<: *worker
-    image: ${DS60_WORKER_SPARK_LOCAL_SCALA_IMAGE:-ds60sqlpy-worker-spark-local-scala:2.0.0}
+    image: ${DS60_WORKER_SPARK_LOCAL_SCALA_IMAGE:-ds60sqlpy-worker-spark-local-scala:2.1.0}
     profiles: [spark-local-scala]
     mem_limit: 3g
     pids_limit: 384
@@ -237,7 +237,7 @@ services:
       DS60_WORKER_PROFILE: spark-local-scala
   spark-python-worker:
     <<: *worker
-    image: ${DS60_WORKER_SPARK_LOCAL_PYTHON_IMAGE:-ds60sqlpy-worker-spark-local-python:2.0.0}
+    image: ${DS60_WORKER_SPARK_LOCAL_PYTHON_IMAGE:-ds60sqlpy-worker-spark-local-python:2.1.0}
     profiles: [spark-local-python]
     mem_limit: 3g
     pids_limit: 384
@@ -252,7 +252,7 @@ services:
 
   java-worker:
     <<: *worker
-    image: ${DS60_WORKER_JAVA21_IMAGE:-ds60sqlpy-worker-java21:2.0.0}
+    image: ${DS60_WORKER_JAVA21_IMAGE:-ds60sqlpy-worker-java21:2.1.0}
     profiles: [java21]
     build:
       context: .
@@ -264,7 +264,7 @@ services:
       DS60_WORKER_PROFILE: java21
   javascript-worker:
     <<: *worker
-    image: ${DS60_WORKER_JAVASCRIPT_NODE_IMAGE:-ds60sqlpy-worker-javascript-node:2.0.0}
+    image: ${DS60_WORKER_JAVASCRIPT_NODE_IMAGE:-ds60sqlpy-worker-javascript-node:2.1.0}
     profiles: [javascript-node]
     build:
       context: .
@@ -277,7 +277,7 @@ services:
       DS60_WORKER_PROFILE: javascript-node
   typescript-worker:
     <<: *worker
-    image: ${DS60_WORKER_TYPESCRIPT_NODE_IMAGE:-ds60sqlpy-worker-typescript-node:2.0.0}
+    image: ${DS60_WORKER_TYPESCRIPT_NODE_IMAGE:-ds60sqlpy-worker-typescript-node:2.1.0}
     profiles: [typescript-node]
     build:
       context: .
@@ -291,7 +291,7 @@ services:
 
   c-worker:
     <<: *worker
-    image: ${DS60_WORKER_C17_IMAGE:-ds60sqlpy-worker-c17:2.0.0}
+    image: ${DS60_WORKER_C17_IMAGE:-ds60sqlpy-worker-c17:2.1.0}
     profiles: [c17]
     build:
       context: .
@@ -303,7 +303,7 @@ services:
 
   go-worker:
     <<: *worker
-    image: ${DS60_WORKER_GO_IMAGE:-ds60sqlpy-worker-go:2.0.0}
+    image: ${DS60_WORKER_GO_IMAGE:-ds60sqlpy-worker-go:2.1.0}
     profiles: [go]
     build:
       context: .
@@ -316,7 +316,7 @@ services:
 
   csharp-worker:
     <<: *worker
-    image: ${DS60_WORKER_CSHARP_DOTNET_IMAGE:-ds60sqlpy-worker-csharp-dotnet:2.0.0}
+    image: ${DS60_WORKER_CSHARP_DOTNET_IMAGE:-ds60sqlpy-worker-csharp-dotnet:2.1.0}
     profiles: [csharp-dotnet]
     build:
       context: .
@@ -328,7 +328,7 @@ services:
 
   rust-worker:
     <<: *worker
-    image: ${DS60_WORKER_RUST_STABLE_IMAGE:-ds60sqlpy-worker-rust-stable:2.0.0}
+    image: ${DS60_WORKER_RUST_STABLE_IMAGE:-ds60sqlpy-worker-rust-stable:2.1.0}
     profiles: [rust-stable]
     build:
       context: .
@@ -341,7 +341,7 @@ services:
 
   swift-worker:
     <<: *worker
-    image: ${DS60_WORKER_SWIFT_LINUX_IMAGE:-ds60sqlpy-worker-swift-linux:2.0.0}
+    image: ${DS60_WORKER_SWIFT_LINUX_IMAGE:-ds60sqlpy-worker-swift-linux:2.1.0}
     profiles: [swift-linux]
     build:
       context: .
@@ -353,7 +353,7 @@ services:
 
   php-worker:
     <<: *worker
-    image: ${DS60_WORKER_PHP_CLI_IMAGE:-ds60sqlpy-worker-php-cli:2.0.0}
+    image: ${DS60_WORKER_PHP_CLI_IMAGE:-ds60sqlpy-worker-php-cli:2.1.0}
     profiles: [php-cli]
     build:
       context: .
@@ -366,7 +366,7 @@ services:
 
   cuda-cpp-worker: &gpu-worker
     <<: *worker
-    image: ${DS60_WORKER_CUDA_CPP_IMAGE:-ds60sqlpy-worker-cuda-cpp:2.0.0}
+    image: ${DS60_WORKER_CUDA_CPP_IMAGE:-ds60sqlpy-worker-cuda-cpp:2.1.0}
     platform: linux/amd64
     profiles: [cuda-cpp]
     mem_limit: 4g
@@ -391,7 +391,7 @@ services:
 
   cuda-python-worker:
     <<: *gpu-worker
-    image: ${DS60_WORKER_CUDA_PYTHON_IMAGE:-ds60sqlpy-worker-cuda-python:2.0.0}
+    image: ${DS60_WORKER_CUDA_PYTHON_IMAGE:-ds60sqlpy-worker-cuda-python:2.1.0}
     profiles: [cuda-python]
     build:
       context: .
@@ -405,7 +405,7 @@ services:
 
   pytorch-cuda-worker:
     <<: *gpu-worker
-    image: ${DS60_WORKER_PYTORCH_CUDA_IMAGE:-ds60sqlpy-worker-pytorch-cuda:2.0.0}
+    image: ${DS60_WORKER_PYTORCH_CUDA_IMAGE:-ds60sqlpy-worker-pytorch-cuda:2.1.0}
     profiles: [pytorch-cuda]
     build:
       context: .
@@ -419,7 +419,7 @@ services:
 
   tensorflow-cuda-worker:
     <<: *gpu-worker
-    image: ${DS60_WORKER_TENSORFLOW_CUDA_IMAGE:-ds60sqlpy-worker-tensorflow-cuda:2.0.0}
+    image: ${DS60_WORKER_TENSORFLOW_CUDA_IMAGE:-ds60sqlpy-worker-tensorflow-cuda:2.1.0}
     profiles: [tensorflow-cuda]
     build:
       context: .

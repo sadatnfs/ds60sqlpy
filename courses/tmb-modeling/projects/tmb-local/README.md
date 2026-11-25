@@ -15,7 +15,7 @@ occur only during build. Model evaluation is offline.
 
 ```bash
 cd courses/tmb-modeling/projects/tmb-local
-docker build --progress=plain --build-arg R_BASE_IMAGE=ds60sqlpy-worker-r-statistics:2.0.0 -t ds60-tmb-local:lesson .
+docker build --progress=plain --build-arg R_BASE_IMAGE=ds60sqlpy-worker-r-statistics:2.1.0 -t ds60-tmb-local:lesson .
 ```
 
 Use the existing R image's actual tag when it differs. A native ARM base produces

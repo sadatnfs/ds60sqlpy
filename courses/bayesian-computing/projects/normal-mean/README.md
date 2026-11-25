@@ -53,7 +53,7 @@ docker run --rm --init \
   --env HOME=/tmp --tmpfs /tmp:rw,nosuid,exec,size=256m \
   --mount "type=bind,src=$PWD,dst=/project,readonly" \
   --mount "type=bind,src=$PWD/work,dst=/output" \
-  --entrypoint python ds60sqlpy-worker-stan-cpu:2.0.0 \
+  --entrypoint python ds60sqlpy-worker-stan-cpu:2.1.0 \
   /project/run.py --cmdstan /opt/cmdstan --output /output/normal-mean-run
 ```
 

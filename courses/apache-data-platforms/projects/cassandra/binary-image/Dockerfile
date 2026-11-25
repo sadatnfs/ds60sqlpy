@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ds60sqlpy-worker-scala-jvm:2.0.0
+ARG BASE_IMAGE=ds60sqlpy-worker-scala-jvm:2.1.0
 FROM ${BASE_IMAGE}
 ARG TARGETARCH
 USER root

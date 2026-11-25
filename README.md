@@ -66,9 +66,11 @@ cd ds60sqlpy
 ./classroom
 ```
 
-Release 2.0.0 is published as combined AMD64/ARM64 images and passed fresh-pull
-acceptance on both architectures. To use the prebuilt images with this checkout,
-run `./classroom --all --from-hub sadatnfs --tag 2.0.0`.
+This checkout targets release 2.1.0. Release 2.0.0 is published as combined
+AMD64/ARM64 images and passed fresh-pull acceptance on both architectures. To use
+prebuilt 2.1.0 images, first verify its completed full publisher and fresh-pull
+acceptance, then use its matching source or starter with
+`./classroom --all --from-hub sadatnfs --tag 2.1.0`.
 See [Docker Hub distribution](#optional-docker-hub-distribution) for the release
 evidence, selective installation and saved versions.
 
@@ -370,7 +372,9 @@ acceptance claim.
 
 ## Optional Docker Hub distribution
 
-Release [2.0.0](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.0.0) is
+This checkout targets release 2.1.0; check its completed publisher and
+fresh-pull acceptance before using its images. The previous release,
+[2.0.0](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.0.0), is
 published. Its [publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45460757558)
 ran from [source `a4354ff8`](https://github.com/sadatnfs/ds60sqlpy/tree/a4354ff8bf50bd2ea48d7eff2c130b75fb34dcc6)
 and promoted the App, the DS60 PostgreSQL image and all 25 ordinary workers as
@@ -388,17 +392,17 @@ failed groups. An authenticated metadata check on October 30 returned HTTP 404
 for the old App tag. Those records describe historical results, not current
 availability or acceptance of this later source.
 
-Use the matching source or starter for the published 2.0.0 images:
+For a completed full 2.1.0 publication, use the matching source or starter:
 
 ```sh
-./classroom --all --from-hub sadatnfs --tag 2.0.0
+./classroom --all --from-hub sadatnfs --tag 2.1.0
 ```
 
 Ordinary startup uploads nothing. For a new Hub selection, omitting `--tag`
 resolves the app's `latest` alias to a concrete release, requires a matching
-checked-in app version, and saves that version. App tags are `:2.0.0` and
-`:latest`; distinct worker tags include `:2.0.0-worker-r-statistics` and
-`:2.0.0-worker-python-core`. Docker selects the native architecture. Tags starting
+checked-in app version, and saves that version. App tags are `:2.1.0` and
+`:latest`; distinct worker tags include `:2.1.0-worker-r-statistics` and
+`:2.1.0-worker-python-core`. Docker selects the native architecture. Tags starting
 `ci-` are publication staging candidates, not learner releases. Hub mode never
 falls back to local builds. The [complete subject/profile/image mapping](docs/dockerhub.md#subjects-runtime-profiles-and-canonical-images)
 explains which runtime serves each subject and how to select only needed workers.
@@ -438,7 +442,7 @@ completed release deliberately. Later bare `./classroom resume` never builds,
 pulls or follows a moving latest tag.
 
 For a completed full release, download without starting services with
-`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 2.0.0`.
+`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 2.1.0`.
 For a partial release, use only its published profiles.
 For an existing project, switching image source/layout or applying an update
 requires the same command without `pull` and with `--rebuild`. In Hub mode
@@ -515,25 +519,25 @@ docker login
 Preview already built and tested images without uploading:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 2.0.0
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 2.1.0
 ```
 
 After reviewing the mapping, explicitly upload:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 2.0.0 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 2.1.0 --push
 ```
 
 This requires the complete ordinary local set by default. It checks all
 selected images before tagging/pushing and does not build, log in, create
 another architecture or publish combined manifests. Prepare missing images
-with `./classroom build --all --local-build --tag 2.0.0`, then qualify them.
+with `./classroom build --all --local-build --tag 2.1.0`, then qualify them.
 
-Manual tags include architecture, such as `2.0.0-lab-arm64`. A matching-architecture
+Manual tags include architecture, such as `2.1.0-lab-arm64`. A matching-architecture
 learner selects that layout explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 2.0.0 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 2.1.0 --architecture-tags
 ```
 
 An ARM64-only Mac publication does not supply AMD64 tags for a typical

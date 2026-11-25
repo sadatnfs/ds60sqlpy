@@ -6,7 +6,7 @@ services:
     # DS60 builds PostgreSQL from docker/postgres (Debian security updates and
     # gosu rebuilt from source). Hub mode sets DS60_POSTGRES_IMAGE to the
     # published release image from 2.0.0; it may also name another image.
-    image: ${DS60_POSTGRES_IMAGE:-ds60sqlpy-postgres:2.0.0}
+    image: ${DS60_POSTGRES_IMAGE:-ds60sqlpy-postgres:2.1.0}
     pull_policy: never
     build:
       context: docker/postgres
@@ -34,7 +34,7 @@ services:
       retries: 30
 
   lab:
-    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:2.0.0}
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:2.1.0}
     pull_policy: never
     build:
       context: .

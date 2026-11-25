@@ -48,7 +48,7 @@ PROTECTED_NAMES = (
     "awesome-copilot",
 )
 PROTECTED_VOLUME_PREFIXES = ("ds60-classroom_", "ds60-phase1-browser_")
-SHARED_IMAGES = ("ds60sqlpy-lab:2.0.0", "ds60sqlpy-worker-python-core:2.0.0")
+SHARED_IMAGES = ("ds60sqlpy-lab:2.1.0", "ds60sqlpy-worker-python-core:2.1.0")
 IMAGE_REPOSITORIES = {"lab": "ds60sqlpy-lab", "python-core-worker": "ds60sqlpy-worker-python-core"}
 VOLUMES = ("classroom-learning", "classroom-runtime", "postgres-data")
 STEPS = ("fresh", "stop", "resume", "rerun", "restart", "recreate", "update", "final-rerun")
@@ -233,7 +233,7 @@ class Lifecycle:
         validate_project(options.project)
         self.steps_selected = ordered_steps(options.steps)
         if options.seed_images is not None and VERSION_RE.fullmatch(options.seed_images) is None:
-            raise HarnessError("--seed-images takes a plain release version such as 2.0.0.")
+            raise HarnessError("--seed-images takes a plain release version such as 2.1.0.")
         self.options = options
         self.runner: Runner = runner
         self.root = root

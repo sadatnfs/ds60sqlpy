@@ -20,8 +20,8 @@ TOKEN_DIGEST = "a" * 64
 PROGRESS_DIGEST = "c" * 64
 LEAKED = "LEAKED-WORKER-TOKEN-value"
 SHARED = {
-    "ds60sqlpy-lab:2.0.0": "sha256:" + "1" * 64,
-    "ds60sqlpy-worker-python-core:2.0.0": "sha256:" + "2" * 64,
+    "ds60sqlpy-lab:2.1.0": "sha256:" + "1" * 64,
+    "ds60sqlpy-worker-python-core:2.1.0": "sha256:" + "2" * 64,
 }
 PROTECTED_VOLUMES = [
     "ds60-classroom_classroom-learning",
@@ -113,7 +113,7 @@ class FakeEngine:
         if self.remove_protected_volume_on_up:
             self.protected_volumes.pop()
         if self.change_shared_on_up:
-            self.images["ds60sqlpy-lab:2.0.0"] = "sha256:" + "f" * 64
+            self.images["ds60sqlpy-lab:2.1.0"] = "sha256:" + "f" * 64
         state = self.worktree / ".classroom" / self.project
         state.mkdir(parents=True, exist_ok=True)
         (state / "classroom.url").write_text(f"http://127.0.0.1:{self.port}/classroom\n")
@@ -178,7 +178,7 @@ class FakeEngine:
 
 @pytest.fixture
 def root(tmp_path: Path) -> Path:
-    (tmp_path / "pyproject.toml").write_text('[project]\nversion = "2.0.0"\n')
+    (tmp_path / "pyproject.toml").write_text('[project]\nversion = "2.1.0"\n')
     return tmp_path
 
 
@@ -223,12 +223,12 @@ def test_accepts_a_disposable_name() -> None:
 
 @pytest.mark.parametrize(
     "tag",
-    ["2.0.0", "2.0.0-p7abc", "1.4.2-p7deadbeef", "2.0.0-p7DEADBEEF", "2.0.0-p7deadbeef0"],
+    ["2.1.0", "2.1.0-p7abc", "1.4.2-p7deadbeef", "2.1.0-p7DEADBEEF", "2.1.0-p7deadbeef0"],
 )
 def test_refuses_non_p7_or_wrong_version_tags(tag: str) -> None:
     with pytest.raises(lifecycle.HarnessError):
-        lifecycle.validate_tag(tag, "2.0.0")
-    lifecycle.validate_tag("2.0.0-p7deadbeef", "2.0.0")
+        lifecycle.validate_tag(tag, "2.1.0")
+    lifecycle.validate_tag("2.1.0-p7deadbeef", "2.1.0")
 
 
 @pytest.mark.parametrize("kind", ["container", "volume", "network", "compose"])
@@ -248,7 +248,7 @@ def test_refuses_project_that_already_has_resources(root: Path, kind: str) -> No
 
 def test_refuses_when_a_p7_tag_already_exists(root: Path) -> None:
     work, engine = make(root)
-    engine.images["ds60sqlpy-lab:2.0.0-p7" + BASE[:8]] = "sha256:" + "e" * 64
+    engine.images["ds60sqlpy-lab:2.1.0-p7" + BASE[:8]] = "sha256:" + "e" * 64
     assert work.run() == 2
     assert engine.commands("worktree") == []
 
@@ -278,7 +278,7 @@ def test_cleanup_with_owned_marker_uses_exact_order(root: Path) -> None:
     work.worktree.mkdir(parents=True)
     work.marker.parent.mkdir(parents=True)
     work.marker.write_text(json.dumps({"project": work.project, "run_id": work.run_id}))
-    work.owned_images = ["ds60sqlpy-lab:2.0.0-p7" + BASE[:8]]
+    work.owned_images = ["ds60sqlpy-lab:2.1.0-p7" + BASE[:8]]
     work.cleanup()
     down = [index for index, argv in enumerate(engine.calls) if "down" in argv]
     rm = [index for index, argv in enumerate(engine.calls) if argv[1:3] == ["image", "rm"]]
@@ -289,7 +289,7 @@ def test_cleanup_with_owned_marker_uses_exact_order(root: Path) -> None:
     assert command[:2] == ["docker", "compose"]
     assert command[command.index("-p") + 1] == work.project
     assert command[-3:] == ["down", "-v", "--remove-orphans"]
-    assert engine.calls[rm[0]] == ["docker", "image", "rm", "ds60sqlpy-lab:2.0.0-p7" + BASE[:8]]
+    assert engine.calls[rm[0]] == ["docker", "image", "rm", "ds60sqlpy-lab:2.1.0-p7" + BASE[:8]]
     assert engine.calls[remove[0]][-3:] == ["remove", "--force", str(work.worktree)]
 
 
@@ -307,7 +307,7 @@ def test_snapshot_diff_rules() -> None:
     assert lifecycle.diff_protected(snapshot(), snapshot()) == {"errors": [], "warnings": []}
     removed = lifecycle.diff_protected(snapshot(), snapshot(volumes=PROTECTED_VOLUMES[:2]))
     assert len(removed["errors"]) == 1 and "ds60-classroom_postgres-data" in removed["errors"][0]
-    changed = dict(SHARED, **{"ds60sqlpy-worker-python-core:2.0.0": "sha256:" + "3" * 64})
+    changed = dict(SHARED, **{"ds60sqlpy-worker-python-core:2.1.0": "sha256:" + "3" * 64})
     image = lifecycle.diff_protected(snapshot(), snapshot(images=changed))
     assert len(image["errors"]) == 1 and "worker-python-core" in image["errors"][0]
     state = lifecycle.diff_protected(
@@ -337,7 +337,7 @@ def test_full_run_orders_steps_and_cleans_only_owned_resources(root: Path) -> No
     )
     removed = sorted(argv[3] for argv in engine.calls if argv[1:3] == ["image", "rm"])
     assert removed == sorted(
-        f"{repo}:2.0.0-p7{sha[:8]}"
+        f"{repo}:2.1.0-p7{sha[:8]}"
         for repo in ("ds60sqlpy-lab", "ds60sqlpy-worker-python-core")
         for sha in (BASE, TARGET)
     )
@@ -361,7 +361,7 @@ def test_launcher_runs_inside_worktree_with_clean_environment(root: Path) -> Non
     fresh = launches[0][0]
     for flag in ("--starter", "--local-build", "--no-browser"):
         assert flag in fresh
-    assert fresh[fresh.index("--tag") + 1] == "2.0.0-p7" + BASE[:8]
+    assert fresh[fresh.index("--tag") + 1] == "2.1.0-p7" + BASE[:8]
     assert fresh[fresh.index("--port") + 1] == "0"
     assert fresh[fresh.index("--database-port") + 1] == "0"
     env = launches[0][2]
@@ -411,7 +411,7 @@ def test_update_checks_out_target_and_rebuilds_with_target_tag(root: Path) -> No
     assert checkout and checkout[0][-1] == TARGET
     rebuild = [argv for argv in engine.calls if "--rebuild" in argv]
     assert (
-        len(rebuild) == 1 and rebuild[0][rebuild[0].index("--tag") + 1] == "2.0.0-p7" + TARGET[:8]
+        len(rebuild) == 1 and rebuild[0][rebuild[0].index("--tag") + 1] == "2.1.0-p7" + TARGET[:8]
     )
     report = json.loads(work.report_path.read_text())
     update = next(step for step in report["steps"] if step["name"] == "update")
@@ -419,11 +419,11 @@ def test_update_checks_out_target_and_rebuilds_with_target_tag(root: Path) -> No
 
 
 def test_seeded_mode_tags_existing_images_and_skips_rebuild(root: Path) -> None:
-    work, engine = make(root, seed="2.0.0")
+    work, engine = make(root, seed="2.1.0")
     assert work.run() == 0
     tags = [argv for argv in engine.calls if argv[1:3] == ["image", "tag"]]
     assert sorted(argv[4] for argv in tags) == sorted(
-        f"{repo}:2.0.0-p7{BASE[:8]}" for repo in ("ds60sqlpy-lab", "ds60sqlpy-worker-python-core")
+        f"{repo}:2.1.0-p7{BASE[:8]}" for repo in ("ds60sqlpy-lab", "ds60sqlpy-worker-python-core")
     )
     assert [argv for argv in engine.calls if "--rebuild" in argv] == []
     report = json.loads(work.report_path.read_text())

@@ -77,7 +77,7 @@ Then build the separate recipe image:
 docker build --progress=plain -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained
 ```
 
-The image reuses local `ds60sqlpy-worker-llm-torch-cpu:2.0.0`, then installs the
+The image reuses local `ds60sqlpy-worker-llm-torch-cpu:2.1.0`, then installs the
 complete `requirements.arm64.lock` or `requirements.amd64.lock` with required
 hashes and binary wheels. Torch 2.15.0 is CPU-only. Transformers 5.23.0,
 TRL 1.18.0 and PEFT 0.21.3 are explicit version choices. No CUDA dependency tree is

@@ -200,7 +200,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">docker run --rm --pull never --network none --memory 3g --cpus <span class="syntax-number">2</span> <span class="syntax-string">\</span>
   --read-only --tmpfs /tmp:rw,exec,size<span class="syntax-operator">=</span><span class="syntax-number">536870912</span> <span class="syntax-string">\</span>
   --mount <span class="syntax-string">&quot;</span><span class="syntax-string">type=bind,src=</span>$PWD<span class="syntax-string">/courses/advanced-spark-modeling/projects/catalyst,dst=/project,readonly</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
-  --entrypoint python ds60sqlpy-worker-spark-local-scala:2.0.0 /project/run.py</code></pre>
+  --entrypoint python ds60sqlpy-worker-spark-local-scala:2.1.0 /project/run.py</code></pre>
 <p>Use the locally prepared version tag if different. No image is pulled by this command. All classes, JARs and Spark scratch files live in disposable <code>/tmp</code>; there is no learner volume and no Docker socket mount. A successful probe proves this tiny single-host compiler/runtime contract, not production cluster speed. Keep the exact image ID, source hashes and output when qualifying another build.</p>
 <p>Read asm-021 through asm-023 for the lifecycle, code generation and rewrite proof. The source is original; Apache Spark APIs are used under the project&#x27;s ordinary license. Consult the <a href="https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html">versioned extension API</a>.</p></article>
   </main>

@@ -174,7 +174,7 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--revision", required=True, help="Expected 40 hex commit")
     parser.add_argument(
-        "--tag", required=True, help="Local image tag, for example 2.0.0-p7abcd1234"
+        "--tag", required=True, help="Local image tag, for example 2.1.0-p7abcd1234"
     )
     parser.add_argument(
         "--profile",
