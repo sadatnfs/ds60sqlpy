@@ -8,10 +8,14 @@ packages are not attempted.
 The worker builds on the digest-pinned `rocker/r-ver` image, which compiles R
 from source on Ubuntu LTS. Its bundled recommended Matrix is older than the
 Matrix the course and the TMB project were qualified with, so the lock lists
-Matrix first and installs it into the site library. The compilers and kernel
-headers are needed only for these source builds and are purged afterwards; no
-lesson compiles code in the worker. The separately prepared TMB image installs
-its own toolchain.
+Matrix first and installs it into the site library. The C, C++ and Fortran
+compilers, `make` and the C headers stay installed after these source builds, so
+learners can build and install local source packages (`R CMD INSTALL`, Rcpp and
+cpp11 code) into a per-job library. The worker remains offline, so packages come
+from local source directories, not CRAN. `scripts/check_r_toolchain.py` proves
+this path during classroom qualification by building a package with C, C++ and
+Fortran routines through the learner entrypoint. The separately prepared TMB
+image installs its own toolchain.
 
 CRAN can rate-limit simultaneous source builds. HTTP 429, 502, 503 and 504
 responses retry the same reviewed URL at most five times, with bounded backoff

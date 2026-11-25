@@ -342,7 +342,11 @@ def readme(records):
             "RStudio. The package-development chapters explain a "
             "real multi-file package workflow as an optional "
             "contributor project; the classroom pad remains a "
-            "single-script execution surface."
+            "single-script execution surface. The worker keeps its "
+            "C, C++ and Fortran compilers, so a script can write a "
+            "small source package to a temporary directory and "
+            "build it with `R CMD INSTALL` or compile Rcpp and cpp11 "
+            "code offline."
         ),
         "",
         (

@@ -299,6 +299,18 @@ def test_native_platform_groups_require_real_service_lifecycle_gates(
     assert "work/apache-service-receipts.json" in command
 
 
+def test_r_group_qualifies_compiled_package_builds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    work, commands = prepared("r", tmp_path, monkeypatch)
+    work.qualify()
+    probe = script_calls(commands, "scripts/check_r_toolchain.py")
+    assert len(probe) == 1 and "work/r-toolchain-receipt.json" in probe[0]
+    assert "--confirm-disposable" in probe[0] and "--check-persistence" not in probe[0]
+    assert set(work.completed) == ci_classroom.required_checks("r")
+    assert "scripts/check_r_toolchain.py" not in ci_classroom.required_checks("python-core")
+
+
 def test_python_web_requires_real_services_browser_and_retained_state(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

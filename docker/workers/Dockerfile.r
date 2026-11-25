@@ -9,12 +9,11 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     && install -d -m 0700 /run/ds60
 COPY docker/workers/r/packages.lock.json /tmp/r-packages.lock.json
 COPY docker/workers/r/install_packages.py /tmp/install_packages.py
-# Compilers and headers are needed only to build the locked CRAN closure; no lesson
-# compiles code at run time, so the toolchain (and the kernel headers it pulls in) is
-# purged without autoremove, which keeps every shared library the packages load.
+# The C, C++ and Fortran compilers, make and the C headers stay installed: learners
+# build and install local source packages (R CMD INSTALL, Rcpp, cpp11) into a per-job
+# library, and the classroom qualification proves that path. The worker stays offline.
 # The openssl package's vignette embeds sample private keys that secret scans flag.
 RUN python3 /tmp/install_packages.py && rm /tmp/install_packages.py /tmp/r-packages.lock.json \
-    && apt-get purge -y gcc g++ gfortran cpp make linux-libc-dev libc6-dev \
     && rm -rf /usr/local/lib/R/site-library/openssl/doc \
     && Rscript --vanilla -e 'invisible(lapply(rownames(installed.packages(lib.loc = .libPaths()[1])), loadNamespace))'
 WORKDIR /opt/worker

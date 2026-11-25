@@ -47,6 +47,8 @@ def required_checks(group: str) -> frozenset[str]:
                 "scripts/check_scientific_artifacts.py:persistence",
             }
         )
+    if group == "r":
+        names.add("scripts/check_r_toolchain.py")
     if group == "data-engineering":
         names.add("owned ML service HTTP and rollback")
         names.add("owned data product HTTP, publication and recovery")
@@ -291,6 +293,8 @@ class ClassroomCI:
                 "scientific-artifact-receipts.json",
                 extra=["--profiles", " ".join(self.profiles)],
             )
+        if self.group == "r":
+            self.check("scripts/check_r_toolchain.py", "r-toolchain-receipt.json")
         if self.group == "data-engineering":
             self.run(
                 [

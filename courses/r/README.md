@@ -118,7 +118,7 @@ Each chapter states its direct prerequisites and includes at least two independe
 
 ## Prepared packages and external projects
 
-The ordinary worker is CPU-based and offline. Prepared packages include ggplot2, Plotly, R6, S7, jsonlite and R's statistical/recommended libraries. Lessons do not install packages, fetch remote data or require RStudio. The package-development chapters explain a real multi-file package workflow as an optional contributor project; the classroom pad remains a single-script execution surface.
+The ordinary worker is CPU-based and offline. Prepared packages include ggplot2, Plotly, R6, S7, jsonlite and R's statistical/recommended libraries. Lessons do not install packages, fetch remote data or require RStudio. The package-development chapters explain a real multi-file package workflow as an optional contributor project; the classroom pad remains a single-script execution surface. The worker keeps its C, C++ and Fortran compilers, so a script can write a small source package to a temporary directory and build it with `R CMD INSTALL` or compile Rcpp and cpp11 code offline.
 
 Learn modeling assumptions and scientific interpretation with the [statistics tutorial](../statistics-ml/README.md). Python and JAX provide complementary executable approaches. A successful R program is evidence about the stated computation, not evidence that an observational association is causal or a model will generalize.
 
