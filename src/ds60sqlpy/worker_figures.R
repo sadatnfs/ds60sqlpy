@@ -50,6 +50,10 @@
   } else {
     setHook(packageEvent("plotly", "onLoad"), register_plotly, action = "append")
   }
+  # R built without Pango defaults bitmap devices to Xlib, and the worker has no
+  # display. Rscript --vanilla skips Rprofile.site, so set the image default here
+  # for learner png() calls and for devices that packages such as Plotly open.
+  options(bitmapType = "cairo")
   grDevices::png(file.path(run_directory, ".ds60-r-%02d.png"), width = 900L, height = 600L, res = 100L, type = "cairo")
   on.exit(
     {

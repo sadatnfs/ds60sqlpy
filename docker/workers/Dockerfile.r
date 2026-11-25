@@ -95,7 +95,12 @@ RUN python3 /tmp/install_packages.py \
 FROM r-runtime
 COPY --from=r-packages /usr/local/share/ds60-build-logs /usr/local/share/ds60-build-logs
 COPY --from=r-packages /usr/local/lib/R/site-library /usr/local/lib/R/site-library
-RUN Rscript --vanilla -e 'invisible(lapply(rownames(installed.packages(lib.loc = .libPaths()[1])), loadNamespace))'
+# Without Pango, R makes Xlib the default bitmap type, and there is no display.
+# Sessions that read the site profile (projects, R CMD INSTALL, interactive R)
+# use cairo; the classroom runner sets the same option because it runs --vanilla.
+RUN echo 'options(bitmapType = "cairo")' >> /usr/local/lib/R/etc/Rprofile.site \
+    && Rscript -e 'stopifnot(identical(getOption("bitmapType"), "cairo")); grDevices::png(tempfile(fileext = ".png")); plot(1); invisible(grDevices::dev.off())' \
+    && Rscript --vanilla -e 'invisible(lapply(rownames(installed.packages(lib.loc = .libPaths()[1])), loadNamespace))'
 WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py src/ds60sqlpy/worker_figures.R /opt/worker/src/ds60sqlpy/
 ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=r-statistics
