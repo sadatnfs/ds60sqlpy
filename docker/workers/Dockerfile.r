@@ -25,18 +25,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # and fontconfig text, and no X11, XCB or GLib.
 WORKDIR /usr/src/cairo
 RUN curl -fsSL --retry 5 --retry-all-errors -o /tmp/cairo.tar.xz \
-       "https://cairographics.org/releases/cairo-${CAIRO_VERSION}.tar.xz" \
+    "https://cairographics.org/releases/cairo-${CAIRO_VERSION}.tar.xz" \
     && echo "${CAIRO_SOURCE_SHA256}  /tmp/cairo.tar.xz" | sha256sum -c - \
     && tar -xJf /tmp/cairo.tar.xz --strip-components=1 && rm /tmp/cairo.tar.xz \
     && meson setup build --prefix=/usr/local --libdir=lib --buildtype=release --wrap-mode=nodownload \
-         -Dxlib=disabled -Dxcb=disabled -Dtee=disabled -Dglib=disabled -Dspectre=disabled \
-         -Dlzo=disabled -Dsymbol-lookup=disabled -Dtests=disabled -Dgtk_doc=false \
-         -Dpng=enabled -Dzlib=enabled -Dfreetype=enabled -Dfontconfig=enabled \
+        -Dxlib=disabled -Dxcb=disabled -Dtee=disabled -Dglib=disabled -Dspectre=disabled \
+        -Dlzo=disabled -Dsymbol-lookup=disabled -Dtests=disabled -Dgtk_doc=false \
+        -Dpng=enabled -Dzlib=enabled -Dfreetype=enabled -Dfontconfig=enabled \
     && meson install -C build --strip && ldconfig \
     && pkgconf --exists cairo-png cairo-ft cairo-pdf cairo-svg && ! pkgconf --exists cairo-xlib
 WORKDIR /usr/src/R
 RUN curl -fsSL --retry 5 --retry-all-errors -o /tmp/R.tar.gz \
-       "https://cloud.r-project.org/src/base/R-4/R-${R_VERSION}.tar.gz" \
+    "https://cloud.r-project.org/src/base/R-4/R-${R_VERSION}.tar.gz" \
     && echo "${R_SOURCE_SHA256}  /tmp/R.tar.gz" | sha256sum -c - \
     && tar -xzf /tmp/R.tar.gz --strip-components=1 && rm /tmp/R.tar.gz
 # The configure options match the previous Ubuntu-based R build: shared libR,
@@ -44,12 +44,12 @@ RUN curl -fsSL --retry 5 --retry-all-errors -o /tmp/R.tar.gz \
 # packages. Graphics use the cairo above; there is no display, so X11 and Tcl/Tk
 # are off, and the unused TIFF device is left out with its library.
 RUN R_PAPERSIZE=letter R_BATCHSAVE="--no-save --no-restore" PERL=/usr/bin/perl \
-       R_UNZIPCMD=/usr/bin/unzip R_ZIPCMD=/usr/bin/zip LIBnn=lib AWK=/usr/bin/awk \
-       CFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2" \
-       CXXFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2" \
-       ./configure --prefix=/usr/local --enable-R-shlib --enable-memory-profiling --with-readline \
-         --with-blas --with-lapack --with-recommended-packages --with-cairo --with-x=no --without-tcltk \
-         --without-libtiff \
+    R_UNZIPCMD=/usr/bin/unzip R_ZIPCMD=/usr/bin/zip LIBnn=lib AWK=/usr/bin/awk \
+    CFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2" \
+    CXXFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2" \
+    ./configure --prefix=/usr/local --enable-R-shlib --enable-memory-profiling --with-readline \
+    --with-blas --with-lapack --with-recommended-packages --with-cairo --with-x=no --without-tcltk \
+    --without-libtiff \
     && make -j"$(nproc)" && make install-strip \
     && /usr/local/bin/Rscript --vanilla -e 'stopifnot(getRversion() == "4.6.1", capabilities("cairo"), capabilities("profmem"))'
 
@@ -78,7 +78,7 @@ COPY --from=r-source /usr/local/bin/R /usr/local/bin/Rscript /usr/local/bin/
 ENV R_HOME=/usr/local/lib/R LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 TZ=Etc/UTC
 RUN ldconfig && install -d -m 2775 -g staff /usr/local/lib/R/site-library \
     && echo "R_LIBS=\${R_LIBS-'/usr/local/lib/R/site-library:/usr/local/lib/R/library'}" \
-       >> /usr/local/lib/R/etc/Renviron.site \
+        >>/usr/local/lib/R/etc/Renviron.site \
     && Rscript --vanilla -e 'stopifnot(getRversion() == "4.6.1", capabilities("cairo"), grepl("openblas", La_library()))'
 
 FROM r-runtime AS r-packages
