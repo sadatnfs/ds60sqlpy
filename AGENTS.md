@@ -26,6 +26,8 @@ For a new computer or a new assistant with no conversation history, start with
 handoff; previous chat sessions, local caches and GSD runtime state are not
 prerequisites. The overhaul is closed out at the owner's request. Do not restart
 completed phases or deferred reviews without a new task.
+See [progress and takeover prompts](docs/TAKEOVER.md) for the delivered changes
+and remaining verification boundaries.
 
 ## CVE policy
 

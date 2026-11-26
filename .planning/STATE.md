@@ -27,6 +27,7 @@ See: .planning/PROJECT.md (updated 2026-11-23)
 **Current focus:** Owner-requested closeout. All 44 plans are done and release
 v2.1.1 is published. Start a new computer or assistant at `AGENTS.md` and
 `docs/fresh-machine.md` on `main`. No automatic continuation is pending.
+Progress and copy-paste takeover prompts: `docs/TAKEOVER.md`.
 
 ## Current Position
 

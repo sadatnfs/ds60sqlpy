@@ -5,6 +5,9 @@ Python environment, local Docker images, MCP connections or GSD session files.
 The completed overhaul is closed out; begin a new task rather than automatically
 resuming historical plans.
 
+For the completed work, exact verification scope and copy-paste takeover
+prompts, read [the progress handoff](TAKEOVER.md).
+
 ## 1. Get the maintained checkout
 
 Install Git, Bash and a running Linux-container Docker engine with Compose

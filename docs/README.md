@@ -38,6 +38,8 @@ practice lessons keep attempts and reference solutions separate.
 
 On a new computer, use [fresh-machine onboarding](fresh-machine.md) for a
 repository-only handoff, published-image setup and the contributor route.
+The [progress handoff](TAKEOVER.md) includes ready-to-use takeover prompts and
+distinguishes completed work from unconfirmed hosted CI.
 
 Start with [CONTRIBUTING.md](../CONTRIBUTING.md), [AGENTS.md](../AGENTS.md) and the
 [repository tour](repository-tour.md). The [checkpoint](implementation/CHECKPOINT.md)
