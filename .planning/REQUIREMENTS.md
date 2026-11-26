@@ -45,13 +45,13 @@
 
 ### Post-release Hardening
 
-- [ ] **HARD-01**: Repository and image security findings with an available fix are remediated; shipped Dockerfile misconfigurations are removed from the app image, base-image and kernel-header findings are reduced, CodeQL scans every push, and each remaining exception has a current justification.
-- [ ] **HARD-02**: Lessons teach lesson-specific material rather than shared template text; the catalog templated-prose total falls by at least half and no lesson exceeds 50% templated words.
-- [ ] **HARD-03**: Runnable code samples in the companion guides are executed by an automated harness in their own runtimes, and failures are fixed or explicitly marked as fragments.
-- [ ] **HARD-04**: The R worker image can build source packages with C, C++ and Fortran code, and a test proves it.
-- [ ] **HARD-05**: Qualified scientific-project images are scanned and pushed to the registry from GitHub Actions only, with multi-architecture manifests.
-- [ ] **HARD-06**: The full test suite passes repeatedly under parallel execution with no known flaky tests.
-- [ ] **HARD-07**: No tracked first-party file contains an em dash or en dash, and a repository-wide gate enforces it.
+- [x] **HARD-01**: Repository and image security findings with an available fix are remediated; shipped Dockerfile misconfigurations are removed from the app image, base-image and kernel-header findings are reduced, CodeQL scans every push, and each remaining exception has a current justification.
+- [x] **HARD-02**: Lessons teach lesson-specific material rather than shared template text; the catalog templated-prose total falls by at least half and no lesson exceeds 50% templated words.
+- [x] **HARD-03**: Runnable code samples in the companion guides are executed by an automated harness in their own runtimes, and failures are fixed or explicitly marked as fragments.
+- [x] **HARD-04**: The R worker image can build source packages with C, C++ and Fortran code, and a test proves it.
+- [x] **HARD-05**: Qualified scientific-project images are scanned and pushed to the registry from GitHub Actions only, with multi-architecture manifests.
+- [x] **HARD-06**: The full test suite passes repeatedly under parallel execution with no known flaky tests.
+- [x] **HARD-07**: No tracked first-party file contains an em dash or en dash, and a repository-wide gate enforces it.
 
 ## v2 Requirements
 
@@ -111,13 +111,13 @@ Deferred until the existing course quality floor and core classroom workflows ar
 | REL-02 | Phase 10 | Complete |
 | UX-03 | Phase 08.1 | Complete |
 | REL-03 | Phase 10 | Complete |
-| HARD-01 | Phase 11 | Pending |
-| HARD-02 | Phase 11 | Pending |
-| HARD-03 | Phase 11 | Pending |
-| HARD-04 | Phase 11 | Pending |
-| HARD-05 | Phase 11 | Pending |
-| HARD-06 | Phase 11 | Pending |
-| HARD-07 | Phase 11 | Pending |
+| HARD-01 | Phase 11 | Complete |
+| HARD-02 | Phase 11 | Complete |
+| HARD-03 | Phase 11 | Complete |
+| HARD-04 | Phase 11 | Complete |
+| HARD-05 | Phase 11 | Complete |
+| HARD-06 | Phase 11 | Complete |
+| HARD-07 | Phase 11 | Complete |
 
 **Coverage:**
 - v1 requirements: 30 total

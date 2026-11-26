@@ -17,7 +17,7 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
 - [x] **Phase 08.1: Unslop Classroom UI Chrome (INSERTED)** - Remove visual slop from the classroom chrome without touching lesson content.
 - [x] **Phase 9: Code & Desktop Acceptance Gates** - Pass repository quality checks and bounded desktop browser acceptance for the overhaul.
 - [x] **Phase 10: Verified Publication & Safe Closeout** - Publish only qualified artifacts, smoke-test the pull, and separately verify safe cleanup.
-- [ ] **Phase 11: Post-release Hardening & Content Completion** - Close the remaining security, content, runtime, publication, test and typography debt left after release 2.0.0.
+- [x] **Phase 11: Post-release Hardening & Content Completion** - Close the remaining security, content, runtime, publication, test and typography debt left after release 2.0.0. (completed 2026-11-25)
 
 ## Phase Details
 
@@ -244,18 +244,18 @@ Plans:
   5. Qualified scientific-project images are pushed to the registry from GitHub Actions only, with scan gates and multi-architecture manifests.
   6. The full test suite passes repeatedly under parallel execution with no known flaky tests.
   7. No tracked first-party file contains an em dash or en dash, and a repository-wide gate keeps it that way.
-**Plans**: 9 plans
+**Plans**: 9/9 plans complete
 
 Plans:
-- [ ] 11-01-PLAN.md: Repository-wide dash removal and gate
-- [ ] 11-02-PLAN.md: Flaky and failing test fixes
-- [ ] 11-03-PLAN.md: R worker compiler toolchain and package-build test
-- [ ] 11-04-PLAN.md: Security hardening (image misconfigurations, kernel headers, Swift base, CodeQL, Dependabot)
-- [ ] 11-05-PLAN.md: Scientific image publication from GitHub Actions
-- [ ] 11-06-PLAN.md: Companion-guide code execution harness and sample fixes
-- [ ] 11-07-PLAN.md: Lesson-specific rewrites of templated prose
-- [ ] 11-08-PLAN.md: CI qualification, policy refresh and Phase 11 closeout
-- [ ] 11-09-PLAN.md: Minimal-CVE R and Swift bases and release 2.1.1
+- [x] 11-01-PLAN.md: Repository-wide dash removal and gate
+- [x] 11-02-PLAN.md: Flaky and failing test fixes
+- [x] 11-03-PLAN.md: R worker compiler toolchain and package-build test
+- [x] 11-04-PLAN.md: Security hardening (image misconfigurations, kernel headers, Swift base, CodeQL, Dependabot)
+- [x] 11-05-PLAN.md: Scientific image publication from GitHub Actions
+- [x] 11-06-PLAN.md: Companion-guide code execution harness and sample fixes
+- [x] 11-07-PLAN.md: Lesson-specific rewrites of templated prose
+- [x] 11-08-PLAN.md: CI qualification, policy refresh and Phase 11 closeout
+- [x] 11-09-PLAN.md: Minimal-CVE R and Swift bases and release 2.1.1
 
 ## Progress
 
@@ -272,4 +272,4 @@ Plans:
 | 08.1. Unslop Classroom UI Chrome (INSERTED) | 1/1 | Complete | 2026-11-24 |
 | 9. Code & Desktop Acceptance Gates | 2/2 | Complete | 2026-11-24 |
 | 10. Verified Publication & Safe Closeout | 2/2 | Complete | 2026-11-24 |
-| 11. Post-release Hardening & Content Completion | 7/9 | In progress | - |
+| 11. Post-release Hardening & Content Completion | 9/9 | Complete    | 2026-11-25 |

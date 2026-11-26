@@ -1,19 +1,20 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 11
-current_phase_name: Post-release Hardening & Content Completion
-current_plan: 0
-status: executing
-stopped_at: Phase-11-executing-wave-1
-last_updated: "2026-11-24T21:30:06.000Z"
-last_activity: 2026-11-24; Phase 11 planned (8 plans); executing wave 1.
-state_head: 2c3c3f8ecefde5a26325f6f49f22238c8b5b147a
+current_phase: 1
+current_phase_name: Qualify 1.4.4 Guide & Python/SQL Walkthroughs
+current_plan: 5
+status: verifying
+stopped_at: Phase 11 complete, ready to verify Phase 1
+last_updated: "2026-11-26T00:20:12.460Z"
+last_activity: 2026-11-25
+last_activity_desc: Phase 11 complete, transitioned to Phase 1
+state_head: a2285ec3785290027a52735ae9778c6bad6e55e9
 progress:
   total_phases: 12
-  completed_phases: 9
-  total_plans: 43
-  completed_plans: 35
-  percent: 81
+  completed_phases: 10
+  total_plans: 44
+  completed_plans: 44
+  percent: 83
 ---
 
 # Project State
@@ -23,22 +24,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-23)
 
 **Core value:** Learners can understand, practice, run, and keep their work in any DS60 course without installing toolchains or losing learning state.
-**Current focus:** Phase 11 post-release hardening: security, templated lessons, guide code execution, R compilers, scientific image publishing, flaky tests and dashes
+**Current focus:** All 44 plans are done and release v2.1.1 is published. Only the human first-time learner walkthrough for Phases 1 and 6 remains.
 
 ## Current Position
 
-Phase: 11 (Post-release Hardening & Content Completion): EXECUTING
-Current Plan: 0
-Total Plans in Phase: 8
-Status: All 35 plans have summaries. Phases 2, 3, 4, 5, 7, 8, 08.1, 9 and 10 verified (passed). Phases 1 and 6 verified human_needed (first-time learner walkthrough). Release v2.0.0 is a published, non-draft GitHub release tagged at a4354ff8; every local DS60 image, container and network was removed, and learner volumes were kept.
-Last activity: 2026-11-24; Phase 11 added at the owner's request (security fixes, lesson template text, guide code execution, R compilers, scientific image publishing from Actions, flaky tests, em/en dashes).
+Phase: 1 (Qualify 1.4.4 Guide & Python/SQL Walkthroughs), awaiting human UAT
+Current Plan: 5 of 5
+Status: Phase 11 verified (7/7) and complete; Phases 1 and 6 await the human learner walkthrough
+Last activity: 2026-11-25: Phase 11 complete; release v2.1.1 published from 658d0cea (Latest); evidence commit a2285ec3
 
-Progress: [████████░░] 81% of plans (9 of 12 phases closed; 2 await human UAT; Phase 11 planning)
+Progress: [████████░░] 44 of 44 plans done (10 of 12 phases closed; Phases 1 and 6 await human UAT)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 9
 - Average duration: -
 - Total execution time: -
 
@@ -46,7 +46,7 @@ Progress: [████████░░] 81% of plans (9 of 12 phases closed; 
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 11 | 9 | - | - |
 
 **Recent Trend:**
 - Last 5 plans: -
@@ -76,7 +76,7 @@ Progress: [████████░░] 81% of plans (9 of 12 phases closed; 
 ### Pending Todos
 
 - Human UAT: a first-time learner walkthrough for Phases 1 and 6.
-- Owner review of the 276 pending-owner CVE exceptions before their earliest expiry (2026-12-23).
+- Owner review of the 94 pending-owner CVE exceptions before they expire (60 on 2026-12-23, 34 on 2026-12-24).
 
 ### Blockers/Concerns
 
@@ -94,15 +94,15 @@ Progress: [████████░░] 81% of plans (9 of 12 phases closed; 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
 | UAT | Phases 1 and 6 first-time learner walkthrough | human_needed | 2026-11-24 | v2.0.0 |
-| Security | 276 pending-owner CVE exceptions (earliest expiry 2026-12-23) | owner review | 2026-11-24 | v2.0.0 |
-| Images | Scientific profile images are not published to Docker Hub | deferred | 2026-11-24 | v2.0.0 |
-| Runtime | R worker ships without compilers; spark-tmb on OpenSSL 3.5; standalone packages on Spark 4.0.1 | deferred | 2026-11-24 | v2.0.0 |
-| Content | Templated stub lessons and guide code that is not executed in CI | deferred | 2026-11-24 | v2.0.0 |
-| Quality | 6 flaky tests (including ballista); 879 repo-wide em/en dash hits outside the changed files | deferred | 2026-11-24 | v2.0.0 |
+| Security | 94 pending-owner CVE exceptions (60 expire 2026-12-23, 34 expire 2026-12-24) | owner review | 2026-11-25 | v2.1.1 |
+| Images | Scientific profile images published from GitHub Actions (HARD-05) | resolved in Phase 11 | 2026-11-24 | v2.1.0 |
+| Runtime | R worker compilers (HARD-04); R rebuilt on Debian 13 and Swift on Amazon Linux 2023 | resolved in Phase 11 | 2026-11-24 | v2.1.1 |
+| Content | Templated lessons (HARD-02) and guide code execution in CI (HARD-03) | resolved in Phase 11 | 2026-11-24 | v2.1.0 |
+| Quality | Flaky tests (HARD-06) and repository-wide em/en dash gate (HARD-07) | resolved in Phase 11 | 2026-11-24 | v2.1.0 |
 | Caches | About 60.63 GB of BuildKit cache and 10 GB in ~/.cache/ds60sqlpy kept locally | owner decision | 2026-11-24 | v2.0.0 |
 
 ## Session Continuity
 
-Last session: 2026-11-24T21:30:06.000Z
-Stopped at: Phase-10-complete
+Last session: 2026-11-26T00:20:12.460Z
+Stopped at: Phase 11 complete, ready to verify Phase 1
 Resume file: None
