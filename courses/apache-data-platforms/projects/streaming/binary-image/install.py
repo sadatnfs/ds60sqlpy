@@ -14,6 +14,8 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 URL = "https://downloads.apache.org/kafka/4.4.0/kafka_2.13-4.4.0.tgz"
+# downloads.apache.org drops a release once a newer one ships; the archive keeps it.
+MIRRORS = (URL, "https://archive.apache.org/dist/kafka/4.4.0/kafka_2.13-4.4.0.tgz")
 SHA512 = (
     "f5ceba8a265ab6bb2d68362b1f6859a95e15d60ef92ba83b43fdf065b557dc18"
     "e98d6383c15b9977320e25b3a2c8b6f11decb17b0fa6c0f163423793a0eb95cb"
@@ -45,6 +47,22 @@ def open_download(source: Any, timeout: float, attempts: int = 5) -> Any:
     raise AssertionError("Unreachable download attempt boundary")
 
 
+def open_mirror(timeout: float) -> tuple[str, Any]:
+    """Open the first mirror still serving the pinned file; the SHA512 pin decides trust."""
+    for index, source in enumerate(MIRRORS):
+        try:
+            return source, open_download(source, timeout)
+        except urllib.error.URLError as error:
+            if index + 1 == len(MIRRORS):
+                raise
+            print(
+                f"{source} is unavailable ({error}); trying the next official Apache mirror.",
+                file=sys.stderr,
+                flush=True,
+            )
+    raise AssertionError("Unreachable mirror boundary")
+
+
 def install(destination: Path = Path("/opt/kafka")) -> None:
     if destination.exists():
         raise ValueError("Destination already exists")
@@ -53,8 +71,9 @@ def install(destination: Path = Path("/opt/kafka")) -> None:
         archive = root / "kafka.tgz"
         digest = hashlib.sha512()
         size = 0
-        with open_download(URL, 60) as response, archive.open("wb") as output:
-            if response.geturl() != URL:
+        source, response = open_mirror(60)
+        with response, archive.open("wb") as output:
+            if response.geturl() != source:
                 raise ValueError("Unexpected distribution redirect")
             while chunk := response.read(1024 * 1024):
                 size += len(chunk)

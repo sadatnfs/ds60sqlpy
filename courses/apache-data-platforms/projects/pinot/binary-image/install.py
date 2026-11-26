@@ -13,7 +13,8 @@ import urllib.request
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-URL = "https://downloads.apache.org/pinot/apache-pinot-1.5.1/apache-pinot-1.5.1-bin.tar.gz"
+# Pinot 1.6.0 replaced 1.5.1 on downloads.apache.org; the Apache archive keeps every release.
+URL = "https://archive.apache.org/dist/pinot/apache-pinot-1.5.1/apache-pinot-1.5.1-bin.tar.gz"
 SHA512 = (
     "0224b13b62e3a7a16f1409081526e07cb35143616d8b3563e2936de82128aaf09"
     "d785bd105b11d221f48784b3031f239fbf969cd53f410243e315cebee034dfa"

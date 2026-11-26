@@ -17,6 +17,11 @@ from typing import Any
 from urllib.parse import urlsplit
 
 LOCK = json.loads(Path(__file__).with_name("artifact-lock.json").read_text())
+# downloads.apache.org drops a release once a newer one ships; the archive keeps it.
+MIRRORS = (
+    LOCK["url"],
+    LOCK["url"].replace("https://downloads.apache.org/", "https://archive.apache.org/dist/", 1),
+)
 
 
 def open_download(source: Any, timeout: float, attempts: int = 5) -> Any:
@@ -42,6 +47,22 @@ def open_download(source: Any, timeout: float, attempts: int = 5) -> Any:
     raise AssertionError("Unreachable download attempt boundary")
 
 
+def open_mirror(timeout: float) -> Any:
+    """Open the first mirror still serving the pinned file; the SHA512 pin decides trust."""
+    for index, source in enumerate(MIRRORS):
+        try:
+            return open_download(source, timeout)
+        except urllib.error.URLError as error:
+            if index + 1 == len(MIRRORS):
+                raise
+            print(
+                f"{source} is unavailable ({error}); trying the next official Apache mirror.",
+                file=sys.stderr,
+                flush=True,
+            )
+    raise AssertionError("Unreachable mirror boundary")
+
+
 def install(target: Path) -> None:
     if target.exists() or target.is_symlink():
         raise ValueError("Runtime destination must be absent; existing data is retained")
@@ -54,7 +75,7 @@ def install(target: Path) -> None:
         digest = hashlib.sha512()
         total = 0
         with (
-            open_download(LOCK["url"], 60) as response,
+            open_mirror(60) as response,
             archive.open("xb") as output,
         ):
             parsed = urlsplit(response.geturl())

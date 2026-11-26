@@ -238,8 +238,8 @@ def qualify(
         "cleanup": False,
     }
 
-    def action(label: str, *arguments: str) -> str:
-        output = command(["bash", "run.sh", *arguments], workspace)
+    def action(label: str, *arguments: str, timeout: float = 240) -> str:
+        output = command(["bash", "run.sh", *arguments], workspace, timeout=timeout)
         (workspace / (label + ".log")).write_text(output + "\n")
         return output
 
@@ -248,7 +248,9 @@ def qualify(
             [docker, "info", "--format", "{{.OSType}}/{{.Architecture}}"], workspace
         )
         if prepare:
-            action("prepare", "prepare", "--binary")
+            # Preparation downloads a pinned Apache release and builds an image,
+            # so a busy runner or mirror needs more than an ordinary action.
+            action("prepare", "prepare", "--binary", timeout=900)
         action("start", "start", *(["--binary"] if name == "streaming" else []))
         fields = dict(line.split("=", 1) for line in (workspace / ".env").read_text().splitlines())
         project = fields["DS60_WORKSHOP_PROJECT"]

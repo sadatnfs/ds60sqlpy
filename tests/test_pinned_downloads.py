@@ -105,3 +105,46 @@ def test_pinned_download_fails_fast_when_missing_and_stops_after_bounded_retries
         with pytest.raises(urllib.error.HTTPError) as raised:
             helper("https://downloads.invalid/pinned", 30)
         assert raised.value.code == code and sleeps == waits
+
+
+MIRRORED = (
+    "courses/apache-data-platforms/projects/cassandra/binary-image/install.py",
+    "courses/apache-data-platforms/projects/flink/binary-image/install.py",
+    "courses/apache-data-platforms/projects/streaming/binary-image/install.py",
+)
+
+
+@pytest.mark.parametrize("relative", MIRRORED)
+def test_retired_apache_release_falls_back_to_the_archive_mirror(
+    relative: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import runpy
+
+    namespace = runpy.run_path(str(ROOT / relative))
+    primary, archive = namespace["MIRRORS"]
+    assert primary.startswith("https://downloads.apache.org/")
+    assert archive == primary.replace(
+        "https://downloads.apache.org/", "https://archive.apache.org/dist/", 1
+    )
+    opened: list[str] = []
+
+    def retired(source: Any, timeout: float) -> Any:
+        opened.append(source)
+        if source == primary:
+            raise http_error(404)
+        return "response"
+
+    monkeypatch.setattr(urllib.request, "urlopen", retired)
+    result = namespace["open_mirror"](30)
+    assert opened == [primary, archive]
+    assert result in {"response", (archive, "response")}
+
+    def missing(source: Any, timeout: float) -> Any:
+        opened.append(source)
+        raise http_error(404)
+
+    opened.clear()
+    monkeypatch.setattr(urllib.request, "urlopen", missing)
+    with pytest.raises(urllib.error.HTTPError):
+        namespace["open_mirror"](30)
+    assert opened == [primary, archive]
