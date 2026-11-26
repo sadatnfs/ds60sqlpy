@@ -66,10 +66,9 @@ cd ds60sqlpy
 ./classroom
 ```
 
-This checkout targets release 2.1.1. Release 2.1.0 is published as combined
-AMD64/ARM64 images and passed fresh-pull acceptance on both architectures. To use
-prebuilt 2.1.1 images, first verify its completed full publisher and fresh-pull
-acceptance, then use its matching source or starter with
+This checkout targets release 2.1.1, which is published as combined AMD64/ARM64
+images and passed fresh-pull acceptance on both architectures. To use its
+prebuilt images instead of building locally, run
 `./classroom --all --from-hub sadatnfs --tag 2.1.1`.
 See [Docker Hub distribution](#optional-docker-hub-distribution) for the release
 evidence, selective installation and saved versions.
@@ -372,17 +371,17 @@ acceptance claim.
 
 ## Optional Docker Hub distribution
 
-This checkout targets release 2.1.1; check its completed publisher and
-fresh-pull acceptance before using its images. The previous release,
-[2.1.0](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.1.0), is
-published. Its [publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45653905041)
-ran from [source `8894b940`](https://github.com/sadatnfs/ds60sqlpy/tree/8894b940aeb22c3934e3e4c423656dfe65f7b7ce)
+This checkout targets release
+[2.1.1](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.1.1), which is
+published. Its [publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45708715797)
+ran from [source `658d0cea`](https://github.com/sadatnfs/ds60sqlpy/tree/658d0cea826a63d3181ac198ead64c3c9b9dbaa9)
 and promoted the App, the DS60 PostgreSQL image, all 25 ordinary workers and the
 four qualified scientific project images as combined Linux AMD64/ARM64 images,
-each with a `latest` alias. Its native AMD64 and ARM64 pull jobs ran a fresh Core
-starter with stop and resume. 2.1.0 supersedes
-[2.0.0](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.0.0), which
-superseded the 1.4.x line. [Docker Hub distribution](docs/dockerhub.md#published-release-and-its-evidence)
+each with a `latest` alias. Its native AMD64 and ARM64 pull jobs inspected every
+published index and ran a fresh Core starter with stop and resume. 2.1.1 supersedes
+[2.1.0](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.1.0), which
+superseded [2.0.0](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.0.0) and
+the 1.4.x line. [Docker Hub distribution](docs/dockerhub.md#published-release-and-its-evidence)
 keeps the full evidence for this and earlier releases.
 
 The [historical 1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)

@@ -22,12 +22,28 @@ Earlier releases have no database tag, so Hub mode builds it locally from
 `docker/postgres` for them.
 GPU workers, SDK/tooling base images and unrelated local images are excluded.
 
-This checkout targets **2.1.1**. Its publication, native image indexes and fresh
-pull/resume acceptance must be checked for that exact release. The 2.1.0
-and 2.0.0 evidence below does not establish those gates for 2.1.1; a version
-string or an earlier successful run never does.
+This checkout targets **2.1.1**, which is published; its evidence is the first
+entry below. Publication, native image indexes and fresh pull/resume acceptance
+are checked for each exact release. A version string or an earlier successful
+run never establishes them for a later one.
 
 ## Published release and its evidence
+
+The [2.1.1 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45708715797)
+completed on November 25, 2026 (UTC) from
+[source `658d0cea`](https://github.com/sadatnfs/ds60sqlpy/tree/658d0cea826a63d3181ac198ead64c3c9b9dbaa9).
+It passed on its second attempt. The first qualified every group on AMD64 and
+ARM64 but stopped at the exact-revision gate, because the dispatch-only
+[PyTorch package verification](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45721660585)
+had not yet run for that commit. After it passed on both architectures, only the
+failed jobs were rerun, which promoted the scanned candidates without rebuilding
+them. It promoted 31 combined AMD64/ARM64 version indexes (the App,
+`2.1.1-postgres`, 25 workers and the four scientific project images) and their 31
+`latest` aliases. Its native AMD64 and ARM64 pull jobs then inspected every
+published index and ran a fresh Core starter with stop and resume. The
+[GitHub release](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.1.1) moves
+the R and Swift workers off Ubuntu 24.04 and cuts the CVE exception list from 256
+entries to 94. 2.1.1 supersedes 2.1.0.
 
 The [2.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45653905041)
 completed on November 25, 2026 (UTC) from
