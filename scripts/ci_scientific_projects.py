@@ -644,20 +644,23 @@ def stage_projects(
     context: release.Context,
     architecture: str,
     directory: Path,
-    scan_path: Path,
+    scan_path: Path | None,
     registry: Any,
     docker: release.Docker,
     root: Path = ROOT,
 ) -> dict[str, Any]:
-    """Push each qualified project image only after clean, current CVE scan evidence."""
+    """Push qualified project images, checking scan evidence only when explicitly supplied."""
     tested = release.read_json(directory / "tested-images.json")
     if tested != tested_snapshot(context, architecture, directory, docker, root):
-        raise ReleaseError("A scientific image changed after its scan snapshot")
-    scan = release.load_scan(scan_path, tested, root)
-    release.scan_block(scan, tested["images"])
+        raise ReleaseError("A scientific image changed after its qualification snapshot")
+    scan = release.load_scan(scan_path, tested, root) if scan_path is not None else None
+    if scan is not None:
+        release.scan_block(scan, tested["images"])
     staged = []
     for image in tested["images"]:
-        print(f"Staging scanned scientific image: {image['profile']} ({architecture})", flush=True)
+        print(
+            f"Staging qualified scientific image: {image['profile']} ({architecture})", flush=True
+        )
         staged.append(release.stage_candidate(registry, docker, context, image, architecture))
     result = {"scan": scan, "images": staged}
     identities = {
@@ -700,20 +703,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "tested":
         snapshot = tested_snapshot(context, args.architecture, directory, docker)
         release.write_json(directory / "tested-images.json", snapshot)
-        print("Recorded the qualified scientific image IDs for scanning")
+        print("Recorded the qualified scientific image IDs")
         return 0
     if args.command == "stage":
-        if args.scan is None:
-            raise ReleaseError("Staging requires clean scan evidence")
         stage_projects(
             context,
             args.architecture,
             directory,
-            owned_path(args.scan),
+            owned_path(args.scan) if args.scan is not None else None,
             release.registry_for(context, push=True),
             docker,
         )
-        print("Staged only the scanned and qualified scientific images")
+        print("Staged only the qualified scientific images")
         return 0
     if args.command == "import-bases":
         if args.receipts_dir is None:

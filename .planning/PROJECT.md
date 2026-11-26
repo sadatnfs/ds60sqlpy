@@ -22,7 +22,7 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 - [ ] Improve the desktop classroom's navigation, lesson operation, exercises, and run experience without losing drafts or saved results.
 - [ ] Review and improve the content and learning experience for every existing language and subject track, using clear, accurate, practical instruction at least as strong as the Python and SQL reference.
 - [ ] Verify supported Docker images, runtime behavior, startup, saved work, and release distribution through reproducible tests.
-- [ ] Scan every image in a release and remediate detected CVEs before publication.
+- [x] Make CVE scanning and CVE-only remediation opt-in, without weakening classroom functionality or image-integrity checks (owner closeout, 2026-11-25).
 - [ ] Gate changes with focused automated tests, repository quality checks, and bounded desktop browser review.
 - [ ] Publish a release only after its code, image, and registry checks pass; stop DS60-owned test containers when the work is finished.
 
@@ -35,6 +35,11 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 
 ## Context
 
+- Current handoff: release v2.1.1 is published; all 44 implementation plans are
+  complete. The owner closed this overhaul on 2026-11-25. Start new-machine
+  work from `main`, `AGENTS.md` and `docs/fresh-machine.md`; no previous chat or
+  machine-local runtime state is needed. Historical context below records the
+  initial checkpoint, not an instruction to resume it.
 - The project is a brownfield Python application with a static HTML, CSS, and JavaScript classroom, a broad multi-subject curriculum, and profile-specific Docker worker images.
 - The repository's GSD codebase map is in `.planning/codebase/`. Product and architecture references include `PRODUCT.md`, `AGENTS.md`, `docs/repository-tour.md`, and `docs/implementation/CHECKPOINT.md`.
 - The current checkout is `checkpoint/classroom-guide-step-through-2026-11-20` at the checkpoint commit `a7b9bee8`. It contains the manual, tour, UI refinements, and an initial Python/SQL step-through implementation.
@@ -48,7 +53,7 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 - **Runtime**: Preserve local Docker delivery, the existing course/profile boundaries, and offline classroom assets.
 - **Learner state**: Keep drafts, progress, receipts, and volumes intact across UI and runtime changes.
 - **Content quality**: Preserve accurate source material and stable lesson identities; make improvements evidence-based and testable.
-- **Image security**: Release images must have no unresolved CVEs in the applicable scan results; rebuild or remediate affected images before publication.
+- **Image security**: CVE scans and CVE-only fixes are opt-in, not publication gates. Preserve runtime qualification, secret checks, digest/checksum validation and local isolation. Do not claim vulnerability-free images.
 - **Release safety**: Separate ordinary code changes from pushing to `main` and publishing images. Verify all release gates and the Docker Hub target before publishing.
 - **Cleanup**: Stop DS60-owned test containers at completion, but do not stop unrelated services or remove learner volumes.
 
@@ -61,7 +66,8 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 | Use Python and SQL as a quality reference, not as exclusive scope | The original near-term work targets these tracks, while the owner expanded the overhaul to all languages | Accepted |
 | Keep the target desktop-only | Mobile-specific work is not wanted for this classroom | Accepted |
 | Preserve the local Docker model and all learner state | This is the established product and its saved work is essential | Accepted |
-| Require clean image vulnerability scans before publication | The owner requires all built images to be CVE-free | Accepted |
+| Require clean image vulnerability scans before publication | Original overhaul requirement | Superseded 2026-11-25 |
+| Prioritize a working classroom; make CVE scans and CVE-only fixes opt-in | Owner explicitly retired the automatic CVE maintenance workload | Accepted 2026-11-25 |
 
 ## Evolution
 
@@ -78,4 +84,4 @@ This document evolves at phase transitions and milestone boundaries.
 2. Update the context with the verified product and release state.
 
 ---
-*Last updated: 2026-11-23 after project initialization*
+*Last updated: 2026-11-25 at owner-requested closeout*

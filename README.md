@@ -16,6 +16,10 @@ Use the [documentation map](docs/README.md) to find installation, learning,
 backup, tutoring and contributor guides. The repository includes dedicated
 skills for guiding a learner and adding a new language or subject.
 
+**New computer or new coding assistant:** follow
+[fresh-machine onboarding](docs/fresh-machine.md). Everything needed to orient
+the assistant is in this repository; no previous chat session is required.
+
 ## Start or resume the classroom
 
 ### 1. Prepare your machine

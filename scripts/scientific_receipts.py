@@ -538,9 +538,9 @@ def validate_published_images(
     architecture: str,
     identities: dict[str, Any],
 ) -> dict[str, Any]:
-    """Each built project image was scanned clean, then pushed to its own candidate tag."""
+    """Each qualified project image was pushed to its own identity-bound candidate tag."""
     if not isinstance(value, dict) or set(value) != {"scan", "images"}:
-        raise ReleaseError("Scientific receipt lacks its scanned candidate images")
+        raise ReleaseError("Scientific receipt lacks its qualified candidate images")
     images = value["images"]
     if not isinstance(images, list) or len(images) != len(STAGED):
         raise ReleaseError("Scientific receipt must stage each built project image once")
@@ -559,7 +559,8 @@ def validate_published_images(
         ] != identities.get(project):
             raise ReleaseError("Staged scientific image differs from the qualified project image")
         release.staged_image_proof(image, context, architecture)
-    release.scan_block(value["scan"], images)
+    if value["scan"] is not None:
+        release.scan_block(value["scan"], images)
     return value
 
 
@@ -767,7 +768,8 @@ def validate_scientific_receipts(
                     "Scientific imported config differs from the immutable native manifest"
                 )
         published = receipt["published_images"]
-        release.promotion_scan_check(published["scan"], root, now or release.utc_now())
+        if published["scan"] is not None:
+            release.promotion_scan_check(published["scan"], root, now or release.utc_now())
         for image in published["images"]:
             native = release.native_descriptor(image["native"], architecture)
             if not same_head(
@@ -787,12 +789,16 @@ def published_natives(
     scans: dict[str, dict[str, Any]] = {key: {} for key in STAGED.values()}
     for architecture, receipt in chosen.items():
         published = receipt["published_images"]
-        rows = {row["profile"]: row for row in published["scan"]["images"]}
+        rows = (
+            {row["profile"]: row for row in published["scan"]["images"]}
+            if published["scan"]
+            else {}
+        )
         for image in published["images"]:
             key = image["profile"]
             native = release.native_descriptor(image["native"], architecture)
             natives[key][architecture] = native
             scans[key][architecture] = release.promotion_scan_record(
-                image, native, rows[key], published["scan"]
+                image, native, rows.get(key), published["scan"]
             )
     return natives, scans

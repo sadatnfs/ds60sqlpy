@@ -721,12 +721,19 @@ local run of `--profiles all` with every option above stays the release gate.
 
 ## Image vulnerability scans
 
-`scripts/image_scan.py` is the release image gate (SEC-01). It runs Trivy
+**Current policy (owner decision, 2026-11-25):** CVE scanning and CVE-only
+remediation are opt-in. Neither full nor targeted workflows run image scans,
+download scanner databases or require scan evidence. The historical exception
+ledger does not need renewal and its expiry cannot block ordinary publication.
+Functional, source/image-identity, secret and runtime checks remain required.
+
+`scripts/image_scan.py` remains an optional manual diagnostic. It runs Trivy
 0.76.2 only as the digest-pinned container
 `aquasec/trivy:0.76.2@sha256:8f6bb947...` through `docker run`, with the Docker
 socket mounted read-only and no registry credentials. Never use the
 `aquasecurity/trivy-action` or `setup-trivy` GitHub actions. Trivy only writes
-JSON (`--exit-code 0`, no ignorefile); DS60 code decides the verdict:
+JSON (`--exit-code 0`, no ignorefile); when explicitly invoked, DS60 code
+decides the diagnostic verdict under these retained rules:
 
 - Any finding with a fixed version blocks at every severity, including LOW and
   UNKNOWN. Fix it by upgrading or rebuilding; the policy cannot accept it, and
@@ -747,7 +754,7 @@ path, or the OS name for coverage), `images` (catalog profiles or `postgres`),
 `justification`, `reviewer`, `reviewed_at` and `expires_at`. Wildcards are
 rejected, and `expires_at` may be at most 90 days after `reviewed_at`. Any
 expired or malformed entry fails every scan. Entries with
-`"reviewer": "pending-owner"` are proposals awaiting owner review;
+`"reviewer": "pending-owner"` are historical proposals, not an active owner queue;
 `python scripts/image_scan.py propose-entries --evidence <file>` drafts them
 for unfixed findings and never for fixable ones. Check the file with
 `python scripts/image_scan.py validate-policy`.
@@ -757,10 +764,13 @@ Scan a local image read-only with `make scan` (defaults
 and the Java DB into `~/.cache/ds60sqlpy/trivy` (caches never live in the
 repository), writes the raw report to `work/p8-scan/reports/` and writes
 evidence to `work/p8-scan/<profile>.json`. Evidence binds each verdict to the
-image ID, revision label, scanner digest, DB timestamps and policy hash. In
-release jobs, `scan --tested work/tested-images.json` scans every
+image ID, revision label, scanner digest, DB timestamps and policy hash.
+For an explicitly requested release scan, `scan --tested work/tested-images.json` scans every
 `tested_image_id` from `docker_release.py inspect`. Exit status 2 means the
-gate blocked.
+optional diagnostic failed. Supplying `--scan` to a staging command opts into
+strict evidence validation, including freshness at promotion. Without it, staged
+receipts record `scan: null` and promotion records `status: not_requested` per
+native digest. Neither is a successful scan or a vulnerability-free claim.
 
 ## Release decision
 
@@ -1011,7 +1021,7 @@ The executable contract lives in
 [`scientific_receipts.py`](../scripts/scientific_receipts.py) and
 [`scientific_package_receipts.py`](../scripts/scientific_package_receipts.py).
 These project environments are not additional ordinary Hub images; their
-scan-gated images publish as separate
+functionally qualified images publish as separate
 [scientific project tags](dockerhub.md#scientific-project-images). Full promotion
 and recovery require complete scientific receipts bound to the same run, source,
 version, native bases and App/Core seeds. Earlier successful attempts may be reused

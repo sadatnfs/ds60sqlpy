@@ -36,6 +36,9 @@ practice lessons keep attempts and reference solutions separate.
 
 ## Develop or add a subject
 
+On a new computer, use [fresh-machine onboarding](fresh-machine.md) for a
+repository-only handoff, published-image setup and the contributor route.
+
 Start with [CONTRIBUTING.md](../CONTRIBUTING.md), [AGENTS.md](../AGENTS.md) and the
 [repository tour](repository-tour.md). The [checkpoint](implementation/CHECKPOINT.md)
 describes current architecture. [Validation](validation.md) lists exact local and

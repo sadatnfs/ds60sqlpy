@@ -16,7 +16,7 @@ All publication routes use one repository, `YOUR_DOCKERHUB_USER/ds60sqlpy`. Repl
 with the actual lowercase username or organization namespace. The app and every
 ordinary worker have separate tags. From release 2.0.0 the DS60 PostgreSQL image
 is built and published with the App and Core images as `VERSION-postgres` and `latest-postgres`,
-scanned under the same CVE policy, and Hub mode pulls it. The image creates the
+and Hub mode pulls it. The image creates the
 course roles only; the classroom loads the training tables on the first SQL run.
 Earlier releases have no database tag, so Hub mode builds it locally from
 `docker/postgres` for them.
@@ -26,6 +26,11 @@ This checkout targets **2.1.1**, which is published; its evidence is the first
 entry below. Publication, native image indexes and fresh pull/resume acceptance
 are checked for each exact release. A version string or an earlier successful
 run never establishes them for a later one.
+
+As of the owner's 2026-11-25 closeout, CVE scans and CVE-only remediation are
+opt-in, not release gates. Historical scan evidence below still describes
+those releases accurately; it does not impose future exception renewals.
+Functional and immutable-image qualification remain required.
 
 ## Published release and its evidence
 
@@ -582,18 +587,16 @@ the publication workflow performs the native runtime qualification itself.
 3. The dedicated scientific-project jobs prepare and qualify the installed
    Spark/Torch package and optional R/TMB reference serially on each native
    architecture, using this run's exact qualified bases. Each job then records
-   the two qualified project image IDs and scans them without registry
-   credentials, using the same pinned scanner and
-   `docker/cve-policy.json` as ordinary images.
-   Only a scan with no blocking finding lets the job push the images to
-   candidate tags such as
+   the two qualified project image IDs and pushes them to candidate tags such as
    `ci-SHA-RUN-ATTEMPT-project-spark-torch-arm64`. Its complete source-bound
-   receipt records each candidate tag, native digest and scan record.
+   receipt records each candidate tag and native digest. CVE scanning is opt-in,
+   not a publication gate; normal staged receipts explicitly record `scan: null`.
 4. Promotion requires the complete ordinary image set and both scientific
    receipts for both architectures, and all required checks to succeed. It
-   rechecks that each scientific candidate still has its recorded digest, that
-   the scan database is less than 24 hours old and that the scan policy matches
-   the committed one. It publishes and validates the worker version tags first,
+   rechecks that each scientific candidate still has its recorded digest.
+   Explicitly supplied optional scan evidence still requires a current database
+   and matching policy; ordinary publication does not load the CVE ledger.
+   It publishes and validates the worker version tags first,
    then the scientific project version tags, then the app version tag. Worker
    and scientific latest aliases follow in the same order, and the app `latest`
    pointer moves last. A downgrade-protected release skips every latest alias.
@@ -601,7 +604,8 @@ the publication workflow performs the native runtime qualification itself.
 The promotion receipt `release.json` (artifact
 `published-release-attempt-ATTEMPT`) records the scientific tags under
 `scientific`: each version and alias row with its index digest, the AMD64 and
-ARM64 native digests behind each project, and the scan records. The receipt
+ARM64 native digests behind each project, and explicit `not_requested` scan
+records when scans were not requested. This never claims a clean scan. The receipt
 must stay within its 256 KiB bound; promotion checks the complete final size
 before it writes any tag. A rerun that finds a scientific version tag already
 published for the same version and revision keeps that index, because rebuilt

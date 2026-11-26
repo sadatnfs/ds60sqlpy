@@ -34,6 +34,12 @@
 
 ### Runtime and Release
 
+**Owner policy update, 2026-11-25:** CVE scanning, CVE-only remediation and
+exception renewal are opt-in. SEC-01 and the scan/CVE portions of REL-01,
+HARD-01 and HARD-05 below are historical completed scope, not current gates.
+Functional tests, native runtime qualification, source/image identity, secret
+checks and publication acceptance remain required.
+
 - [x] **RUN-01**: Every Docker image profile included in a release builds from the intended repository revision for its supported architectures and passes its documented startup and operation checks.
 - [x] **RUN-02**: Fresh setup, resume, stop, and restart behavior are verified with disposable Compose projects, and saved learner data remains intact.
 - [x] **SEC-01**: Every image intended for publication is scanned with the current configured vulnerability checks and has no unresolved detected CVEs; affected images are remediated and rescanned before publication.

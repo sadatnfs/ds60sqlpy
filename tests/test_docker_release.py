@@ -1381,6 +1381,8 @@ def stage_cli(
     docker.operations.clear()
     gate = tmp_path / "gate.json"
     gate.write_text(json.dumps({"selection": None}))
+    # Optional scan tests use the fixture policy, not the aging historical ledger.
+    monkeypatch.setattr(release, "ROOT", tmp_path)
     monkeypatch.setattr(release, "load_gate", lambda path: (context, profiles, "build"))
     monkeypatch.setattr(release, "load_tested", lambda path, ctx, found: snapshot)
     monkeypatch.setattr(
@@ -1404,16 +1406,25 @@ def stage_cli(
     return docker, snapshot, argv
 
 
-def test_stage_without_scan_evidence_is_a_usage_error_before_any_tag(
+def test_stage_without_scan_evidence_still_qualifies_and_records_no_scan(
     tmp_path: Path,
     context: release.Context,
     profiles: dict[str, release.Profile],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     docker, _, argv = stage_cli(tmp_path, context, profiles, monkeypatch)
-    assert release.main(argv) == 2
-    assert not [op for op in docker.operations if op[0] in {"tag", "push"}]
-    assert not (tmp_path / "receipt.json").exists()
+
+    def forbidden(*args: Any, **kwargs: Any) -> Any:
+        pytest.fail("Default publication must not load the CVE policy or scan evidence")
+
+    monkeypatch.setattr(release, "load_scan", forbidden)
+    monkeypatch.setattr(release, "committed_policy", forbidden)
+    assert release.main(argv) == 0
+    assert [op for op in docker.operations if op[0] == "push"]
+    staged = json.loads((tmp_path / "receipt.json").read_text())
+    assert staged["scan"] is None
+    assert {row["kind"] for row in staged["qualification"]} == {"module-references", "ci-summary"}
+    release.staged_receipt(staged, context, profiles, root=tmp_path)
 
 
 def committed_policy_sha() -> str:
@@ -1577,6 +1588,38 @@ EXPIRED_ENTRY = {
     "reviewed_at": "2026-01-01",
     "expires_at": "2026-02-01",
 }
+
+
+def test_unscanned_release_promotes_despite_expired_cve_policy(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    registry = FakeRegistry()
+    folder = tmp_path / "receipts"
+    expected = complete_receipts(folder, registry, context, profiles)
+    for path in release.receipt_files(folder):
+        value = release.read_json(path)
+        value["scan"] = None
+        release.write_json(path, value)
+    (tmp_path / "docker/cve-policy.json").write_text(
+        json.dumps({"schema": 1, "entries": [EXPIRED_ENTRY]})
+    )
+    scans: dict[str, dict[str, Any]] = {}
+    inputs = release.promotion_inputs(folder, context, profiles, registry, tmp_path, scans=scans)
+    assert inputs == expected
+    report = release.promote_release(
+        context,
+        profiles,
+        registry,
+        natives=inputs,
+        output=tmp_path / "release.json",
+        root=tmp_path,
+        scan=scans,
+    )
+    assert all(
+        row["status"] == "not_requested" and "counts" not in row
+        for by_arch in report["scan"].values()
+        for row in by_arch.values()
+    )
 
 
 @pytest.mark.parametrize(

@@ -90,31 +90,6 @@ jobs:
         run: >-
           python scripts/ci_classroom.py qualify --group python-core --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
-      - name: Record the UTC date for the vulnerability database cache
-        id: scan-date
-        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
-      - name: Restore today's vulnerability database outside the checkout
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: ${{ runner.temp }}/trivy
-          key: trivy-db-${{ runner.os }}-${{ runner.arch }}-${{ steps.scan-date.outputs.date }}
-      - name: Scan qualified images before any publication
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/image_scan.py download-db --cache "$RUNNER_TEMP/trivy"
-          python scripts/image_scan.py scan --tested work/tested-images.json --policy docker/cve-policy.json \
-            --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports
-      - name: Retain scan evidence and reports
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: scan-reports-seed-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
-          path: |
-            work/scan-evidence.json
-            work/scan-reports/*.json
-          if-no-files-found: ignore
-          retention-days: 30
       - name: Stage only the qualified application, Core and PostgreSQL image IDs
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -127,7 +102,7 @@ jobs:
           printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           python scripts/docker_release.py stage --gate work/release/gate.json \
             --tested-images work/tested-images.json --qualification work/module-reference-results.json \
-            --qualification work/ci-qualification.json --scan work/scan-evidence.json \
+            --qualification work/ci-qualification.json \
             --output work/release-receipt.json
       - name: Retain immutable native seed digests
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -238,31 +213,6 @@ jobs:
         run: >-
           python scripts/ci_classroom.py qualify --group "$CI_GROUP" --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
-      - name: Record the UTC date for the vulnerability database cache
-        id: scan-date
-        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
-      - name: Restore today's vulnerability database outside the checkout
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: ${{ runner.temp }}/trivy
-          key: trivy-db-${{ runner.os }}-${{ runner.arch }}-${{ steps.scan-date.outputs.date }}
-      - name: Scan qualified images before any publication
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/image_scan.py download-db --cache "$RUNNER_TEMP/trivy"
-          python scripts/image_scan.py scan --tested work/tested-images.json --policy docker/cve-policy.json \
-            --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports
-      - name: Retain scan evidence and reports
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: scan-reports-${{ matrix.group }}-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
-          path: |
-            work/scan-evidence.json
-            work/scan-reports/*.json
-          if-no-files-found: ignore
-          retention-days: 30
       - name: Stage only the qualified selected worker IDs
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -275,7 +225,7 @@ jobs:
           printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           python scripts/docker_release.py stage --gate work/release/gate.json \
             --tested-images work/tested-images.json --qualification work/module-reference-results.json \
-            --qualification work/ci-qualification.json --scan work/scan-evidence.json \
+            --qualification work/ci-qualification.json \
             --output work/release-receipt.json
       - name: Retain selected native candidate digests
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -394,33 +344,7 @@ jobs:
         run: >-
           python scripts/ci_scientific_projects.py tested --gate work/release/gate.json
           --architecture "$ARCHITECTURE" --directory work/scientific
-      - name: Record the UTC date for the vulnerability database cache
-        id: scientific-scan-date
-        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
-      - name: Restore today's vulnerability database outside the checkout
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: ${{ runner.temp }}/trivy
-          key: trivy-db-${{ runner.os }}-${{ runner.arch }}-${{ steps.scientific-scan-date.outputs.date }}
-      - name: Scan qualified scientific images against the committed CVE policy
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/image_scan.py download-db --cache "$RUNNER_TEMP/trivy"
-          python scripts/image_scan.py scan --tested work/scientific/tested-images.json \
-            --policy docker/cve-policy.json --cache "$RUNNER_TEMP/trivy" \
-            --output work/scientific-scan/scan-evidence.json --reports work/scientific-scan/scan-reports
-      - name: Retain scientific scan evidence and reports
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: scan-reports-scientific-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
-          path: |
-            work/scientific-scan/scan-evidence.json
-            work/scientific-scan/scan-reports/*.json
-          if-no-files-found: ignore
-          retention-days: 30
-      - name: Stage only the scanned and qualified scientific image IDs
+      - name: Stage only the qualified scientific image IDs
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -432,7 +356,7 @@ jobs:
           trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
           printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           python scripts/ci_scientific_projects.py stage --gate work/release/gate.json \
-            --architecture "$ARCHITECTURE" --directory work/scientific --scan work/scientific-scan/scan-evidence.json
+            --architecture "$ARCHITECTURE" --directory work/scientific
       - name: Validate and seal this native scientific receipt
         run: >-
           python scripts/ci_scientific_projects.py complete --gate work/release/gate.json

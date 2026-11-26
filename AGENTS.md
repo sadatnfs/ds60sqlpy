@@ -19,6 +19,29 @@ rewrites and destructive cleanup have distinct scopes. Do not use em or en
 dashes; `scripts/check_no_dashes.py` rejects them in every tracked text file
 except vendored third-party bundles.
 
+## Fresh-machine handoff
+
+For a new computer or a new assistant with no conversation history, start with
+[fresh-machine onboarding](docs/fresh-machine.md). The repository is the durable
+handoff; previous chat sessions, local caches and GSD runtime state are not
+prerequisites. The overhaul is closed out at the owner's request. Do not restart
+completed phases or deferred reviews without a new task.
+
+## CVE policy
+
+As of 2026-11-25, CVE scanning and CVE-only remediation are **opt-in**, not
+classroom, CI or release requirements. Do not automatically scan images,
+renew the historical exception ledger, rebuild working dependencies to reduce
+CVE counts, or treat expired exceptions as unfinished owner work. This replaces
+the earlier zero-CVE requirement in the historical GSD phase documents.
+Run `make scan` or supply release `--scan` evidence only when explicitly asked.
+Unscanned receipts must say so, never claim a clean scan.
+
+Keep functional tests, runtime qualification, checksum/digest verification,
+secret checks, CodeQL, loopback isolation and learner-state protections.
+This is not a claim that the images are vulnerability-free or suitable for
+untrusted multi-tenant hosting.
+
 ## Choose the right role
 
 - For explanation, placement, debugging or resuming study, use

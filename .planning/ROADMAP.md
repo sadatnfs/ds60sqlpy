@@ -1,5 +1,11 @@
 # Roadmap: DS60 Classroom Overhaul
 
+**Owner closeout, 2026-11-25:** All implementation plans are complete.
+Do not automatically reopen phases. CVE scans, CVE-only fixes and exception
+renewal are now opt-in; the Phase 8/11 scan criteria below are historical,
+not ongoing release requirements. Human UAT remains explicitly unperformed.
+New assistants start at `AGENTS.md` and `docs/fresh-machine.md`.
+
 ## Overview
 
 Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough checkpoint first, then use a catalog-wide evidence matrix to improve every existing language and subject track. The work proceeds from consistent lesson foundations through worked examples, practice, and course-appropriate walkthroughs; then it improves the desktop workspace and verifies local Docker runtimes, image security, code quality, and browser behavior. Publication and test-resource cleanup remain separate, explicitly gated outcomes. This is a brownfield local desktop classroom overhaul, not a new product or a scope limited to Python and SQL.

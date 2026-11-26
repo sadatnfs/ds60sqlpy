@@ -129,47 +129,6 @@ jobs:
         run: >-
           python scripts/ci_classroom.py qualify --group python-core --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
-      - name: Record the UTC date for the vulnerability database cache
-        id: scan-date
-        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
-      - name: Restore today's vulnerability database outside the checkout
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: ${{ runner.temp }}/trivy
-          key: trivy-db-${{ runner.os }}-${{ runner.arch }}-${{ steps.scan-date.outputs.date }}
-      - name: Scan qualified images before any publication
-        env:
-          MODE: ${{ needs.intent.outputs.mode }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/image_scan.py download-db --cache "$RUNNER_TEMP/trivy"
-          if [ "$MODE" = publish ]; then
-            python scripts/image_scan.py scan --tested work/tested-images.json --policy docker/cve-policy.json \
-              --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports
-            exit 0
-          fi
-          # Build-test mode records no tested snapshot, so scan each local image by tag.
-          status=0
-          for profile in app python-core postgres; do
-            # PostgreSQL is a built-in release image, not a catalog row.
-            repository=ds60sqlpy-postgres
-            [ "$profile" = postgres ] || repository="$(awk -v p="$profile" '$1 == p { print $3 }' docker/classroom-images.tsv)"
-            python scripts/image_scan.py scan --image "$repository:$RELEASE_VERSION" --profile "$profile" \
-              --policy docker/cve-policy.json --cache "$RUNNER_TEMP/trivy" \
-              --output "work/scan-evidence-$profile.json" --reports "work/scan-reports/$profile" || status=1
-          done
-          exit "$status"
-      - name: Retain scan evidence and reports
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: scan-reports-seed-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
-          path: |
-            work/scan-evidence*.json
-            work/scan-reports/
-          if-no-files-found: ignore
-          retention-days: 30
       - name: Stage only the qualified native seed IDs
         if: needs.intent.outputs.mode == 'publish'
         env:
@@ -183,7 +142,7 @@ jobs:
           printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           python scripts/docker_release.py stage --gate work/release/gate.json \
             --tested-images work/tested-images.json --qualification work/module-reference-results.json \
-            --qualification work/ci-qualification.json --scan work/scan-evidence.json \
+            --qualification work/ci-qualification.json \
             --output work/release-receipt.json
       - name: Retain qualified seed digests for this run
         if: needs.intent.outputs.mode == 'publish'
@@ -304,45 +263,6 @@ jobs:
         run: >-
           python scripts/ci_classroom.py qualify --group "$CI_GROUP" --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
-      - name: Record the UTC date for the vulnerability database cache
-        id: scan-date
-        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
-      - name: Restore today's vulnerability database outside the checkout
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: ${{ runner.temp }}/trivy
-          key: trivy-db-${{ runner.os }}-${{ runner.arch }}-${{ steps.scan-date.outputs.date }}
-      - name: Scan qualified images before any publication
-        env:
-          MODE: ${{ needs.intent.outputs.mode }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/image_scan.py download-db --cache "$RUNNER_TEMP/trivy"
-          if [ "$MODE" = publish ]; then
-            python scripts/image_scan.py scan --tested work/tested-images.json --policy docker/cve-policy.json \
-              --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports
-            exit 0
-          fi
-          # Build-test mode records no tested snapshot, so scan each local image by tag.
-          status=0
-          for profile in $PROFILES; do
-            repository="$(awk -v p="$profile" '$1 == p { print $3 }' docker/classroom-images.tsv)"
-            python scripts/image_scan.py scan --image "$repository:$RELEASE_VERSION" --profile "$profile" \
-              --policy docker/cve-policy.json --cache "$RUNNER_TEMP/trivy" \
-              --output "work/scan-evidence-$profile.json" --reports "work/scan-reports/$profile" || status=1
-          done
-          exit "$status"
-      - name: Retain scan evidence and reports
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: scan-reports-${{ matrix.group }}-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
-          path: |
-            work/scan-evidence*.json
-            work/scan-reports/
-          if-no-files-found: ignore
-          retention-days: 30
       - name: Stage only the qualified selected worker IDs
         if: needs.intent.outputs.mode == 'publish'
         env:
@@ -356,7 +276,7 @@ jobs:
           printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           python scripts/docker_release.py stage --gate work/release/gate.json \
             --tested-images work/tested-images.json --qualification work/module-reference-results.json \
-            --qualification work/ci-qualification.json --scan work/scan-evidence.json \
+            --qualification work/ci-qualification.json \
             --output work/release-receipt.json
       - name: Retain qualified selected native digests
         if: needs.intent.outputs.mode == 'publish'

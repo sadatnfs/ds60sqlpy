@@ -1,3 +1,11 @@
+## Current owner handoff
+
+Read `AGENTS.md` and `docs/fresh-machine.md` first. Work from `main`; the
+overhaul is closed out. Do not restart completed GSD phases or deferred reviews
+unless asked. Prior conversations and machine-local GSD state are not required.
+CVE scans and CVE-only remediation are opt-in. The 2026-11-25 owner decision
+supersedes historical zero-CVE and exception-renewal requirements.
+
 <!-- GSD:project-start source:PROJECT.md -->
 
 ## Project
@@ -14,7 +22,7 @@ DS60 Classroom is a local, desktop-first browser classroom for learning programm
 - **Runtime**: Preserve local Docker delivery, the existing course/profile boundaries, and offline classroom assets.
 - **Learner state**: Keep drafts, progress, receipts, and volumes intact across UI and runtime changes.
 - **Content quality**: Preserve accurate source material and stable lesson identities; make improvements evidence-based and testable.
-- **Image security**: Release images must have no unresolved CVEs in the applicable scan results; rebuild or remediate affected images before publication.
+- **Image security**: CVE scanning and CVE-only remediation are opt-in, not release gates. Preserve functional qualification, secret checks and image integrity; never label an unscanned image CVE-free.
 - **Release safety**: Separate ordinary code changes from pushing to `main` and publishing images. Verify all release gates and the Docker Hub target before publishing.
 - **Cleanup**: Stop DS60-owned test containers at completion, but do not stop unrelated services or remove learner volumes.
 

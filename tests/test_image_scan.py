@@ -271,13 +271,17 @@ def test_clean_scan_exits_zero(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 # Task 2: policy -----------------------------------------------------------------------------
 
 
-def test_policy_starter_file_is_valid(capsys: pytest.CaptureFixture[str]) -> None:
+def test_policy_starter_file_is_valid(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
     raw = json.loads((scan.ROOT / "docker/cve-policy.json").read_text("utf-8"))
     assert raw["schema"] == 1 and isinstance(raw["entries"], list)
     assert all(e["kind"] in scan.POLICY_KINDS and e["justification"] for e in raw["entries"])
     # D-06: configuration findings are accepted only as Trivy DS rules on named files.
     misconfig = [e for e in raw["entries"] if e["kind"] == "misconfig"]
     assert all(e["id"].startswith("DS-") and "/" in e["package"] for e in misconfig)
+    # This is historical policy-format coverage, not an expiring release gate.
+    monkeypatch.setattr(scan, "utc_now", lambda: POLICY_NOW)
     assert scan.main(["validate-policy"]) == 0
     assert "policy valid" in capsys.readouterr().out
 

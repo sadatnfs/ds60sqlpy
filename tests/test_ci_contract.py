@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os
 import re
 import shlex
@@ -358,7 +357,7 @@ def _run(step: dict[str, Any]) -> str:
     return str(step.get("run", ""))
 
 
-def test_release_scan_gate_precedes_every_stage() -> None:
+def test_release_qualification_precedes_every_stage_without_automatic_scans() -> None:
     staging_jobs = 0
     for path in sorted(WORKFLOW.parent.glob("*.yml")):
         for name, job in _workflow_jobs(path).items():
@@ -370,41 +369,29 @@ def test_release_scan_gate_precedes_every_stage() -> None:
             where = f"{path.name}:{name}"
             qualify = [i for i, s in enumerate(steps) if "ci_classroom.py qualify" in _run(s)]
             scans = [i for i, s in enumerate(steps) if "scripts/image_scan.py scan" in _run(s)]
-            assert len(qualify) == 1 and len(scans) == 1 and len(stages) == 1, where
-            assert qualify[0] < scans[0] < stages[0], where
-            scan = steps[scans[0]]
-            assert "publish" not in scan.get("if", ""), where
-            assert "secrets." not in json.dumps(scan), where
-            assert "scripts/image_scan.py download-db" in _run(scan), where
-            assert '--cache "$RUNNER_TEMP/trivy"' in _run(scan), where
-            assert "--policy docker/cve-policy.json" in _run(scan), where
-            assert "--tested work/tested-images.json" in _run(scan), where
-            assert "set -euo pipefail" in _run(scan), where
-            assert "--reference" not in _run(scan), where
+            assert len(qualify) == 1 and not scans and len(stages) == 1, where
+            assert qualify[0] < stages[0], where
             if name == "seed":
-                inspect = [s for s in steps[: scans[0]] if "docker_release.py inspect" in _run(s)]
+                inspect = [s for s in steps[: qualify[0]] if "docker_release.py inspect" in _run(s)]
                 assert len(inspect) == 1, where
                 assert '--profiles "app python-core postgres"' in _run(inspect[0]), where
-            assert "--scan work/scan-evidence.json" in _run(steps[stages[0]]), where
-            cache = [s for s in steps[: scans[0]] if s.get("uses", "").startswith("actions/cache@")]
-            assert len(cache) == 1, where
-            assert cache[0]["with"]["path"] == "${{ runner.temp }}/trivy", where
-            assert cache[0]["with"]["key"].startswith("trivy-db-${{ runner.os }}-"), where
-            uploads = [
-                s
-                for s in steps
-                if s.get("uses", "").startswith("actions/upload-artifact@")
-                and s.get("with", {}).get("name", "").startswith("scan-reports-")
-            ]
-            assert len(uploads) == 1, where
-            assert uploads[0]["if"] == "always()", where
-            assert steps.index(uploads[0]) < stages[0], where
+            assert "--scan" not in _run(steps[stages[0]]), where
+            assert not any("image_scan.py" in _run(s) for s in steps), where
             receipt = [
                 s for s in steps if s.get("with", {}).get("name", "").startswith("release-receipt-")
             ]
             assert all(s["with"]["path"] == "work/release-receipt.json" for s in receipt), where
     # Seed and workers in both the full and targeted publication workflows.
     assert staging_jobs == 4
+
+
+def test_workflows_do_not_launch_cve_scanners() -> None:
+    for path in WORKFLOW.parent.glob("*.yml"):
+        for job in _workflow_jobs(path).values():
+            for step in job.get("steps", []):
+                command = _run(step)
+                assert "image_scan.py" not in command, path.name
+                assert "make scan" not in command, path.name
 
 
 def test_trivy_runs_only_through_the_pinned_image_scan_wrapper() -> None:

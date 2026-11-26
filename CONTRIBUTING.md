@@ -5,6 +5,12 @@ A curriculum change should keep its guide, learner artifact, reference,
 metadata and rendered pages consistent. A runtime change needs evidence from
 execution, including failure behavior, rather than only a successful build.
 
+For a new computer or assistant, begin with
+[fresh-machine onboarding](docs/fresh-machine.md).
+Image CVE scans and CVE-only fixes are optional, not contribution or release
+requirements. Do not renew historical exceptions unless explicitly asked.
+Functional qualification, secret checks and local-runtime protections still apply.
+
 ## Choose your setup
 
 To learn or inspect the running product, install a Linux-container engine with

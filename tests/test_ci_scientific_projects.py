@@ -1233,12 +1233,17 @@ def staging_fixture(
     return registry, docker, directory, scan
 
 
-def test_stage_pushes_only_scanned_qualified_project_images_once(
-    fixture: dict[str, Any], tmp_path: Path
+@pytest.mark.parametrize("with_scan", [False, True])
+def test_stage_pushes_only_qualified_project_images_once(
+    fixture: dict[str, Any], tmp_path: Path, with_scan: bool
 ) -> None:
     context, root = fixture["context"], fixture["root"]
     registry, docker, directory, scan = staging_fixture(fixture, tmp_path)
-    result = execution.stage_projects(context, "arm64", directory, scan, registry, docker, root)
+    scan_path = scan if with_scan else None
+    result = execution.stage_projects(
+        context, "arm64", directory, scan_path, registry, docker, root
+    )
+    assert (result["scan"] is not None) == with_scan
     pushes = [operation for operation in docker.operations if operation[0] == "push"]
     assert pushes == [
         ("push", context.repository + ":" + release.candidate_tag(context, profile, "arm64"))
@@ -1252,7 +1257,7 @@ def test_stage_pushes_only_scanned_qualified_project_images_once(
     scientific.validate_published_images(result, context, "arm64", identities)
     docker.operations.clear()
     assert (
-        execution.stage_projects(context, "arm64", directory, scan, registry, docker, root)
+        execution.stage_projects(context, "arm64", directory, scan_path, registry, docker, root)
         == result
     )
     assert not any(operation[0] in {"tag", "push"} for operation in docker.operations)
@@ -1283,7 +1288,7 @@ def test_stage_refuses_blocking_or_changed_images_before_any_push(
     assert registry.puts == [] and not (directory / "published-images.json").exists()
 
 
-def test_workflow_scans_scientific_images_before_a_credentialed_stage() -> None:
+def test_workflow_qualifies_scientific_images_without_automatic_scans() -> None:
     yaml = pytest.importorskip("yaml")
     path = ROOT / ".github/workflows/publish-images.yml"
     steps = yaml.load(path.read_text(), Loader=yaml.BaseLoader)["jobs"]["scientific-projects"][
@@ -1305,14 +1310,41 @@ def test_workflow_scans_scientific_images_before_a_credentialed_stage() -> None:
         if "ci_scientific_projects.py qualify" in step.get("run", "")
     )
     tested = index("ci_scientific_projects.py tested")
-    cache = index("actions/cache@")
-    scan = index("image_scan.py scan")
     stage = index("ci_scientific_projects.py stage")
     complete = index("ci_scientific_projects.py complete")
-    assert qualify < tested < cache < scan < stage < complete
-    assert "--policy docker/cve-policy.json" in steps[scan]["run"]
-    assert "DOCKERHUB" not in json.dumps(steps[scan]) + json.dumps(steps[tested])
+    assert qualify < tested < stage < complete
+    assert not any("image_scan.py" in step.get("run", "") for step in steps)
+    assert "DOCKERHUB" not in json.dumps(steps[tested])
     stage_step = steps[stage]
-    assert "--scan work/scientific-scan/scan-evidence.json" in stage_step["run"]
+    assert "--scan" not in stage_step["run"]
     assert set(stage_step["env"]) == {"DOCKERHUB_USERNAME", "DOCKERHUB_TOKEN"}
     assert "set -euo pipefail" in stage_step["run"] and "docker logout" in stage_step["run"]
+
+
+def test_scientific_promotion_without_scans_retains_native_identity(
+    fixture: dict[str, Any], tmp_path: Path
+) -> None:
+    from tests.test_docker_release import FakeRegistry
+
+    directory = receipts_directory(fixture, tmp_path / "science")
+    for path in release.receipt_files(directory):
+        raw = release.read_json(path)
+        raw["published_images"]["scan"] = None
+        release.write_json(path, raw)
+    chosen = scientific.validate_scientific_receipts(
+        directory,
+        fixture["context"],
+        fixture["profiles"],
+        fixture["natives"],
+        fixture["root"],
+        registry=fixture["registry"],
+        now=datetime.now(UTC) + timedelta(days=365),
+    )
+    natives, scans = scientific.published_natives(chosen)
+    _, _, record = release.scientific_plan(fixture["context"], FakeRegistry(), natives, scans)
+    assert record["scan"] == scans
+    assert all(
+        row["status"] == "not_requested" and row["native_digest"] == natives[profile][arch].digest
+        for profile, by_arch in scans.items()
+        for arch, row in by_arch.items()
+    )

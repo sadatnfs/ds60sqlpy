@@ -1339,7 +1339,7 @@ def stage_candidate(
     image: dict[str, Any],
     architecture: str,
 ) -> dict[str, Any]:
-    """Push one already scanned and qualified local image ID to its candidate tag."""
+    """Push one qualified local image ID to its candidate tag."""
     tag = candidate_tag(context, image["profile"], architecture)
     if registry.head(tag) is None:
         target = context.repository + ":" + tag
@@ -1358,10 +1358,11 @@ def stage_images(
     docker: Docker,
     root: Path = ROOT,
     *,
-    scan: dict[str, Any],
+    scan: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     architecture = tested["architecture"]
-    scan_block(scan, tested["images"])
+    if scan is not None:
+        scan_block(scan, tested["images"])
     docker.native(architecture)
     seed_bindings = {}
     if tested["group"] != "python-core":
@@ -1477,7 +1478,8 @@ def staged_receipt(
             raise ReleaseError("Seed receipts require the native image config digest")
     if raw.get("group") != image_group(selected, profiles, root):
         raise ReleaseError("Staged receipt profile set differs from its qualification group")
-    scan_block(raw["scan"], images)
+    if raw["scan"] is not None:
+        scan_block(raw["scan"], images)
     bindings = raw.get("seed_native_digests")
     if not isinstance(bindings, dict) or set(bindings) != (
         set() if selected == SEEDS else set(SEEDS)
@@ -1595,9 +1597,20 @@ def receipt_files(directory: Path) -> list[Path]:
 
 
 def promotion_scan_record(
-    image: dict[str, Any], native: Descriptor, row: dict[str, Any], scan: dict[str, Any]
+    image: dict[str, Any],
+    native: Descriptor,
+    row: dict[str, Any] | None,
+    scan: dict[str, Any] | None,
 ) -> dict[str, Any]:
     """The compact per-platform scan record a release report keeps for one native image."""
+    if scan is None:
+        return {
+            "status": "not_requested",
+            "tested_image_id": image["tested_image_id"],
+            "native_digest": native.digest,
+        }
+    if row is None:
+        raise ReleaseError("Requested scan evidence is missing its native image record")
     return {
         "tested_image_id": image["tested_image_id"],
         "native_digest": native.digest,
@@ -1628,7 +1641,8 @@ def promotion_inputs(
     selected: dict[tuple[str, str], dict[str, Any]] = {}
     for path in receipt_files(directory):
         raw = staged_receipt(read_json(path), context, profiles, root=root)
-        promotion_scan_check(raw["scan"], root, now)
+        if raw["scan"] is not None:
+            promotion_scan_check(raw["scan"], root, now)
         identity = (raw["group"], raw["architecture"])
         attempt = int(raw["context"]["run_attempt"])
         prior = selected.get(identity)
@@ -1659,7 +1673,7 @@ def promotion_inputs(
     result: dict[str, dict[str, Descriptor]] = {key: {} for key in selected_profiles}
     records: dict[str, dict[str, Any]] = {key: {} for key in selected_profiles}
     for (group, arch), raw in selected.items():
-        scanned = {row["profile"]: row for row in raw["scan"]["images"]}
+        scanned = {row["profile"]: row for row in raw["scan"]["images"]} if raw["scan"] else {}
         if group != "python-core" and raw["seed_native_digests"] != seeds[arch]:
             raise ReleaseError(
                 "Worker receipts used different seeds; rerun those groups against "
@@ -1677,7 +1691,9 @@ def promotion_inputs(
             if not same_head(registry.head(expected.digest), expected):
                 raise ReleaseError("Qualified native manifest is missing")
             result[key][arch] = expected
-            records[key][arch] = promotion_scan_record(image, expected, scanned[key], raw["scan"])
+            records[key][arch] = promotion_scan_record(
+                image, expected, scanned.get(key), raw["scan"]
+            )
     if any(set(items) != set(ARCHITECTURES) for items in result.values()):
         raise ReleaseError(
             "Promotion requires complete catalog coverage on amd64 and arm64"
@@ -1994,7 +2010,7 @@ def main(argv: list[str] | None = None) -> int:
         elif name == "stage":
             command.add_argument("--tested-images", required=True, type=Path)
             command.add_argument("--qualification", required=True, action="append", type=Path)
-            command.add_argument("--scan", required=True, type=Path)
+            command.add_argument("--scan", type=Path, help="optionally require scan evidence")
             command.add_argument("--output", required=True, type=Path)
         elif name == "import-seed":
             command.add_argument("--receipt", required=True, type=Path)
@@ -2046,8 +2062,8 @@ def main(argv: list[str] | None = None) -> int:
                 target_group,
             }:
                 raise ReleaseError("Staged profiles differ from the targeted gate")
-            # The scan gate runs before qualification files, local preflight, tags or pushes.
-            scan = load_scan(args.scan, tested)
+            # Explicitly requested scans still fail closed before any registry writes.
+            scan = load_scan(args.scan, tested, ROOT) if args.scan is not None else None
             records = qualification_records(
                 args.qualification,
                 context,
